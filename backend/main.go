@@ -1,17 +1,13 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"github.com/EgooAI/BeikeStartups/database"
+	"github.com/EgooAI/BeikeStartups/router"
 )
 
 func main() {
-	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	router.Run() // listens on 0.0.0.0:8080 by default
+	database.InitDatabase()
+
+	r := router.SetupRouter()
+	r.Run(":8080")
 }

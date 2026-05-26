@@ -1,0 +1,21 @@
+backend/
+├── main.go              # 程序入口
+├── go.mod               # 依赖管理
+├── database/
+│   └── database.go      # 数据库初始化
+├── model/
+│   └── models.go        # 数据模型定义
+├── middleware/
+│   ├── auth.go          # 认证中间件
+│   └── jwt.go           # JWT工具
+├── handler/
+│   ├── auth.go          # 认证相关handler
+│   ├── application.go   # 创业申请handler
+│   ├── team.go          # 团队handler
+│   ├── project.go       # 项目handler
+│   ├── recruitment.go   # 招募handler
+│   └── response.go      # 招募响应handler
+├── router/
+│   └── router.go        # 路由配置
+└── response/
+    └── response.go      # 统一响应格式
