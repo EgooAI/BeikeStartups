@@ -56,7 +56,14 @@ func AuthMiddleware() gin.HandlerFunc {
 
 func RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := c.MustGet("user").(*model.User)
+		userValue, exists := c.Get("user")
+		if !exists || userValue == nil {
+			response.Unauthorized(c, "需要登录")
+			c.Abort()
+			return
+		}
+
+		user := userValue.(*model.User)
 		if user == nil {
 			response.Unauthorized(c, "需要登录")
 			c.Abort()
@@ -68,13 +75,14 @@ func RequireAuth() gin.HandlerFunc {
 
 func RequireRole(roles ...model.UserRole) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := c.MustGet("user").(*model.User)
-		if user == nil {
+		userValue, exists := c.Get("user")
+		if !exists || userValue == nil {
 			response.Unauthorized(c, "需要登录")
 			c.Abort()
 			return
 		}
 
+		user := userValue.(*model.User)
 		for _, role := range roles {
 			if user.Role == role {
 				c.Next()
@@ -89,7 +97,14 @@ func RequireRole(roles ...model.UserRole) gin.HandlerFunc {
 
 func RequireTeamOwner() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := c.MustGet("user").(*model.User)
+		userValue, exists := c.Get("user")
+		if !exists || userValue == nil {
+			response.Unauthorized(c, "需要登录")
+			c.Abort()
+			return
+		}
+
+		user := userValue.(*model.User)
 		if user == nil {
 			response.Unauthorized(c, "需要登录")
 			c.Abort()

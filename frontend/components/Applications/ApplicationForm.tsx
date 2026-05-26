@@ -1,0 +1,127 @@
+// frontend/components/Applications/ApplicationForm.tsx
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { applicationApi } from '@/lib/api';
+
+interface ApplicationFormProps {
+  initialData?: {
+    title: string;
+    description: string;
+    business_plan: string;
+  };
+  onSuccess?: () => void;
+}
+
+export default function ApplicationForm({ initialData, onSuccess }: ApplicationFormProps) {
+  const [formData, setFormData] = useState({
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    business_plan: initialData?.business_plan || '',
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await applicationApi.create(formData);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/applications');
+      }
+    } catch (err: any) {
+      setError(err.message || '创建申请失败');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          项目名称 *
+        </label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          required
+          maxLength={200}
+          value={formData.title}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          placeholder="输入项目名称"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          项目描述 *
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          required
+          rows={4}
+          value={formData.description}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          placeholder="简要描述您的创业项目"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="business_plan" className="block text-sm font-medium text-gray-700 mb-2">
+          商业计划
+        </label>
+        <textarea
+          id="business_plan"
+          name="business_plan"
+          rows={8}
+          value={formData.business_plan}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          placeholder="详细描述您的商业模式、市场分析、竞争优势等"
+        />
+      </div>
+
+      <div className="flex space-x-4">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+        >
+          {isLoading ? '提交中...' : '提交申请'}
+        </button>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          取消
+        </button>
+      </div>
+    </form>
+  );
+}

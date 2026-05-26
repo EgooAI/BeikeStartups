@@ -1,13 +1,33 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/EgooAI/BeikeStartups/handler"
-	// "github.com/EgooAI/BeikeStartups/middleware"
+	"github.com/EgooAI/BeikeStartups/middleware"
 	"github.com/gin-gonic/gin"
 )
 
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
+	router.Use(corsMiddleware())
+	router.Use(middleware.AuthMiddleware())
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
@@ -17,10 +37,10 @@ func SetupRouter() *gin.Engine {
 	{
 		auth.POST("/register", handler.Register)
 		auth.POST("/login", handler.Login)
-		auth.GET("/me", handler.GetCurrentUser)
+		auth.GET("/me", middleware.RequireAuth(), handler.GetCurrentUser)
 	}
 
-	applications := router.Group("/api/applications")
+	applications := router.Group("/api/applications").Use(middleware.RequireAuth())
 	{
 		applications.POST("", handler.CreateApplication)
 		applications.GET("/:id", handler.GetApplication)
@@ -32,7 +52,7 @@ func SetupRouter() *gin.Engine {
 		applications.POST("/:id/reject", handler.RejectApplication)
 	}
 
-	teams := router.Group("/api/teams")
+	teams := router.Group("/api/teams").Use(middleware.RequireAuth())
 	{
 		teams.GET("", handler.ListTeams)
 		teams.GET("/:id", handler.GetTeam)
@@ -41,7 +61,7 @@ func SetupRouter() *gin.Engine {
 		teams.DELETE("/:id", handler.DeleteTeam)
 	}
 
-	projects := router.Group("/api/projects")
+	projects := router.Group("/api/projects").Use(middleware.RequireAuth())
 	{
 		projects.GET("", handler.ListProjects)
 		projects.GET("/:id", handler.GetProject)
@@ -57,7 +77,7 @@ func SetupRouter() *gin.Engine {
 		projects.POST("/:id/invalidate", handler.InvalidateProject)
 	}
 
-	recruitments := router.Group("/api/recruitments")
+	recruitments := router.Group("/api/recruitments").Use(middleware.RequireAuth())
 	{
 		recruitments.GET("", handler.ListRecruitments)
 		recruitments.GET("/:id", handler.GetRecruitment)
@@ -68,7 +88,7 @@ func SetupRouter() *gin.Engine {
 		recruitments.POST("/:id/invalidate", handler.InvalidateRecruitment)
 	}
 
-	responses := router.Group("/api/responses")
+	responses := router.Group("/api/responses").Use(middleware.RequireAuth())
 	{
 		responses.POST("", handler.CreateResponse)
 		responses.GET("/:id", handler.GetResponse)
