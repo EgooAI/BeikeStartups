@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/EgooAI/BeikeStartups/database"
@@ -138,19 +139,35 @@ func DeleteApplication(c *gin.Context) {
 func ListApplications(c *gin.Context) {
 	user := c.MustGet("user").(*model.User)
 
+	// pagination
+	page := 1
+	limit := 20
+	if p := c.Query("page"); p != "" {
+		fmt.Sscan(p, &page)
+	}
+	if l := c.Query("limit"); l != "" {
+		fmt.Sscan(l, &limit)
+	}
+
 	var applications []model.StartupApplication
 	query := database.DB.Preload("User")
-
 	if user.Role != model.RoleAdmin {
 		query = query.Where("user_id = ?", user.ID)
 	}
 
-	if err := query.Find(&applications).Error; err != nil {
+	var total int64
+	if err := query.Model(&model.StartupApplication{}).Count(&total).Error; err != nil {
+		response.InternalError(c, "获取申请列表总数失败")
+		return
+	}
+
+	offset := (page - 1) * limit
+	if err := query.Offset(offset).Limit(limit).Find(&applications).Error; err != nil {
 		response.InternalError(c, "获取申请列表失败")
 		return
 	}
 
-	response.Success(c, applications)
+	response.Success(c, gin.H{"items": applications, "meta": gin.H{"page": page, "limit": limit, "total": total}})
 }
 
 func SubmitApplication(c *gin.Context) {

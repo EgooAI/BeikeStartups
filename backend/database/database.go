@@ -3,30 +3,18 @@ package database
 import (
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/EgooAI/BeikeStartups/config"
 	"github.com/EgooAI/BeikeStartups/model"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
-func InitDatabase() {
-	// 加载 .env 文件
-	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: .env file not found, using system environment variables")
-	}
-
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-
+func InitDatabase(cfg *config.Config) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai",
-		dbHost, dbUser, dbPassword, dbName, dbPort)
+		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
 
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -37,10 +25,18 @@ func InitDatabase() {
 	err = DB.AutoMigrate(
 		&model.User{},
 		&model.Team{},
+		&model.TeamMemberInvitation{},
+		&model.TeamJoinRequest{},
 		&model.StartupApplication{},
 		&model.Project{},
 		&model.Recruitment{},
 		&model.RecruitmentResponse{},
+		&model.ResourceOpportunity{},
+		&model.ProjectFavorite{},
+		&model.ProjectBPRequest{},
+		&model.ProjectConnectionRequest{},
+		&model.Event{},
+		&model.EventSignup{},
 	)
 	if err != nil {
 		log.Fatal("failed to migrate database:", err)

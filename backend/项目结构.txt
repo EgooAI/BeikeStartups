@@ -1,21 +1,46 @@
 backend/
-©À©¤©¤ main.go              # ³ÌĞòÈë¿Ú
-©À©¤©¤ go.mod               # ÒÀÀµ¹ÜÀí
-©À©¤©¤ database/
-©¦   ©¸©¤©¤ database.go      # Êı¾İ¿â³õÊ¼»¯
-©À©¤©¤ model/
-©¦   ©¸©¤©¤ models.go        # Êı¾İÄ£ĞÍ¶¨Òå
-©À©¤©¤ middleware/
-©¦   ©À©¤©¤ auth.go          # ÈÏÖ¤ÖĞ¼ä¼ş
-©¦   ©¸©¤©¤ jwt.go           # JWT¹¤¾ß
-©À©¤©¤ handler/
-©¦   ©À©¤©¤ auth.go          # ÈÏÖ¤Ïà¹Øhandler
-©¦   ©À©¤©¤ application.go   # ´´ÒµÉêÇëhandler
-©¦   ©À©¤©¤ team.go          # ÍÅ¶Óhandler
-©¦   ©À©¤©¤ project.go       # ÏîÄ¿handler
-©¦   ©À©¤©¤ recruitment.go   # ÕĞÄ¼handler
-©¦   ©¸©¤©¤ response.go      # ÕĞÄ¼ÏìÓ¦handler
-©À©¤©¤ router/
-©¦   ©¸©¤©¤ router.go        # Â·ÓÉÅäÖÃ
-©¸©¤©¤ response/
-    ©¸©¤©¤ response.go      # Í³Ò»ÏìÓ¦¸ñÊ½
+  .env                     # åç«¯ç¯å¢ƒé…ç½®æ–‡ä»¶
+  .gitignore               # Git å¿½ç•¥è§„åˆ™
+  beike_startups.db        # æœ¬åœ° SQLite æ•°æ®åº“æ–‡ä»¶ï¼ˆå¼€å‘ç¯å¢ƒï¼‰
+  go.mod                   # Go æ¨¡å—æè¿°æ–‡ä»¶
+  go.sum                   # Go ä¾èµ–æ ¡éªŒæ–‡ä»¶
+  main.go                  # åç«¯æœåŠ¡å…¥å£ï¼Œå¯åŠ¨ Gin è·¯ç”±
+
+  config/
+    config.go              # é…ç½®åŠ è½½ä¸ç¯å¢ƒå˜é‡å¤„ç†
+
+  database/
+    database.go            # æ•°æ®åº“è¿æ¥åˆå§‹åŒ–ä¸å…¨å±€ DB å¯¹è±¡
+
+  model/
+    models.go              # GORM æ•°æ®æ¨¡å‹å®šä¹‰ï¼šUserã€Teamã€Projectã€Recruitmentã€Responseã€Application ç­‰
+
+  middleware/
+    auth.go                # èº«ä»½è®¤è¯ã€æƒé™æ£€æŸ¥ä¸­é—´ä»¶
+    jwt.go                 # JWT Token ç”Ÿæˆä¸è§£æ
+
+  handler/
+    auth.go                # ç”¨æˆ·æ³¨å†Œã€ç™»å½•ã€å½“å‰ç”¨æˆ·ä¿¡æ¯ä¸è§’è‰²ç”³è¯·å¤„ç†
+    application.go         # åˆ›ä¸šç”³è¯· CRUD ä¸å®¡æ‰¹æµç¨‹
+    team.go                # å›¢é˜Ÿåˆ›å»ºã€æˆå‘˜ç®¡ç†ã€é‚€è¯·ã€å…¥é˜Ÿç”³è¯·ã€å®¡æ ¸ã€è½¬ç§»æ‰€æœ‰æƒ
+    project.go             # é¡¹ç›®å‘å¸ƒã€ä¸Šæ¶/ä¸‹æ¶å®¡æ ¸ã€ä½œåºŸã€åˆ†é¡µåˆ—è¡¨
+    recruitment.go         # å›¢é˜Ÿæ‹›å‹Ÿå‘å¸ƒã€æ›´æ–°ã€è§£å†³ã€ä½œåºŸã€åˆ†é¡µåˆ—è¡¨
+    response.go            # å¯¹æ¥å“åº”åˆ›å»ºã€å®¡æ‰¹ã€ä½œåºŸ
+    resource.go            # èµ„æºæœºä¼šç®¡ç†ï¼ˆpartner/admin æƒé™ï¼‰
+    event.go               # æ´»åŠ¨å‘å¸ƒã€æ›´æ–°ã€æŠ¥åã€ç®¡ç†å‘˜æŠ¥ååˆ—è¡¨
+    upload.go              # æ–‡ä»¶ä¸Šä¼ å¤„ç†
+
+  repository/
+    application_repository.go  # ç”³è¯·ç›¸å…³æ•°æ®åº“è®¿é—®
+    team_repository.go         # å›¢é˜Ÿã€æˆå‘˜ã€é‚€è¯·ã€å…¥é˜Ÿç”³è¯·æ•°æ®åº“è®¿é—®
+    user_repository.go         # ç”¨æˆ·æŸ¥è¯¢ä¸æ›´æ–°æ•°æ®åº“è®¿é—®
+
+  service/
+    auth_service.go         # æ³¨å†Œã€ç™»å½•ã€è§’è‰²ç”³è¯·ä¸ç®¡ç†å‘˜ç”¨æˆ·ç®¡ç†é€»è¾‘
+    team_service.go         # å›¢é˜Ÿé‚€è¯·ã€å…¥é˜Ÿç”³è¯·ã€å®¡æ‰¹ä¸æ‰€æœ‰æƒè½¬ç§»ä¸šåŠ¡é€»è¾‘
+
+  response/
+    response.go            # ç»Ÿä¸€å“åº”æ ¼å¼å°è£…
+
+  router/
+    router.go              # è·¯ç”±æ³¨å†Œä¸è·¨åŸŸé…ç½®

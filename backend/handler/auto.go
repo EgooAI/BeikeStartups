@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"github.com/EgooAI/BeikeStartups/database"
-	"github.com/EgooAI/BeikeStartups/middleware"
+	"fmt"
+
 	"github.com/EgooAI/BeikeStartups/model"
+	"github.com/EgooAI/BeikeStartups/repository"
 	"github.com/EgooAI/BeikeStartups/response"
+	"github.com/EgooAI/BeikeStartups/service"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterRequest struct {
@@ -29,36 +30,15 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	var existingUser model.User
-	if err := database.DB.Where("username = ? OR email = ?", req.Username, req.Email).First(&existingUser).Error; err == nil {
-		response.BadRequest(c, "用户名或邮箱已存在")
-		return
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		response.InternalError(c, "密码加密失败")
-		return
-	}
-
-	user := model.User{
+	user, token, err := service.RegisterUser(service.RegisterInput{
 		Username: req.Username,
 		Email:    req.Email,
-		Password: string(hashedPassword),
+		Password: req.Password,
 		Nickname: req.Nickname,
 		Phone:    req.Phone,
-		Role:     model.RoleStudent,
-		IsActive: true,
-	}
-
-	if err := database.DB.Create(&user).Error; err != nil {
-		response.InternalError(c, "注册失败")
-		return
-	}
-
-	token, err := middleware.GenerateToken(user.ID, user.Username, user.Role)
+	})
 	if err != nil {
-		response.InternalError(c, "生成令牌失败")
+		response.BadRequest(c, err.Error())
 		return
 	}
 
@@ -75,25 +55,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	var user model.User
-	if err := database.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
-		response.Unauthorized(c, "用户名或密码错误")
-		return
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		response.Unauthorized(c, "用户名或密码错误")
-		return
-	}
-
-	if !user.IsActive {
-		response.Forbidden(c, "账户已被禁用")
-		return
-	}
-
-	token, err := middleware.GenerateToken(user.ID, user.Username, user.Role)
+	user, token, err := service.LoginUser(service.LoginInput{
+		Username: req.Username,
+		Password: req.Password,
+	})
 	if err != nil {
-		response.InternalError(c, "生成令牌失败")
+		response.Unauthorized(c, err.Error())
 		return
 	}
 
@@ -105,5 +72,214 @@ func Login(c *gin.Context) {
 
 func GetCurrentUser(c *gin.Context) {
 	user := c.MustGet("user").(*model.User)
+	response.Success(c, user)
+}
+
+type UpdateCurrentUserRequest struct {
+	Nickname *string `json:"nickname"`
+	Avatar   *string `json:"avatar"`
+	Phone    *string `json:"phone"`
+	Email    *string `json:"email"`
+}
+
+func UpdateCurrentUser(c *gin.Context) {
+	var req UpdateCurrentUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+
+	if req.Nickname != nil {
+		user.Nickname = *req.Nickname
+	}
+	if req.Avatar != nil {
+		user.Avatar = *req.Avatar
+	}
+	if req.Phone != nil {
+		user.Phone = *req.Phone
+	}
+	if req.Email != nil {
+		// check uniqueness
+		if existing, err := repository.FindUserByUsernameOrEmail("", *req.Email); err == nil && existing.ID != user.ID {
+			response.BadRequest(c, "邮箱已被使用")
+			return
+		}
+		user.Email = *req.Email
+	}
+
+	if err := repository.UpdateUser(user); err != nil {
+		response.InternalError(c, "更新用户失败")
+		return
+	}
+
+	response.Success(c, user)
+}
+
+type RoleRequestRequest struct {
+	RequestedRole   model.UserRole `json:"requested_role" binding:"required,oneof=mentor investor partner"`
+	Organization    string         `json:"organization"`
+	Expertise       string         `json:"expertise"`
+	InvestmentFocus string         `json:"investment_focus"`
+	ServiceArea     string         `json:"service_area"`
+	ApplicationNote string         `json:"application_note"`
+}
+
+type ReviewRoleRequestRequest struct {
+	Note string `json:"note"`
+}
+
+func RequestUserRole(c *gin.Context) {
+	var req RoleRequestRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	updated, err := service.RequestUserRole(user, service.RoleRequestInput{
+		RequestedRole:   req.RequestedRole,
+		Organization:    req.Organization,
+		Expertise:       req.Expertise,
+		InvestmentFocus: req.InvestmentFocus,
+		ServiceArea:     req.ServiceArea,
+		ApplicationNote: req.ApplicationNote,
+	})
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, updated)
+}
+
+func ListRoleRequests(c *gin.Context) {
+	requests, err := service.ListRoleRequests()
+	if err != nil {
+		response.InternalError(c, "获取角色申请列表失败")
+		return
+	}
+
+	response.Success(c, requests)
+}
+
+func ApproveRoleRequest(c *gin.Context) {
+	id := c.Param("id")
+	var userID uint
+	_, _ = fmt.Sscan(id, &userID)
+
+	updated, err := service.ApproveRoleRequest(userID)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, updated)
+}
+
+func RejectRoleRequest(c *gin.Context) {
+	id := c.Param("id")
+	var userID uint
+	_, _ = fmt.Sscan(id, &userID)
+
+	updated, err := service.RejectRoleRequest(userID)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, updated)
+}
+
+func ListUsers(c *gin.Context) {
+	role := model.UserRole(c.Query("role"))
+	users, err := service.ListApprovedUsersByRole(role)
+	if err != nil {
+		response.InternalError(c, "获取用户列表失败")
+		return
+	}
+
+	response.Success(c, users)
+}
+
+type AdminUpdateUserActiveStatusRequest struct {
+	Active bool `json:"active"`
+}
+
+type AdminUpdateUserRoleRequest struct {
+	Role model.UserRole `json:"role" binding:"required,oneof=student mentor investor partner admin"`
+}
+
+func AdminListUsers(c *gin.Context) {
+	role := model.UserRole(c.Query("role"))
+	status := model.UserStatus(c.Query("status"))
+
+	var active *bool
+	if a := c.Query("is_active"); a != "" {
+		value := a == "true"
+		active = &value
+	}
+
+	users, err := service.AdminListUsers(role, status, active)
+	if err != nil {
+		response.InternalError(c, "获取用户列表失败")
+		return
+	}
+
+	response.Success(c, users)
+}
+
+func AdminUpdateUserActiveStatus(c *gin.Context) {
+	id := c.Param("id")
+	var userID uint
+	_, _ = fmt.Sscan(id, &userID)
+
+	var req AdminUpdateUserActiveStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	user, err := service.SetUserActiveStatus(userID, req.Active)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, user)
+}
+
+func AdminUpdateUserRole(c *gin.Context) {
+	id := c.Param("id")
+	var userID uint
+	_, _ = fmt.Sscan(id, &userID)
+
+	var req AdminUpdateUserRoleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	user, err := service.UpdateUserRole(userID, req.Role)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, user)
+}
+
+func GetUser(c *gin.Context) {
+	id := c.Param("id")
+	var userID uint
+	_, _ = fmt.Sscan(id, &userID)
+
+	user, err := service.GetUserByID(userID)
+	if err != nil {
+		response.NotFound(c, "用户不存在")
+		return
+	}
+
 	response.Success(c, user)
 }

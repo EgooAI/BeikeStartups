@@ -3,14 +3,17 @@ package router
 import (
 	"net/http"
 
+	"github.com/EgooAI/BeikeStartups/config"
 	"github.com/EgooAI/BeikeStartups/handler"
 	"github.com/EgooAI/BeikeStartups/middleware"
+	"github.com/EgooAI/BeikeStartups/model"
 	"github.com/gin-gonic/gin"
 )
 
 func corsMiddleware() gin.HandlerFunc {
+	cfg := config.Load()
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Header("Access-Control-Allow-Origin", cfg.CORSOrigin)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
@@ -29,6 +32,12 @@ func SetupRouter() *gin.Engine {
 	router.Use(corsMiddleware())
 	router.Use(middleware.AuthMiddleware())
 
+	// serve uploaded files
+	router.Static("/uploads", "./uploads")
+
+	// upload endpoint
+	router.POST("/api/uploads", handler.UploadFile)
+
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
@@ -38,6 +47,24 @@ func SetupRouter() *gin.Engine {
 		auth.POST("/register", handler.Register)
 		auth.POST("/login", handler.Login)
 		auth.GET("/me", middleware.RequireAuth(), handler.GetCurrentUser)
+		auth.PUT("/me", middleware.RequireAuth(), handler.UpdateCurrentUser)
+		auth.POST("/role-request", middleware.RequireAuth(), handler.RequestUserRole)
+		auth.GET("/role-requests", middleware.RequireRole(model.RoleAdmin), handler.ListRoleRequests)
+		auth.POST("/role-requests/:id/approve", middleware.RequireRole(model.RoleAdmin), handler.ApproveRoleRequest)
+		auth.POST("/role-requests/:id/reject", middleware.RequireRole(model.RoleAdmin), handler.RejectRoleRequest)
+	}
+
+	users := router.Group("/api/users")
+	{
+		users.GET("", handler.ListUsers)
+		users.GET("/:id", handler.GetUser)
+	}
+
+	admin := router.Group("/api/admin").Use(middleware.RequireRole(model.RoleAdmin))
+	{
+		admin.GET("/users", handler.AdminListUsers)
+		admin.PUT("/users/:id/active", handler.AdminUpdateUserActiveStatus)
+		admin.PUT("/users/:id/role", handler.AdminUpdateUserRole)
 	}
 
 	applications := router.Group("/api/applications").Use(middleware.RequireAuth())
@@ -48,17 +75,28 @@ func SetupRouter() *gin.Engine {
 		applications.DELETE("/:id", handler.DeleteApplication)
 		applications.GET("", handler.ListApplications)
 		applications.POST("/:id/submit", handler.SubmitApplication)
-		applications.POST("/:id/approve", handler.ApproveApplication)
-		applications.POST("/:id/reject", handler.RejectApplication)
+		applications.POST("/:id/approve", middleware.RequireRole(model.RoleAdmin), handler.ApproveApplication)
+		applications.POST("/:id/reject", middleware.RequireRole(model.RoleAdmin), handler.RejectApplication)
 	}
 
 	teams := router.Group("/api/teams").Use(middleware.RequireAuth())
 	{
 		teams.GET("", handler.ListTeams)
 		teams.GET("/:id", handler.GetTeam)
+		teams.GET("/:id/members", handler.ListTeamMembers)
+		teams.GET("/:id/invitations", handler.ListTeamInvitations)
+		teams.GET("/:id/join-requests", handler.ListTeamJoinRequests)
 		teams.POST("", handler.CreateTeam)
-		teams.PUT("/:id", handler.UpdateTeam)
-		teams.DELETE("/:id", handler.DeleteTeam)
+		teams.POST("/:id/members", handler.AddTeamMember)
+		teams.POST("/:id/invite", handler.InviteTeamMember)
+		teams.POST("/:id/invitations/:invite_id/accept", handler.AcceptTeamInvitation)
+		teams.POST("/:id/invitations/:invite_id/reject", handler.RejectTeamInvitation)
+		teams.POST("/:id/join-requests", handler.RequestTeamJoin)
+		teams.POST("/:id/join-requests/:request_id/approve", handler.ApproveTeamJoinRequest)
+		teams.POST("/:id/join-requests/:request_id/reject", handler.RejectTeamJoinRequest)
+		teams.POST("/:id/transfer-owner", handler.TransferTeamOwnership)
+		teams.POST("/:id/approve", middleware.RequireRole(model.RoleAdmin), handler.ApproveTeam)
+		teams.POST("/:id/reject", middleware.RequireRole(model.RoleAdmin), handler.RejectTeam)
 	}
 
 	projects := router.Group("/api/projects").Use(middleware.RequireAuth())
@@ -69,12 +107,35 @@ func SetupRouter() *gin.Engine {
 		projects.PUT("/:id", handler.UpdateProject)
 		projects.DELETE("/:id", handler.DeleteProject)
 		projects.POST("/:id/request-online", handler.RequestProjectOnline)
-		projects.POST("/:id/approve-online", handler.ApproveProjectOnline)
-		projects.POST("/:id/reject-online", handler.RejectProjectOnline)
+		projects.POST("/:id/approve-online", middleware.RequireRole(model.RoleAdmin), handler.ApproveProjectOnline)
+		projects.POST("/:id/reject-online", middleware.RequireRole(model.RoleAdmin), handler.RejectProjectOnline)
 		projects.POST("/:id/request-offline", handler.RequestProjectOffline)
-		projects.POST("/:id/approve-offline", handler.ApproveProjectOffline)
-		projects.POST("/:id/reject-offline", handler.RejectProjectOffline)
+		projects.POST("/:id/approve-offline", middleware.RequireRole(model.RoleAdmin), handler.ApproveProjectOffline)
+		projects.POST("/:id/reject-offline", middleware.RequireRole(model.RoleAdmin), handler.RejectProjectOffline)
 		projects.POST("/:id/invalidate", handler.InvalidateProject)
+		projects.POST("/:id/favorite", handler.FavoriteProject)
+		projects.DELETE("/:id/favorite", handler.UnfavoriteProject)
+		projects.GET("/favorites", handler.ListFavoriteProjects)
+		projects.POST("/:id/bp-request", handler.RequestProjectBP)
+		projects.GET("/:id/bp-requests", handler.ListProjectBPRequests)
+		projects.POST("/:id/bp-requests/:request_id/approve", handler.ApproveProjectBPRequest)
+		projects.POST("/:id/bp-requests/:request_id/reject", handler.RejectProjectBPRequest)
+		projects.POST("/:id/connection-requests", handler.CreateProjectConnectionRequest)
+		projects.GET("/:id/connection-requests", handler.ListProjectConnectionRequests)
+		projects.POST("/:id/connection-requests/:request_id/accept", handler.AcceptProjectConnectionRequest)
+		projects.POST("/:id/connection-requests/:request_id/reject", handler.RejectProjectConnectionRequest)
+	}
+
+	events := router.Group("/api/events").Use(middleware.RequireAuth())
+	{
+		events.GET("", handler.ListEvents)
+		events.GET("/:id", handler.GetEvent)
+		events.POST("", middleware.RequireRole(model.RoleAdmin), handler.CreateEvent)
+		events.PUT("/:id", middleware.RequireRole(model.RoleAdmin), handler.UpdateEvent)
+		events.DELETE("/:id", middleware.RequireRole(model.RoleAdmin), handler.DeleteEvent)
+		events.POST("/:id/signup", handler.SignUpEvent)
+		events.DELETE("/:id/signup", handler.CancelEventSignup)
+		events.GET("/:id/signups", middleware.RequireRole(model.RoleAdmin), handler.ListEventSignups)
 	}
 
 	recruitments := router.Group("/api/recruitments").Use(middleware.RequireAuth())
@@ -97,6 +158,15 @@ func SetupRouter() *gin.Engine {
 		responses.POST("/:id/accept", handler.AcceptResponse)
 		responses.POST("/:id/reject", handler.RejectResponse)
 		responses.POST("/:id/invalidate", handler.InvalidateResponse)
+	}
+
+	resources := router.Group("/api/resources").Use(middleware.RequireAuth())
+	{
+		resources.GET("", handler.ListResourceOpportunities)
+		resources.GET("/:id", handler.GetResourceOpportunity)
+		resources.POST("", middleware.RequireRole(model.RolePartner, model.RoleAdmin), handler.CreateResourceOpportunity)
+		resources.PUT("/:id", middleware.RequireRole(model.RolePartner, model.RoleAdmin), handler.UpdateResourceOpportunity)
+		resources.DELETE("/:id", middleware.RequireRole(model.RolePartner, model.RoleAdmin), handler.DeleteResourceOpportunity)
 	}
 
 	return router

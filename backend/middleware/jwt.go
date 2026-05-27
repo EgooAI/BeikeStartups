@@ -4,11 +4,17 @@ import (
 	"errors"
 	"time"
 
+	"github.com/EgooAI/BeikeStartups/config"
 	"github.com/EgooAI/BeikeStartups/model"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("beike-startups-secret-key-change-in-production")
+var jwtSecret []byte
+
+func init() {
+	cfg := config.Load()
+	jwtSecret = []byte(cfg.JWTSecret)
+}
 
 func GenerateToken(userID uint, username string, role model.UserRole) (string, error) {
 	_ = Claims{

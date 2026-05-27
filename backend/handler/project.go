@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/EgooAI/BeikeStartups/database"
 	"github.com/EgooAI/BeikeStartups/model"
+	"github.com/EgooAI/BeikeStartups/repository"
 	"github.com/EgooAI/BeikeStartups/response"
 	"github.com/gin-gonic/gin"
 )
@@ -34,9 +37,13 @@ func CreateProject(c *gin.Context) {
 
 	user := c.MustGet("user").(*model.User)
 
-	var team model.Team
-	if err := database.DB.Where("owner_id = ?", user.ID).First(&team).Error; err != nil {
+	team, err := repository.GetTeamByOwnerID(user.ID)
+	if err != nil {
 		response.Forbidden(c, "需要先创建团队")
+		return
+	}
+	if team.Status != model.TeamStatusApproved {
+		response.Forbidden(c, "团队认证未通过，无法发布项目")
 		return
 	}
 
@@ -167,6 +174,16 @@ func DeleteProject(c *gin.Context) {
 }
 
 func ListProjects(c *gin.Context) {
+	// pagination
+	page := 1
+	limit := 20
+	if p := c.Query("page"); p != "" {
+		fmt.Sscan(p, &page)
+	}
+	if l := c.Query("limit"); l != "" {
+		fmt.Sscan(l, &limit)
+	}
+
 	var projects []model.Project
 	query := database.DB.Preload("Team")
 
@@ -187,12 +204,313 @@ func ListProjects(c *gin.Context) {
 		query = query.Where("title LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 
-	if err := query.Find(&projects).Error; err != nil {
+	var total int64
+	if err := query.Model(&model.Project{}).Count(&total).Error; err != nil {
+		response.InternalError(c, "获取项目总数失败")
+		return
+	}
+
+	offset := (page - 1) * limit
+	if err := query.Offset(offset).Limit(limit).Find(&projects).Error; err != nil {
 		response.InternalError(c, "获取项目列表失败")
 		return
 	}
 
-	response.Success(c, projects)
+	response.Success(c, gin.H{"items": projects, "meta": gin.H{"page": page, "limit": limit, "total": total}})
+}
+
+func FavoriteProject(c *gin.Context) {
+	projectID := c.Param("id")
+	var project model.Project
+	if err := database.DB.First(&project, projectID).Error; err != nil {
+		response.NotFound(c, "项目不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	favorite := model.ProjectFavorite{
+		UserID:    user.ID,
+		ProjectID: project.ID,
+	}
+
+	if err := database.DB.Where("user_id = ? AND project_id = ?", user.ID, project.ID).First(&model.ProjectFavorite{}).Error; err == nil {
+		response.BadRequest(c, "已收藏该项目")
+		return
+	}
+
+	if err := database.DB.Create(&favorite).Error; err != nil {
+		response.InternalError(c, "收藏项目失败")
+		return
+	}
+
+	response.Success(c, favorite)
+}
+
+func UnfavoriteProject(c *gin.Context) {
+	projectID := c.Param("id")
+	user := c.MustGet("user").(*model.User)
+
+	if err := database.DB.Where("user_id = ? AND project_id = ?", user.ID, projectID).Delete(&model.ProjectFavorite{}).Error; err != nil {
+		response.InternalError(c, "取消收藏失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "已取消收藏", nil)
+}
+
+func ListFavoriteProjects(c *gin.Context) {
+	user := c.MustGet("user").(*model.User)
+	var favorites []model.ProjectFavorite
+	if err := database.DB.Preload("Project").Where("user_id = ?", user.ID).Find(&favorites).Error; err != nil {
+		response.InternalError(c, "获取收藏项目失败")
+		return
+	}
+
+	response.Success(c, favorites)
+}
+
+type RequestProjectBPRequest struct {
+	Message string `json:"message" binding:"required"`
+}
+
+func RequestProjectBP(c *gin.Context) {
+	projectID := c.Param("id")
+	var project model.Project
+	if err := database.DB.First(&project, projectID).Error; err != nil {
+		response.NotFound(c, "项目不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, project.TeamID).Error; err == nil && team.OwnerID == user.ID {
+		response.BadRequest(c, "团队成员无需申请BP权限")
+		return
+	}
+
+	var req RequestProjectBPRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	bpRequest := model.ProjectBPRequest{
+		ProjectID:  project.ID,
+		UserID:     user.ID,
+		Status:     model.RequestStatusPending,
+		ReviewNote: req.Message,
+	}
+
+	if err := database.DB.Create(&bpRequest).Error; err != nil {
+		response.InternalError(c, "申请 BP 权限失败")
+		return
+	}
+
+	response.Success(c, bpRequest)
+}
+
+func ListProjectBPRequests(c *gin.Context) {
+	projectID := c.Param("id")
+	var project model.Project
+	if err := database.DB.First(&project, projectID).Error; err != nil {
+		response.NotFound(c, "项目不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权查看 BP 请求")
+		return
+	}
+
+	var requests []model.ProjectBPRequest
+	if err := database.DB.Preload("User").Where("project_id = ?", project.ID).Find(&requests).Error; err != nil {
+		response.InternalError(c, "获取 BP 请求失败")
+		return
+	}
+
+	response.Success(c, requests)
+}
+
+func ApproveProjectBPRequest(c *gin.Context) {
+	requestID := c.Param("request_id")
+	var bpRequest model.ProjectBPRequest
+	if err := database.DB.Preload("Project").First(&bpRequest, requestID).Error; err != nil {
+		response.NotFound(c, "BP 请求不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, bpRequest.Project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权审批 BP 请求")
+		return
+	}
+
+	if bpRequest.Status != model.RequestStatusPending {
+		response.BadRequest(c, "只能审批待处理的 BP 请求")
+		return
+	}
+
+	bpRequest.Status = model.RequestStatusAccepted
+	if err := database.DB.Save(&bpRequest).Error; err != nil {
+		response.InternalError(c, "审批 BP 请求失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "BP 请求已批准", bpRequest)
+}
+
+func RejectProjectBPRequest(c *gin.Context) {
+	requestID := c.Param("request_id")
+	var bpRequest model.ProjectBPRequest
+	if err := database.DB.Preload("Project").First(&bpRequest, requestID).Error; err != nil {
+		response.NotFound(c, "BP 请求不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, bpRequest.Project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权审批 BP 请求")
+		return
+	}
+
+	if bpRequest.Status != model.RequestStatusPending {
+		response.BadRequest(c, "只能审批待处理的 BP 请求")
+		return
+	}
+
+	bpRequest.Status = model.RequestStatusRejected
+	if err := database.DB.Save(&bpRequest).Error; err != nil {
+		response.InternalError(c, "驳回 BP 请求失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "BP 请求已拒绝", bpRequest)
+}
+
+type ConnectionRequestInput struct {
+	Message string `json:"message" binding:"required"`
+}
+
+func CreateProjectConnectionRequest(c *gin.Context) {
+	projectID := c.Param("id")
+	var project model.Project
+	if err := database.DB.First(&project, projectID).Error; err != nil {
+		response.NotFound(c, "项目不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, project.TeamID).Error; err == nil && team.OwnerID == user.ID {
+		response.BadRequest(c, "团队无法对自己项目发起对接申请")
+		return
+	}
+
+	var req ConnectionRequestInput
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	connReq := model.ProjectConnectionRequest{
+		ProjectID: project.ID,
+		UserID:    user.ID,
+		Message:   req.Message,
+		Status:    model.RequestStatusPending,
+	}
+
+	if err := database.DB.Create(&connReq).Error; err != nil {
+		response.InternalError(c, "创建对接申请失败")
+		return
+	}
+
+	response.Success(c, connReq)
+}
+
+func ListProjectConnectionRequests(c *gin.Context) {
+	projectID := c.Param("id")
+	var project model.Project
+	if err := database.DB.First(&project, projectID).Error; err != nil {
+		response.NotFound(c, "项目不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权查看对接申请")
+		return
+	}
+
+	var requests []model.ProjectConnectionRequest
+	if err := database.DB.Preload("User").Where("project_id = ?", project.ID).Find(&requests).Error; err != nil {
+		response.InternalError(c, "获取对接申请失败")
+		return
+	}
+
+	response.Success(c, requests)
+}
+
+func AcceptProjectConnectionRequest(c *gin.Context) {
+	requestID := c.Param("request_id")
+	var connReq model.ProjectConnectionRequest
+	if err := database.DB.Preload("Project").First(&connReq, requestID).Error; err != nil {
+		response.NotFound(c, "对接申请不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, connReq.Project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权审批对接申请")
+		return
+	}
+
+	if connReq.Status != model.RequestStatusPending {
+		response.BadRequest(c, "只能审批待处理的对接申请")
+		return
+	}
+
+	connReq.Status = model.RequestStatusAccepted
+	if err := database.DB.Save(&connReq).Error; err != nil {
+		response.InternalError(c, "审批对接申请失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "对接申请已接受", connReq)
+}
+
+func RejectProjectConnectionRequest(c *gin.Context) {
+	requestID := c.Param("request_id")
+	var connReq model.ProjectConnectionRequest
+	if err := database.DB.Preload("Project").First(&connReq, requestID).Error; err != nil {
+		response.NotFound(c, "对接申请不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, connReq.Project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权审批对接申请")
+		return
+	}
+
+	if connReq.Status != model.RequestStatusPending {
+		response.BadRequest(c, "只能审批待处理的对接申请")
+		return
+	}
+
+	connReq.Status = model.RequestStatusRejected
+	if err := database.DB.Save(&connReq).Error; err != nil {
+		response.InternalError(c, "驳回对接申请失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "对接申请已拒绝", connReq)
 }
 
 func RequestProjectOnline(c *gin.Context) {

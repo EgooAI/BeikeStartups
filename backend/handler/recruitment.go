@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/EgooAI/BeikeStartups/database"
 	"github.com/EgooAI/BeikeStartups/model"
+	"github.com/EgooAI/BeikeStartups/repository"
 	"github.com/EgooAI/BeikeStartups/response"
 	"github.com/gin-gonic/gin"
 )
@@ -36,9 +38,13 @@ func CreateRecruitment(c *gin.Context) {
 
 	user := c.MustGet("user").(*model.User)
 
-	var team model.Team
-	if err := database.DB.Where("owner_id = ?", user.ID).First(&team).Error; err != nil {
+	team, err := repository.GetTeamByOwnerID(user.ID)
+	if err != nil {
 		response.Forbidden(c, "需要先创建团队")
+		return
+	}
+	if team.Status != model.TeamStatusApproved {
+		response.Forbidden(c, "团队认证未通过，无法发布招募")
 		return
 	}
 
@@ -161,6 +167,16 @@ func DeleteRecruitment(c *gin.Context) {
 }
 
 func ListRecruitments(c *gin.Context) {
+	// pagination
+	page := 1
+	limit := 20
+	if p := c.Query("page"); p != "" {
+		fmt.Sscan(p, &page)
+	}
+	if l := c.Query("limit"); l != "" {
+		fmt.Sscan(l, &limit)
+	}
+
 	var recruitments []model.Recruitment
 	query := database.DB.Preload("Team")
 
@@ -171,12 +187,19 @@ func ListRecruitments(c *gin.Context) {
 		query = query.Where("status = ?", model.RecruitStatusActive)
 	}
 
-	if err := query.Find(&recruitments).Error; err != nil {
+	var total int64
+	if err := query.Model(&model.Recruitment{}).Count(&total).Error; err != nil {
+		response.InternalError(c, "获取招募总数失败")
+		return
+	}
+
+	offset := (page - 1) * limit
+	if err := query.Offset(offset).Limit(limit).Find(&recruitments).Error; err != nil {
 		response.InternalError(c, "获取招募列表失败")
 		return
 	}
 
-	response.Success(c, recruitments)
+	response.Success(c, gin.H{"items": recruitments, "meta": gin.H{"page": page, "limit": limit, "total": total}})
 }
 
 func SolveRecruitment(c *gin.Context) {
