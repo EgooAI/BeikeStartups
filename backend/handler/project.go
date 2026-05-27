@@ -37,14 +37,15 @@ func CreateProject(c *gin.Context) {
 
 	user := c.MustGet("user").(*model.User)
 
-	team, err := repository.GetTeamByOwnerID(user.ID)
-	if err != nil {
-		response.Forbidden(c, "需要先创建团队")
-		return
-	}
-	if team.Status != model.TeamStatusApproved {
-		response.Forbidden(c, "团队认证未通过，无法发布项目")
-		return
+	// 草稿项目不需要团队认证，申请上架时才需要
+	var teamID uint = 0
+	if user.Role == model.RoleTeam {
+		team, err := repository.GetTeamByOwnerID(user.ID)
+		if err != nil {
+			response.Forbidden(c, "需要先创建团队")
+			return
+		}
+		teamID = team.ID
 	}
 
 	project := model.Project{
@@ -54,7 +55,8 @@ func CreateProject(c *gin.Context) {
 		CoverImage:  req.CoverImage,
 		Status:      model.ProjStatusDraft,
 		IsPublic:    req.IsPublic,
-		TeamID:      team.ID,
+		TeamID:      teamID,
+		UserID:      user.ID,
 		Tags:        req.Tags,
 	}
 
@@ -75,15 +77,25 @@ func GetProject(c *gin.Context) {
 		return
 	}
 
-	user := c.MustGet("user").(*model.User)
-	if project.Status != model.ProjStatusOnline && user == nil {
-		response.Forbidden(c, "项目未上架，无法查看")
+	// 公开项目（已上架且公开）任何人都可以查看
+	if project.Status == model.ProjStatusOnline && project.IsPublic {
+		project.ViewCount++
+		database.DB.Save(&project)
+		response.Success(c, project)
 		return
 	}
 
-	if project.Status != model.ProjStatusOnline && user != nil {
+	// 未上架或私有项目需要登录
+	userValue, exists := c.Get("user")
+	if !exists || userValue == nil {
+		response.Forbidden(c, "项目未上架或为私有项目，需要登录查看")
+		return
+	}
+
+	user := userValue.(*model.User)
+	if project.Status != model.ProjStatusOnline {
 		var team model.Team
-		if err := database.DB.First(&team, project.TeamID).Error; err == nil && team.OwnerID != user.ID && user.Role != model.RoleAdmin {
+		if err := database.DB.First(&team, project.TeamID).Error; err == nil && team.OwnerID != user.ID && user.Role != model.RoleAdmin && user.Role != model.RoleSuperAdmin {
 			response.Forbidden(c, "无权查看此项目")
 			return
 		}
@@ -188,10 +200,35 @@ func ListProjects(c *gin.Context) {
 	query := database.DB.Preload("Team")
 
 	status := c.Query("status")
+
+	// 检查用户是否为管理员
+	isAdmin := false
+	if userValue, exists := c.Get("user"); exists && userValue != nil {
+		if user, ok := userValue.(*model.User); ok {
+			if user.Role == model.RoleAdmin || user.Role == model.RoleSuperAdmin {
+				isAdmin = true
+			}
+		}
+	}
+
+	// 如果是管理员且没有指定状态，显示所有状态
+	// 如果是普通用户且没有指定状态，需要根据用户角色来决定
 	if status != "" {
 		query = query.Where("status = ?", status)
-	} else {
-		query = query.Where("status = ?", model.ProjStatusOnline)
+	} else if !isAdmin {
+		// 检查用户是否已登录
+		if userValue, exists := c.Get("user"); exists && userValue != nil {
+			if user, ok := userValue.(*model.User); ok {
+				// 对于登录用户，显示自己的所有项目（通过 UserID 过滤）
+				query = query.Where("user_id = ?", user.ID)
+			} else {
+				// 未登录用户只显示已上架的项目
+				query = query.Where("status = ?", model.ProjStatusOnline)
+			}
+		} else {
+			// 未登录用户只显示已上架的项目
+			query = query.Where("status = ?", model.ProjStatusOnline)
+		}
 	}
 
 	isPublic := c.Query("is_public")
@@ -523,10 +560,26 @@ func RequestProjectOnline(c *gin.Context) {
 	}
 
 	user := c.MustGet("user").(*model.User)
-	var team model.Team
-	if err := database.DB.First(&team, project.TeamID).Error; err != nil || team.OwnerID != user.ID {
-		response.Forbidden(c, "无权执行此操作")
-		return
+
+	// 检查项目是否属于当前用户
+	if project.TeamID != 0 {
+		var team model.Team
+		if err := database.DB.First(&team, project.TeamID).Error; err != nil || team.OwnerID != user.ID {
+			response.Forbidden(c, "无权执行此操作")
+			return
+		}
+	} else {
+		// 项目没有关联团队，需要先创建或关联团队
+		team, err := repository.GetTeamByOwnerID(user.ID)
+		if err != nil {
+			response.Forbidden(c, "需要先创建团队才能申请上架")
+			return
+		}
+		if team.Status != model.TeamStatusApproved {
+			response.Forbidden(c, "团队认证未通过，无法申请上架")
+			return
+		}
+		project.TeamID = team.ID
 	}
 
 	if project.Status != model.ProjStatusDraft {

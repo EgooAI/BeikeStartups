@@ -108,8 +108,6 @@ func SetupRouter() *gin.Engine {
 
 	projects := router.Group("/api/projects").Use(middleware.RequireAuth())
 	{
-		projects.GET("", handler.ListProjects)
-		projects.GET("/:id", handler.GetProject)
 		projects.POST("", handler.CreateProject)
 		projects.PUT("/:id", handler.UpdateProject)
 		projects.DELETE("/:id", handler.DeleteProject)
@@ -132,6 +130,10 @@ func SetupRouter() *gin.Engine {
 		projects.POST("/:id/connection-requests/:request_id/accept", handler.AcceptProjectConnectionRequest)
 		projects.POST("/:id/connection-requests/:request_id/reject", handler.RejectProjectConnectionRequest)
 	}
+
+	// 公开项目接口（无需认证）
+	router.GET("/api/projects", handler.ListProjects)
+	router.GET("/api/projects/:id", handler.GetProject)
 
 	events := router.Group("/api/events").Use(middleware.RequireAuth())
 	{

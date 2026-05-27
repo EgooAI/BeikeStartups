@@ -74,6 +74,17 @@ export default function Header() {
             {user ? (
               <>
                 <Link
+                  href="/my-projects"
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive('/my-projects')
+                      ? 'bg-[#0a2a5c]/5 text-[#0a2a5c]'
+                      : 'text-gray-600 hover:text-[#0a2a5c] hover:bg-gray-50'
+                  }`}
+                >
+                  <ProjectOutlined />
+                  <span>我的项目</span>
+                </Link>
+                <Link
                   href="/dashboard"
                   className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive('/dashboard')

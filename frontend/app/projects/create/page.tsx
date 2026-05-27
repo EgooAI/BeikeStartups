@@ -35,7 +35,7 @@ export default function CreateProjectPage() {
 
     try {
       await projectApi.create(formData);
-      router.push('/projects');
+      router.push('/my-projects');
     } catch (err: any) {
       setError(err.message || '创建项目失败');
     } finally {

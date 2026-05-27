@@ -186,8 +186,10 @@ type Project struct {
 	Industry    string        `gorm:"size:100" json:"industry"`
 	FundingNeed string        `gorm:"size:100" json:"funding_need"`
 
-	TeamID    uint   `gorm:"not null;index" json:"team_id"`
+	TeamID    uint   `gorm:"index" json:"team_id"`
 	Team      *Team  `gorm:"foreignKey:TeamID" json:"team,omitempty"`
+	UserID    uint   `gorm:"index" json:"user_id"`
+	User      *User  `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	Tags      string `gorm:"size:500" json:"tags"`
 	ViewCount uint   `gorm:"default:0" json:"view_count"`
 }
