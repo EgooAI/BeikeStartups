@@ -85,9 +85,9 @@ export default function Header() {
                   <span>我的项目</span>
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/profile"
                   className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive('/dashboard')
+                    isActive('/profile')
                       ? 'bg-[#0a2a5c]/5 text-[#0a2a5c]'
                       : 'text-gray-600 hover:text-[#0a2a5c] hover:bg-gray-50'
                   }`}
@@ -160,7 +160,7 @@ export default function Header() {
             {user ? (
               <>
                 <Link
-                  href="/dashboard"
+                  href="/profile"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"
                 >

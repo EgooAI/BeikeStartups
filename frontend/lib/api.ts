@@ -97,6 +97,12 @@ export const authApi = {
   
   getCurrentUser: () =>
     api.get('/api/auth/me'),
+  
+  updateProfile: (data: { nickname?: string; avatar?: string; phone?: string; email?: string }) =>
+    api.put('/api/auth/me', data),
+
+  changePassword: (data: { old_password: string; new_password: string }) =>
+    api.post('/api/auth/change-password', data),
 };
 
 export const applicationApi = {

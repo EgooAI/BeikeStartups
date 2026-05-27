@@ -117,6 +117,27 @@ func UpdateCurrentUser(c *gin.Context) {
 	response.Success(c, user)
 }
 
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+}
+
+func ChangePassword(c *gin.Context) {
+	var req ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	if err := service.ChangePassword(user.ID, req.OldPassword, req.NewPassword); err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.SuccessWithMessage(c, "密码修改成功", nil)
+}
+
 type RoleRequestRequest struct {
 	RequestedRole   model.UserRole `json:"requested_role" binding:"required,oneof=mentor investor partner"`
 	Organization    string         `json:"organization"`
@@ -329,4 +350,18 @@ func AdminDemote(c *gin.Context) {
 	}
 
 	response.Success(c, user)
+}
+
+func AdminResetRoleRequest(c *gin.Context) {
+	id := c.Param("id")
+	var userID uint
+	_, _ = fmt.Sscan(id, &userID)
+
+	user, err := service.ResetRoleRequestStatus(userID)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.SuccessWithMessage(c, "角色申请状态已重置，用户可重新申请", user)
 }

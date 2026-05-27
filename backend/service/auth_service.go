@@ -110,6 +110,11 @@ func RequestUserRole(user *model.User, input RoleRequestInput) (*model.User, err
 		return nil, errors.New("已有待审核的角色申请，请等待处理")
 	}
 
+	// 如果之前申请被拒绝，允许重新申请
+	if user.RoleStatus == model.UserStatusRejected {
+		user.RoleStatus = model.UserStatusApproved
+	}
+
 	user.RequestedRole = input.RequestedRole
 	user.RoleStatus = model.UserStatusPending
 	user.Organization = input.Organization
@@ -288,4 +293,59 @@ func DemoteAdmin(userID uint, currentUserID uint) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func ResetRoleRequestStatus(userID uint) (*model.User, error) {
+	user, err := repository.FindUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 重置角色申请状态，允许用户重新申请
+	user.RequestedRole = ""
+	user.RoleStatus = model.UserStatusApproved
+	user.Organization = ""
+	user.Expertise = ""
+	user.InvestmentFocus = ""
+	user.ServiceArea = ""
+	user.ApplicationNote = ""
+
+	if err := repository.UpdateUser(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func ChangePassword(userID uint, oldPassword, newPassword string) error {
+	if oldPassword == "" || newPassword == "" {
+		return errors.New("旧密码和新密码不能为空")
+	}
+
+	if len(newPassword) < 6 {
+		return errors.New("新密码长度至少为6位")
+	}
+
+	user, err := repository.FindUserByID(userID)
+	if err != nil {
+		return errors.New("用户不存在")
+	}
+
+	// 验证旧密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
+		return errors.New("旧密码错误")
+	}
+
+	// 生成新密码哈希
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New("密码加密失败")
+	}
+
+	user.Password = string(hashedPassword)
+	if err := repository.UpdateUser(user); err != nil {
+		return errors.New("密码更新失败")
+	}
+
+	return nil
 }

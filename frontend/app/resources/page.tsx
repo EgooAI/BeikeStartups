@@ -132,6 +132,30 @@ export default function ResourcesPage() {
     );
   }
 
+  // 非学生身份显示权限不足提示
+  if (user.role !== 'student') {
+    return (
+      <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-custom-lg p-12 max-w-md text-center">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BuildOutlined className="text-4xl text-gray-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-3">权限不足</h2>
+          <p className="text-gray-500 mb-8">
+            创投资源功能仅对学生开放。若您需要申请投资人、导师或资源方身份，请先注册学生账号。
+          </p>
+          <a
+            href="/"
+            className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+          >
+            返回首页
+            <ArrowRightOutlined className="ml-2" />
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       <div className="bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] text-white">

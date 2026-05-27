@@ -48,6 +48,7 @@ func SetupRouter() *gin.Engine {
 		auth.POST("/login", handler.Login)
 		auth.GET("/me", middleware.RequireAuth(), handler.GetCurrentUser)
 		auth.PUT("/me", middleware.RequireAuth(), handler.UpdateCurrentUser)
+		auth.POST("/change-password", middleware.RequireAuth(), handler.ChangePassword)
 		auth.POST("/role-request", middleware.RequireAuth(), handler.RequestUserRole)
 		auth.GET("/role-requests", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ListRoleRequests)
 		auth.POST("/role-requests/:id/approve", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveRoleRequest)
@@ -65,6 +66,7 @@ func SetupRouter() *gin.Engine {
 		admin.GET("/users", handler.AdminListUsers)
 		admin.PUT("/users/:id/active", handler.AdminUpdateUserActiveStatus)
 		admin.PUT("/users/:id/role", handler.AdminUpdateUserRole)
+		admin.POST("/users/:id/reset-role-request", handler.AdminResetRoleRequest)
 	}
 
 	superAdmin := router.Group("/api/admin").Use(middleware.RequireRole(model.RoleSuperAdmin))
@@ -171,8 +173,8 @@ func SetupRouter() *gin.Engine {
 
 	resources := router.Group("/api/resources").Use(middleware.RequireAuth())
 	{
-		resources.GET("", handler.ListResourceOpportunities)
-		resources.GET("/:id", handler.GetResourceOpportunity)
+		resources.GET("", middleware.RequireRole(model.RoleStudent), handler.ListResourceOpportunities)
+		resources.GET("/:id", middleware.RequireRole(model.RoleStudent), handler.GetResourceOpportunity)
 		resources.POST("", middleware.RequireRole(model.RolePartner, model.RoleAdmin), handler.CreateResourceOpportunity)
 		resources.PUT("/:id", middleware.RequireRole(model.RolePartner, model.RoleAdmin), handler.UpdateResourceOpportunity)
 		resources.DELETE("/:id", middleware.RequireRole(model.RolePartner, model.RoleAdmin), handler.DeleteResourceOpportunity)

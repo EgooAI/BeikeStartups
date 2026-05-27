@@ -21,7 +21,7 @@ interface RoleRequest {
   investment_focus?: string;
   service_area?: string;
   application_note?: string;
-  status: string;
+  role_status: string;
   user_id: number;
   user?: any;
   created_at: string;
@@ -120,7 +120,7 @@ export default function AdminVerificationsPage() {
   }
 
   const pendingApps = applications.filter(a => a.status === 'pending');
-  const pendingRoles = roleRequests.filter(r => r.status === 'pending');
+  const pendingRoles = roleRequests.filter(r => r.role_status === 'pending');
 
   return (
     <div className="p-6 lg:p-8">
@@ -249,12 +249,12 @@ export default function AdminVerificationsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${
-                      req.status === 'approved' ? 'bg-green-500' :
-                      req.status === 'rejected' ? 'bg-red-500' :
+                      req.role_status === 'approved' ? 'bg-green-500' :
+                      req.role_status === 'rejected' ? 'bg-red-500' :
                       'bg-amber-500'
                     }`}>
-                      {req.status === 'approved' ? <CheckCircleOutlined /> :
-                       req.status === 'rejected' ? <CloseCircleOutlined /> :
+                      {req.role_status === 'approved' ? <CheckCircleOutlined /> :
+                       req.role_status === 'rejected' ? <CloseCircleOutlined /> :
                        <ClockCircleOutlined />}
                     </div>
                     <div>
@@ -270,11 +270,11 @@ export default function AdminVerificationsPage() {
                     </div>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    req.status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                    req.status === 'approved' ? 'bg-green-50 text-green-600' :
+                    req.role_status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                    req.role_status === 'approved' ? 'bg-green-50 text-green-600' :
                     'bg-red-50 text-red-500'
                   }`}>
-                    {req.status === 'pending' ? '待审核' : req.status === 'approved' ? '已通过' : '已拒绝'}
+                    {req.role_status === 'pending' ? '待审核' : req.role_status === 'approved' ? '已通过' : '已拒绝'}
                   </span>
                 </div>
 
@@ -311,7 +311,7 @@ export default function AdminVerificationsPage() {
                   )}
                 </div>
 
-                {req.status === 'pending' && (
+                {req.role_status === 'pending' && (
                   <div className="flex space-x-3 border-t border-gray-100 pt-4">
                     <button
                       onClick={() => handleApproveRole(req.id)}
