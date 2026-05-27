@@ -8,18 +8,23 @@
 - GET  /api/auth/me        获取当前用户（需登录）
 - PUT  /api/auth/me        更新当前用户资料（nickname/avatar/phone/email）
 - POST /api/auth/role-request  提交身份/角色申请（需登录）
- 
+
 用户:
 - GET  /api/users  用户列表（仅返回审核通过的用户，可通过 role 查询）
 - GET  /api/users/:id  获取用户详情
 
 管理员:
-- GET  /api/admin/users  管理员查看用户列表（需 admin，支持 role, status, is_active 查询）
-- PUT  /api/admin/users/:id/active  管理员启用/禁用用户（需 admin，body: { active: bool }）
-- PUT  /api/admin/users/:id/role  管理员修改用户角色（需 admin，body: { role: "student|mentor|investor|partner|admin" }）
-- GET  /api/auth/role-requests  查看角色申请列表（需 admin）
-- POST /api/auth/role-requests/:id/approve  审批角色申请（需 admin）
-- POST /api/auth/role-requests/:id/reject   拒绝角色申请（需 admin）
+- GET  /api/admin/users  管理员查看用户列表（需 admin/super_admin，支持 role, status, is_active 查询）
+- PUT  /api/admin/users/:id/active  管理员启用/禁用用户（需 admin/super_admin，body: { is_active: bool }）
+- PUT  /api/admin/users/:id/role  管理员修改用户角色（需 admin/super_admin，body: { role: "student|mentor|investor|partner|team|admin|super_admin" }）
+- GET  /api/auth/role-requests  查看角色申请列表（需 admin/super_admin）
+- POST /api/auth/role-requests/:id/approve  审批角色申请（需 admin/super_admin）
+- POST /api/auth/role-requests/:id/reject   拒绝角色申请（需 admin/super_admin）
+
+超级管理员专属:
+- GET  /api/admin/admins  查看所有管理员列表（需 super_admin）
+- POST /api/admin/admins/promote  提升用户为管理员（需 super_admin，body: { user_id }）
+- POST /api/admin/admins/demote    撤销管理员权限（需 super_admin，body: { user_id }）
 
 文件上传:
 - POST /api/uploads  multipart/form-data, 字段名 `file`, 返回 { data: { url } }
@@ -32,33 +37,33 @@
 - PUT  /api/applications/:id  更新申请
 - DELETE /api/applications/:id  删除申请
 - POST /api/applications/:id/submit  提交申请
-- POST /api/applications/:id/approve  审批申请（需 admin）
-- POST /api/applications/:id/reject  拒绝申请（需 admin）
+- POST /api/applications/:id/approve  审批申请（需 admin/super_admin）
+- POST /api/applications/:id/reject  拒绝申请（需 admin/super_admin）
 
 团队:
 - GET  /api/teams  列表（支持 page, limit, status）
 - GET  /api/teams/:id  团队详情
 - POST /api/teams  创建团队
 - PUT  /api/teams/:id  更新团队（需 owner/admin）
-- DELETE /api/teams/:id  删除团队（需 owner/admin）
-- POST /api/teams/:id/approve  审批团队（需 admin）
-- POST /api/teams/:id/reject  拒绝团队（需 admin）
+- DELETE /api/teams/:id  删除团队（需 owner/admin/super_admin）
+- POST /api/teams/:id/approve  审批团队（需 admin/super_admin）
+- POST /api/teams/:id/reject  拒绝团队（需 admin/super_admin）
 
 团队成员:
 - GET  /api/teams/:id/members  团队成员列表
-- POST /api/teams/:id/members  直接添加成员（需 owner/admin）
-- DELETE /api/teams/:id/members/:user_id  移除成员（需 owner/admin 或本人）
+- POST /api/teams/:id/members  直接添加成员（需 owner/admin/super_admin）
+- DELETE /api/teams/:id/members/:user_id  移除成员（需 owner/admin/super_admin 或本人）
 
 邀请与申请:
-- POST /api/teams/:id/invite  邀请用户加入团队（需 owner/admin）
-- GET  /api/teams/:id/invitations  邀请列表（需 owner/admin）
+- POST /api/teams/:id/invite  邀请用户加入团队（需 owner/admin/super_admin）
+- GET  /api/teams/:id/invitations  邀请列表（需 owner/admin/super_admin）
 - POST /api/teams/:id/invitations/:invite_id/accept  接受邀请
 - POST /api/teams/:id/invitations/:invite_id/reject  拒绝邀请
 - POST /api/teams/:id/join-requests  申请加入团队
-- GET  /api/teams/:id/join-requests  查看加入申请（需 owner/admin）
-- POST /api/teams/:id/join-requests/:request_id/approve  批准加入申请（需 owner/admin）
-- POST /api/teams/:id/join-requests/:request_id/reject  拒绝加入申请（需 owner/admin）
-- POST /api/teams/:id/transfer-owner  转移团队所有权（body: { new_owner_id }，需 owner/admin）
+- GET  /api/teams/:id/join-requests  查看加入申请（需 owner/admin/super_admin）
+- POST /api/teams/:id/join-requests/:request_id/approve  批准加入申请（需 owner/admin/super_admin）
+- POST /api/teams/:id/join-requests/:request_id/reject  拒绝加入申请（需 owner/admin/super_admin）
+- POST /api/teams/:id/transfer-owner  转移团队所有权（body: { new_owner_id }，需 owner/admin/super_admin）
 
 项目:
 - GET  /api/projects  列表（支持 page, limit, status, is_public, search；默认返回已上线项目）
@@ -67,23 +72,23 @@
 - PUT  /api/projects/:id  更新项目
 - DELETE /api/projects/:id  删除项目
 - POST /api/projects/:id/request-online  申请上架
-- POST /api/projects/:id/approve-online  审批上线（需 admin）
-- POST /api/projects/:id/reject-online  拒绝上线（需 admin）
+- POST /api/projects/:id/approve-online  审批上线（需 admin/super_admin）
+- POST /api/projects/:id/reject-online  拒绝上线（需 admin/super_admin）
 - POST /api/projects/:id/request-offline  申请下架
-- POST /api/projects/:id/approve-offline  审批下架（需 admin）
-- POST /api/projects/:id/reject-offline  拒绝下架（需 admin）
-- POST /api/projects/:id/invalidate  作废项目（需 owner/admin）
+- POST /api/projects/:id/approve-offline  审批下架（需 admin/super_admin）
+- POST /api/projects/:id/reject-offline  拒绝下架（需 admin/super_admin）
+- POST /api/projects/:id/invalidate  作废项目（需 owner/admin/super_admin）
 - POST /api/projects/:id/favorite  收藏项目
 - DELETE /api/projects/:id/favorite  取消收藏项目
 - GET  /api/projects/favorites  我的收藏项目
 - POST /api/projects/:id/bp-request  申请查看项目BP
-- GET  /api/projects/:id/bp-requests  查看 BP 请求（需 owner/admin）
-- POST /api/projects/:id/bp-requests/:request_id/approve  批准 BP 请求（需 owner/admin）
-- POST /api/projects/:id/bp-requests/:request_id/reject  拒绝 BP 请求（需 owner/admin）
+- GET  /api/projects/:id/bp-requests  查看 BP 请求（需 owner/admin/super_admin）
+- POST /api/projects/:id/bp-requests/:request_id/approve  批准 BP 请求（需 owner/admin/super_admin）
+- POST /api/projects/:id/bp-requests/:request_id/reject  拒绝 BP 请求（需 owner/admin/super_admin）
 - POST /api/projects/:id/connection-requests  发起对接申请
-- GET  /api/projects/:id/connection-requests  查看对接申请（需 owner/admin）
-- POST /api/projects/:id/connection-requests/:request_id/accept  接受对接申请（需 owner/admin）
-- POST /api/projects/:id/connection-requests/:request_id/reject  拒绝对接申请（需 owner/admin）
+- GET  /api/projects/:id/connection-requests  查看对接申请（需 owner/admin/super_admin）
+- POST /api/projects/:id/connection-requests/:request_id/accept  接受对接申请（需 owner/admin/super_admin）
+- POST /api/projects/:id/connection-requests/:request_id/reject  拒绝对接申请（需 owner/admin/super_admin）
 
 招募:
 - GET  /api/recruitments  列表（支持 page, limit, status；默认返回 active 招募）
@@ -92,17 +97,17 @@
 - PUT  /api/recruitments/:id  更新招募
 - DELETE /api/recruitments/:id  删除招募
 - POST /api/recruitments/:id/solve  标记招募完成
-- POST /api/recruitments/:id/invalidate  作废招募（需 owner/admin）
+- POST /api/recruitments/:id/invalidate  作废招募（需 owner/admin/super_admin）
 
 活动:
- - GET  /api/events  列表（支持 page, limit, status；默认返回 active 活动）
- - GET  /api/events/:id  获取活动详情
- - POST /api/events  创建活动（需 admin）
- - PUT  /api/events/:id  更新活动（需 admin）
- - DELETE /api/events/:id  删除活动（需 admin）
- - POST /api/events/:id/signup  报名活动
- - DELETE /api/events/:id/signup  取消报名
- - GET  /api/events/:id/signups  查看活动报名列表（需 admin）
+- GET  /api/events  列表（支持 page, limit, status；默认返回 active 活动）
+- GET  /api/events/:id  获取活动详情
+- POST /api/events  创建活动（需 admin/super_admin）
+- PUT  /api/events/:id  更新活动（需 admin/super_admin）
+- DELETE /api/events/:id  删除活动（需 admin/super_admin）
+- POST /api/events/:id/signup  报名活动
+- DELETE /api/events/:id/signup  取消报名
+- GET  /api/events/:id/signups  查看活动报名列表（需 admin/super_admin）
 
 响应:
 - POST /api/responses  创建响应
@@ -116,11 +121,12 @@
 资源机会:
 - GET  /api/resources  列表（支持 page, limit, status, resource_type, search）
 - GET  /api/resources/:id  获取资源机会详情
-- POST /api/resources  创建资源机会（需 partner/admin）
-- PUT  /api/resources/:id  更新资源机会（需 partner/admin）
-- DELETE /api/resources/:id  删除资源机会（需 partner/admin）
+- POST /api/resources  创建资源机会（需 partner/admin/super_admin）
+- PUT  /api/resources/:id  更新资源机会（需 partner/admin/super_admin）
+- DELETE /api/resources/:id  删除资源机会（需 partner/admin/super_admin）
 
 备注:
 - 列表接口均采用统一返回结构 { code, message, data }，其中 data 对于分页返回 { items: [], meta: { page, limit, total } }
 - 上传返回 URL 使用当前请求 Host 生成
 - 开发环境请确保前端 `NEXT_PUBLIC_API_URL` 指向后端地址，或直接使用返回的 `url`
+- super_admin 拥有所有 admin 权限，且独有管理员管理功能

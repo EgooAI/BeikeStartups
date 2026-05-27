@@ -28,6 +28,14 @@ const adminNavItems = [
   { name: '资源管理', href: '/admin/resources', icon: <BuildOutlined /> },
 ];
 
+const superAdminNavItems = [
+  { name: '管理员管理', href: '/admin/admins', icon: <SafetyOutlined /> },
+];
+
+function isAdminRole(role: string) {
+  return role === 'admin' || role === 'super_admin';
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
@@ -35,7 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== 'admin')) {
+    if (!isLoading && (!user || !isAdminRole(user.role))) {
       router.push('/admin/login');
     }
   }, [user, isLoading, router]);
@@ -48,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!user || user.role !== 'admin') return null;
+  if (!user || !isAdminRole(user.role)) return null;
 
   const handleLogout = () => {
     logout();
@@ -92,6 +100,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {isActive(item.href) && <RightOutlined className="ml-auto text-xs" />}
               </Link>
             ))}
+            {user.role === 'super_admin' && (
+              <>
+                <div className="pt-4 pb-2 px-4">
+                  <p className="text-xs font-medium text-white/30 uppercase tracking-wider">超级管理员</p>
+                </div>
+                {superAdminNavItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                      isActive(item.href)
+                        ? 'bg-white/10 text-white shadow-sm'
+                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span>{item.name}</span>
+                    {isActive(item.href) && <RightOutlined className="ml-auto text-xs" />}
+                  </Link>
+                ))}
+              </>
+            )}
           </nav>
           <div className="px-4 py-4 border-t border-white/10">
             <div className="flex items-center space-x-3 px-4 py-3">
@@ -100,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{user.nickname || user.username}</p>
-                <p className="text-xs text-white/50">管理员</p>
+                <p className="text-xs text-white/50">{user.role === 'super_admin' ? '超级管理员' : '管理员'}</p>
               </div>
             </div>
             <div className="flex space-x-2 mt-2">

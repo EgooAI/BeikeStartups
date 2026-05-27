@@ -208,7 +208,7 @@ type AdminUpdateUserActiveStatusRequest struct {
 }
 
 type AdminUpdateUserRoleRequest struct {
-	Role model.UserRole `json:"role" binding:"required,oneof=student mentor investor partner admin"`
+	Role model.UserRole `json:"role" binding:"required,oneof=student mentor investor partner admin super_admin"`
 }
 
 func AdminListUsers(c *gin.Context) {
@@ -278,6 +278,53 @@ func GetUser(c *gin.Context) {
 	user, err := service.GetUserByID(userID)
 	if err != nil {
 		response.NotFound(c, "用户不存在")
+		return
+	}
+
+	response.Success(c, user)
+}
+
+func AdminListAll(c *gin.Context) {
+	admins, err := service.ListAdminUsers()
+	if err != nil {
+		response.InternalError(c, "获取管理员列表失败")
+		return
+	}
+
+	response.Success(c, admins)
+}
+
+func AdminPromote(c *gin.Context) {
+	var req struct {
+		UserID uint `json:"user_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	user, err := service.PromoteToAdmin(req.UserID)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, user)
+}
+
+func AdminDemote(c *gin.Context) {
+	var req struct {
+		UserID uint `json:"user_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	currentUser := c.MustGet("user").(*model.User)
+	user, err := service.DemoteAdmin(req.UserID, currentUser.ID)
+	if err != nil {
+		response.BadRequest(c, err.Error())
 		return
 	}
 

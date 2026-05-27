@@ -60,11 +60,18 @@ func SetupRouter() *gin.Engine {
 		users.GET("/:id", handler.GetUser)
 	}
 
-	admin := router.Group("/api/admin").Use(middleware.RequireRole(model.RoleAdmin))
+	admin := router.Group("/api/admin").Use(middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin))
 	{
 		admin.GET("/users", handler.AdminListUsers)
 		admin.PUT("/users/:id/active", handler.AdminUpdateUserActiveStatus)
 		admin.PUT("/users/:id/role", handler.AdminUpdateUserRole)
+	}
+
+	superAdmin := router.Group("/api/admin").Use(middleware.RequireRole(model.RoleSuperAdmin))
+	{
+		superAdmin.GET("/admins", handler.AdminListAll)
+		superAdmin.POST("/admins/promote", handler.AdminPromote)
+		superAdmin.POST("/admins/demote", handler.AdminDemote)
 	}
 
 	applications := router.Group("/api/applications").Use(middleware.RequireAuth())

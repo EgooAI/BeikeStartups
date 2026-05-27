@@ -84,14 +84,14 @@ export default function Header() {
                   <UserOutlined />
                   <span>{user.nickname || user.username}</span>
                 </Link>
-                {user.role === 'admin' && (
+                {user.role === 'admin' || user.role === 'super_admin' ? (
                   <Link
                     href="/admin"
                     className="px-3 py-2 rounded-lg text-sm font-medium text-[#f59e0b] hover:bg-amber-50 transition-colors"
                   >
                     管理后台
                   </Link>
-                )}
+                ) : null}
                 <button
                   onClick={handleLogout}
                   className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"

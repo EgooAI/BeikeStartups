@@ -14,6 +14,7 @@ const (
 	RoleInvestor UserRole = "investor"
 	RolePartner  UserRole = "partner"
 	RoleAdmin    UserRole = "admin"
+	RoleSuperAdmin UserRole = "super_admin"
 )
 
 type UserStatus string

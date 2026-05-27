@@ -193,13 +193,18 @@ func UpdateUserRole(userID uint, role model.UserRole) (*model.User, error) {
 		return nil, errors.New("角色不能为空")
 	}
 
-	if role != model.RoleStudent && role != model.RoleMentor && role != model.RoleInvestor && role != model.RolePartner && role != model.RoleAdmin {
+	if role != model.RoleStudent && role != model.RoleMentor && role != model.RoleInvestor && role != model.RolePartner && role != model.RoleAdmin && role != model.RoleSuperAdmin {
 		return nil, errors.New("无效的角色类型")
 	}
 
 	user, err := repository.FindUserByID(userID)
 	if err != nil {
 		return nil, err
+	}
+
+	// Prevent modifying super_admin accounts
+	if user.Role == model.RoleSuperAdmin {
+		return nil, errors.New("无法修改超级管理员账号")
 	}
 
 	user.Role = role
@@ -221,4 +226,66 @@ func ListApprovedUsersByRole(role model.UserRole) ([]model.User, error) {
 
 func GetUserByID(id uint) (*model.User, error) {
 	return repository.FindUserByID(id)
+}
+
+func ListAdminUsers() ([]model.User, error) {
+	var admins []model.User
+	adminUsers, err := repository.ListApprovedUsersByRole(model.RoleAdmin)
+	if err != nil {
+		return nil, err
+	}
+	admins = append(admins, adminUsers...)
+
+	superAdminUsers, err := repository.ListApprovedUsersByRole(model.RoleSuperAdmin)
+	if err != nil {
+		return nil, err
+	}
+	admins = append(admins, superAdminUsers...)
+
+	return admins, nil
+}
+
+func PromoteToAdmin(userID uint) (*model.User, error) {
+	user, err := repository.FindUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Role == model.RoleAdmin || user.Role == model.RoleSuperAdmin {
+		return nil, errors.New("该用户已经是管理员")
+	}
+
+	user.Role = model.RoleAdmin
+	user.RoleStatus = model.UserStatusApproved
+	user.RequestedRole = ""
+
+	if err := repository.UpdateUser(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func DemoteAdmin(userID uint, currentUserID uint) (*model.User, error) {
+	if userID == currentUserID {
+		return nil, errors.New("不能撤销自己的管理员权限")
+	}
+
+	user, err := repository.FindUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Role != model.RoleAdmin {
+		return nil, errors.New("该用户不是管理员")
+	}
+
+	user.Role = model.RoleStudent
+	user.RoleStatus = model.UserStatusApproved
+
+	if err := repository.UpdateUser(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

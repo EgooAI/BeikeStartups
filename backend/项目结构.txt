@@ -1,10 +1,10 @@
 backend/
   .env                     # 后端环境配置文件
   .gitignore               # Git 忽略规则
-  beike_startups.db        # 本地 SQLite 数据库文件（开发环境）
   go.mod                   # Go 模块描述文件
   go.sum                   # Go 依赖校验文件
   main.go                  # 后端服务入口，启动 Gin 路由
+  server.exe               # 编译后的可执行文件
 
   config/
     config.go              # 配置加载与环境变量处理
@@ -16,11 +16,11 @@ backend/
     models.go              # GORM 数据模型定义：User、Team、Project、Recruitment、Response、Application 等
 
   middleware/
-    auth.go                # 身份认证、权限检查中间件
+    auth.go                # 身份认证、权限检查中间件（RequireAuth、RequireRole）
     jwt.go                 # JWT Token 生成与解析
 
   handler/
-    auth.go                # 用户注册、登录、当前用户信息与角色申请处理
+    auto.go                # 用户注册、登录、当前用户信息、角色申请、管理员管理、超级管理员管理
     application.go         # 创业申请 CRUD 与审批流程
     team.go                # 团队创建、成员管理、邀请、入队申请、审核、转移所有权
     project.go             # 项目发布、上架/下架审核、作废、分页列表
@@ -36,7 +36,7 @@ backend/
     user_repository.go         # 用户查询与更新数据库访问
 
   service/
-    auth_service.go         # 注册、登录、角色申请与管理员用户管理逻辑
+    auth_service.go         # 注册、登录、角色申请、管理员管理、超级管理员管理业务逻辑
     team_service.go         # 团队邀请、入队申请、审批与所有权转移业务逻辑
 
   response/

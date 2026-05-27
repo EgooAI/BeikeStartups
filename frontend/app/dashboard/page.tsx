@@ -26,6 +26,7 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
+  CrownOutlined,
 } from '@ant-design/icons';
 
 const roleConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -35,6 +36,7 @@ const roleConfig: Record<string, { label: string; color: string; icon: any }> = 
   mentor: { label: '校外导师', color: 'from-green-400 to-green-600', icon: ExperimentOutlined },
   partner: { label: '资源方', color: 'from-teal-400 to-teal-600', icon: BuildOutlined },
   admin: { label: '管理员', color: 'from-red-400 to-red-600', icon: SafetyOutlined },
+  super_admin: { label: '超级管理员', color: 'from-yellow-400 to-yellow-600', icon: SafetyOutlined },
 };
 
 export default function DashboardPage() {

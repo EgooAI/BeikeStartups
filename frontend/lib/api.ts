@@ -302,3 +302,14 @@ export const adminApi = {
   updateUserRole: (id: number, role: string) =>
     api.put(`/api/admin/users/${id}/role`, { role }),
 };
+
+export const superAdminApi = {
+  listAdmins: () =>
+    api.get('/api/admin/admins'),
+
+  promoteToAdmin: (userId: number) =>
+    api.post('/api/admin/admins/promote', { user_id: userId }),
+
+  demoteAdmin: (userId: number) =>
+    api.post('/api/admin/admins/demote', { user_id: userId }),
+};

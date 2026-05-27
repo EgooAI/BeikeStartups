@@ -83,6 +83,11 @@ func RequireRole(roles ...model.UserRole) gin.HandlerFunc {
 		}
 
 		user := userValue.(*model.User)
+		// super_admin has all permissions
+		if user.Role == model.RoleSuperAdmin {
+			c.Next()
+			return
+		}
 		for _, role := range roles {
 			if user.Role == role {
 				c.Next()

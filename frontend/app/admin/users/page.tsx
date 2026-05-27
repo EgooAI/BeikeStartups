@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import { adminApi } from '@/lib/api';
 import { User } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { UserOutlined, SearchOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { UserOutlined, SearchOutlined, CheckCircleOutlined, ExclamationCircleOutlined, CrownOutlined } from '@ant-design/icons';
 
 export default function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,6 +57,7 @@ export default function AdminUsersPage() {
       mentor: '导师',
       partner: '资源方',
       admin: '管理员',
+      super_admin: '超级管理员',
     };
     return labels[role] || role;
   };
@@ -67,9 +70,13 @@ export default function AdminUsersPage() {
       mentor: 'bg-green-50 text-green-600',
       partner: 'bg-teal-50 text-teal-600',
       admin: 'bg-red-50 text-red-600',
+      super_admin: 'bg-yellow-50 text-yellow-600',
     };
     return colors[role] || 'bg-gray-50 text-gray-600';
   };
+
+  const isSuperAdmin = (role: string) => role === 'super_admin';
+  const currentUserIsSuperAdmin = currentUser?.role === 'super_admin';
 
   const filteredUsers = users.filter(u =>
     u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -123,11 +130,18 @@ export default function AdminUsersPage() {
                 <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-9 h-9 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
-                        <UserOutlined />
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                        isSuperAdmin(u.role) ? 'bg-yellow-50 text-yellow-600' : 'bg-[#0a2a5c]/5 text-[#0a2a5c]'
+                      }`}>
+                        {isSuperAdmin(u.role) ? <CrownOutlined /> : <UserOutlined />}
                       </div>
                       <div>
-                        <p className="font-medium text-[#0a2a5c]">{u.nickname || u.username}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium text-[#0a2a5c]">{u.nickname || u.username}</p>
+                          {isSuperAdmin(u.role) && (
+                            <span className="text-xs bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded font-medium">SUPER</span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-400">@{u.username}</p>
                       </div>
                     </div>
@@ -150,30 +164,34 @@ export default function AdminUsersPage() {
                     {new Date(u.created_at).toLocaleDateString('zh-CN')}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      <select
-                        value={u.role}
-                        onChange={(e) => changeRole(u.id, e.target.value)}
-                        className="text-xs px-2 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20"
-                      >
-                        <option value="student">同学</option>
-                        <option value="team">创业团队</option>
-                        <option value="investor">投资人</option>
-                        <option value="mentor">导师</option>
-                        <option value="partner">资源方</option>
-                        <option value="admin">管理员</option>
-                      </select>
-                      <button
-                        onClick={() => toggleActive(u.id, u.is_active)}
-                        className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${
-                          u.is_active
-                            ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                            : 'bg-green-50 text-green-600 hover:bg-green-100'
-                        }`}
-                      >
-                        {u.is_active ? '冻结' : '解冻'}
-                      </button>
-                    </div>
+                    {isSuperAdmin(u.role) && !currentUserIsSuperAdmin ? (
+                      <span className="text-xs text-gray-400">不可操作</span>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <select
+                          value={u.role}
+                          onChange={(e) => changeRole(u.id, e.target.value)}
+                          className="text-xs px-2 py-1.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20"
+                        >
+                          <option value="student">同学</option>
+                          <option value="investor">投资人</option>
+                          <option value="mentor">导师</option>
+                          <option value="partner">资源方</option>
+                          {currentUserIsSuperAdmin && <option value="admin">管理员</option>}
+                          {currentUserIsSuperAdmin && <option value="super_admin">超级管理员</option>}
+                        </select>
+                        <button
+                          onClick={() => toggleActive(u.id, u.is_active)}
+                          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                            u.is_active
+                              ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                              : 'bg-green-50 text-green-600 hover:bg-green-100'
+                          }`}
+                        >
+                          {u.is_active ? '冻结' : '解冻'}
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

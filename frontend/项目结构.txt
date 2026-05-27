@@ -1,0 +1,141 @@
+frontend/
+  .gitignore               # Git 忽略规则
+  eslint.config.mjs        # ESLint 配置
+  next.config.ts           # Next.js 配置
+  package.json             # 项目依赖描述文件
+  package-lock.json        # npm 依赖锁定文件
+  pnpm-lock.yaml           # pnpm 依赖锁定文件
+  pnpm-workspace.yaml      # pnpm 工作空间配置
+  postcss.config.mjs       # PostCSS 配置（Tailwind CSS）
+  tsconfig.json             # TypeScript 配置
+  LICENSE                  # 项目许可证
+
+  app/                     # Next.js App Router 页面目录
+    layout.tsx             # 根布局（Provider、Header、Footer）
+    page.tsx               # 首页
+    globals.css            # 全局样式
+
+    about/
+      page.tsx             # 关于页面
+
+    admin/                 # 管理后台（admin/super_admin）
+      layout.tsx           # 管理后台布局（侧边栏、权限控制）
+      page.tsx             # 仪表板/统计概览
+      login/
+        page.tsx           # 管理员登录页面
+      users/
+        page.tsx           # 用户管理页面
+      admins/
+        page.tsx           # 管理员管理页面（super_admin 专属）
+      verifications/
+        page.tsx           # 身份审核页面
+      projects/
+        page.tsx           # 项目管理页面
+      events/
+        page.tsx           # 活动管理页面
+      resources/
+        page.tsx           # 资源管理页面
+
+    applications/          # 创业申请
+      page.tsx             # 申请列表
+      create/
+        page.tsx           # 创建申请
+      [id]/
+        page.tsx           # 申请详情
+
+    dashboard/
+      page.tsx             # 个人中心仪表板
+
+    events/
+      page.tsx             # 活动列表
+
+    login/
+      page.tsx             # 用户登录页面
+
+    projects/              # 项目库
+      page.tsx             # 项目列表
+      create/
+        page.tsx           # 创建项目
+      [id]/
+        page.tsx           # 项目详情
+
+    recruitments/          # 招募广场
+      page.tsx             # 招募列表
+      create/
+        page.tsx           # 发布招募
+      [id]/
+        page.tsx           # 招募详情
+
+    register/
+      page.tsx             # 用户注册页面
+
+    resources/
+      page.tsx             # 创投资源页面
+
+    responses/
+      page.tsx             # 我的响应列表
+      [id]/
+        page.tsx           # 响应详情
+
+    role-request/
+      page.tsx             # 身份认证申请页面
+
+    teams/                 # 创业团队
+      page.tsx             # 团队列表
+      create/
+        page.tsx           # 创建团队
+      [id]/
+        page.tsx           # 团队详情
+
+  components/              # React 组件库
+    Applications/          # 创业申请相关组件
+      ApplicationCard.tsx   # 申请卡片
+      ApplicationForm.tsx   # 申请表单
+      ApplicationList.tsx   # 申请列表
+
+    Auth/                  # 认证相关组件
+      LoginForm.tsx         # 登录表单
+      RegisterForm.tsx      # 注册表单
+
+    Common/                # 通用组件
+      ErrorBoundary.tsx     # 错误边界
+      Loading.tsx           # 加载状态
+      StatusBadge.tsx       # 状态徽章
+
+    Layout/                # 布局组件
+      Footer.tsx            # 页脚
+      Header.tsx            # 顶部导航栏
+      MainLayout.tsx        # 主布局
+      Sidebar.tsx           # 侧边栏
+
+    Projects/              # 项目相关组件
+      ProjectCard.tsx       # 项目卡片
+      ProjectForm.tsx       # 项目表单
+      ProjectList.tsx       # 项目列表
+
+    Recruitments/          # 招募相关组件
+      RecruitmentCard.tsx   # 招募卡片
+      RecruitmentForm.tsx   # 招募表单
+      RecruitmentList.tsx   # 招募列表
+
+    Teams/                 # 团队相关组件
+      TeamCard.tsx          # 团队卡片
+      TeamForm.tsx          # 团队表单
+      TeamList.tsx          # 团队列表
+
+  context/
+    AuthContext.tsx         # 认证上下文（用户状态、登录/登出）
+
+  hooks/                   # 自定义 Hooks
+    useApi.ts               # API 调用 Hook
+    useAuth.ts              # 认证状态 Hook
+
+  lib/                     # 工具库
+    api.ts                  # API 客户端（封装所有后端接口）
+    auth.ts                 # 认证辅助函数
+    utils.ts                # 通用工具函数
+
+  types/
+    index.ts                # TypeScript 类型定义（User、Team、Project 等）
+
+  public/                  # 静态资源

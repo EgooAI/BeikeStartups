@@ -1,0 +1,126 @@
+简要接口说明（按前端 API 客户端 lib/api.ts 整理）
+
+公共前缀: /api（由 NEXT_PUBLIC_API_URL 配置）
+
+认证 (authApi):
+- register(data)           → POST /api/auth/register  注册
+- login(data)              → POST /api/auth/login     登录
+- getCurrentUser()         → GET  /api/auth/me        获取当前用户（需登录）
+
+用户 (userApi):
+- list(role?)              → GET  /api/users  用户列表
+- get(id)                  → GET  /api/users/:id  获取用户详情
+
+管理员 (adminApi):
+- listUsers()              → GET  /api/admin/users  管理员查看用户列表
+- updateUserActive(id, isActive)  → PUT /api/admin/users/:id/active
+- updateUserRole(id, role) → PUT /api/admin/users/:id/role
+
+角色申请 (roleApi):
+- request(data)            → POST /api/auth/role-request  提交身份申请
+- listRequests()           → GET  /api/auth/role-requests  查看申请列表
+- approve(id)              → POST /api/auth/role-requests/:id/approve
+- reject(id)               → POST /api/auth/role-requests/:id/reject
+
+超级管理员专属 (superAdminApi):
+- listAdmins()             → GET  /api/admin/admins  查看所有管理员
+- promoteToAdmin(userId)    → POST /api/admin/admins/promote  提升为管理员
+- demoteAdmin(userId)       → POST /api/admin/admins/demote  撤销管理员权限
+
+创业申请 (applicationApi):
+- list()                   → GET  /api/applications
+- get(id)                  → GET  /api/applications/:id
+- create(data)             → POST /api/applications
+- update(id, data)         → PUT  /api/applications/:id
+- delete(id)               → DELETE /api/applications/:id
+- submit(id)               → POST /api/applications/:id/submit
+- approve(id, note)        → POST /api/applications/:id/approve
+- reject(id, note)         → POST /api/applications/:id/reject
+
+团队 (teamApi):
+- list(status?)            → GET  /api/teams
+- get(id)                  → GET  /api/teams/:id
+- create(data)             → POST /api/teams
+- update(id, data)         → PUT  /api/teams/:id
+- delete(id)               → DELETE /api/teams/:id
+- approve(id)              → POST /api/teams/:id/approve
+- reject(id)               → POST /api/teams/:id/reject
+- getMembers(id)           → GET  /api/teams/:id/members
+- addMember(id, userId)    → POST /api/teams/:id/members
+- removeMember(id, userId)  → DELETE /api/teams/:id/members/:user_id
+- invite(id, userId)       → POST /api/teams/:id/invite
+- getInvitations(id)       → GET  /api/teams/:id/invitations
+- acceptInvitation(id, inviteId) → POST /api/teams/:id/invitations/:invite_id/accept
+- rejectInvitation(id, inviteId) → POST /api/teams/:id/invitations/:invite_id/reject
+- createJoinRequest(id)    → POST /api/teams/:id/join-requests
+- getJoinRequests(id)      → GET  /api/teams/:id/join-requests
+- approveJoinRequest(id, requestId) → POST /api/teams/:id/join-requests/:request_id/approve
+- rejectJoinRequest(id, requestId) → POST /api/teams/:id/join-requests/:request_id/reject
+- transferOwner(id, newOwnerId) → POST /api/teams/:id/transfer-owner
+
+项目 (projectApi):
+- list(params?)            → GET  /api/projects（支持 status, is_public, search）
+- get(id)                  → GET  /api/projects/:id
+- create(data)             → POST /api/projects
+- update(id, data)         → PUT  /api/projects/:id
+- delete(id)               → DELETE /api/projects/:id
+- requestOnline(id)        → POST /api/projects/:id/request-online
+- approveOnline(id)        → POST /api/projects/:id/approve-online
+- rejectOnline(id)         → POST /api/projects/:id/reject-online
+- requestOffline(id)       → POST /api/projects/:id/request-offline
+- approveOffline(id)       → POST /api/projects/:id/approve-offline
+- rejectOffline(id)       → POST /api/projects/:id/reject-offline
+- invalidate(id)          → POST /api/projects/:id/invalidate
+- favorite(id)            → POST /api/projects/:id/favorite
+- unfavorite(id)          → DELETE /api/projects/:id/favorite
+- getFavorites()           → GET  /api/projects/favorites
+- requestBP(id)            → POST /api/projects/:id/bp-request
+- getBPRequests(id)        → GET  /api/projects/:id/bp-requests
+- approveBPRequest(id, requestId) → POST /api/projects/:id/bp-requests/:request_id/approve
+- rejectBPRequest(id, requestId) → POST /api/projects/:id/bp-requests/:request_id/reject
+- createConnectionRequest(id) → POST /api/projects/:id/connection-requests
+- getConnectionRequests(id) → GET  /api/projects/:id/connection-requests
+- acceptConnectionRequest(id, requestId) → POST /api/projects/:id/connection-requests/:request_id/accept
+- rejectConnectionRequest(id, requestId) → POST /api/projects/:id/connection-requests/:request_id/reject
+
+招募 (recruitmentApi):
+- list(status?)            → GET  /api/recruitments
+- get(id)                  → GET  /api/recruitments/:id
+- create(data)             → POST /api/recruitments
+- update(id, data)         → PUT  /api/recruitments/:id
+- delete(id)               → DELETE /api/recruitments/:id
+- solve(id)                → POST /api/recruitments/:id/solve
+- invalidate(id)           → POST /api/recruitments/:id/invalidate
+
+活动 (eventApi):
+- list(params?)            → GET  /api/events（支持 page, limit, status）
+- get(id)                  → GET  /api/events/:id
+- create(data)             → POST /api/events
+- update(id, data)         → PUT  /api/events/:id
+- delete(id)               → DELETE /api/events/:id
+- signup(id)               → POST /api/events/:id/signup
+- cancelSignup(id)         → DELETE /api/events/:id/signup
+- getSignups(id)           → GET  /api/events/:id/signups
+
+响应 (responseApi):
+- list(params?)            → GET  /api/responses
+- get(id)                  → GET  /api/responses/:id
+- create(data)             → POST /api/responses
+- update(id, data)         → PUT  /api/responses/:id
+- delete(id)               → DELETE /api/responses/:id
+- accept(id)               → POST /api/responses/:id/accept
+- reject(id)               → POST /api/responses/:id/reject
+- invalidate(id)           → POST /api/responses/:id/invalidate
+
+资源机会 (resourceApi):
+- list(params?)            → GET  /api/resources（支持 status, resource_type, search）
+- get(id)                  → GET  /api/resources/:id
+- create(data)             → POST /api/resources
+- update(id, data)         → PUT  /api/resources/:id
+- delete(id)               → DELETE /api/resources/:id
+
+备注:
+- 所有 API 调用自动携带 Authorization: Bearer {token} 请求头
+- 列表接口均采用统一返回结构 { code, message, data }
+- data 对于分页返回 { items: [], meta: { page, limit, total } }
+- 管理员接口需登录后访问，超级管理员接口仅 super_admin 角色可访问
