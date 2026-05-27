@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { resourceApi, roleApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -8,47 +7,46 @@ import {
   FundOutlined,
   ExperimentOutlined,
   BuildOutlined,
-  UserOutlined,
-  RightOutlined,
   ArrowRightOutlined,
-  SearchOutlined,
-  TeamOutlined,
-  BulbOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 
-const sections = [
+const roleOptions = [
   {
     id: 'investor',
-    title: '投资人专区',
-    icon: <FundOutlined className="text-3xl" />,
+    title: '投资人',
+    icon: <FundOutlined className="text-2xl" />,
     color: 'from-purple-500 to-purple-700',
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200',
     textColor: 'text-purple-700',
-    desc: '发现早期校园创业项目，提前连接年轻创业团队，参与项目路演与投融资对接。',
-    features: ['查看认证项目', '收藏项目', '申请查看BP', '报名闭门路演', '发起对接申请'],
+    desc: '发现高校早期创新项目，提前连接有潜力的年轻创业团队',
+    fields: ['organization', 'investment_focus'],
+    label: '申请投资人认证',
   },
   {
     id: 'mentor',
-    title: '校外导师专区',
-    icon: <ExperimentOutlined className="text-3xl" />,
+    title: '校外导师',
+    icon: <ExperimentOutlined className="text-2xl" />,
     color: 'from-green-500 to-green-700',
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
     textColor: 'text-green-700',
-    desc: '以真实行业经验帮助学生团队完善商业模式、产品路径与市场策略。',
-    features: ['认领辅导项目', '参与线上诊断', '发布导师方向', '报名创业训练营'],
+    desc: '用行业经验帮助学生创业团队完善商业模式与产品路径',
+    fields: ['organization', 'expertise'],
+    label: '成为创业导师',
   },
   {
     id: 'partner',
-    title: '资源方专区',
-    icon: <BuildOutlined className="text-3xl" />,
+    title: '资源方',
+    icon: <BuildOutlined className="text-2xl" />,
     color: 'from-teal-500 to-teal-700',
     bgColor: 'bg-teal-50',
     borderColor: 'border-teal-200',
     textColor: 'text-teal-700',
-    desc: '为创业团队提供试点场景、技术服务、办公空间、渠道资源与产业合作机会。',
-    features: ['发布资源', '匹配项目', '接收合作申请', '参与资源对接会'],
+    desc: '提供产业资源、试点场景、服务能力，与校园创新项目合作',
+    fields: ['organization', 'service_area'],
+    label: '发布资源合作',
   },
 ];
 
@@ -56,6 +54,16 @@ export default function ResourcesPage() {
   const { user } = useAuth();
   const [resources, setResources] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRole, setSelectedRole] = useState('');
+  const [form, setForm] = useState({
+    organization: '',
+    expertise: '',
+    investment_focus: '',
+    service_area: '',
+    application_note: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     fetchResources();
@@ -75,6 +83,55 @@ export default function ResourcesPage() {
     }
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRole) return;
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await roleApi.request({
+        requested_role: selectedRole,
+        ...form,
+      });
+      setMessage('申请已提交，请等待管理员审核。');
+      setForm({
+        organization: '',
+        expertise: '',
+        investment_focus: '',
+        service_area: '',
+        application_note: '',
+      });
+    } catch (err: any) {
+      setMessage(err.message || '提交失败，请重试');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 未登录显示登录提示
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-custom-lg p-12 max-w-md text-center">
+          <div className="w-20 h-20 bg-[#0a2a5c]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BuildOutlined className="text-4xl text-[#0a2a5c]" />
+          </div>
+          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-3">登录后查看创投资源</h2>
+          <p className="text-gray-500 mb-8">
+            登录后即可浏览投资人、导师和资源方专区，申请相关身份认证。
+          </p>
+          <a
+            href="/login"
+            className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+          >
+            立即登录
+            <ArrowRightOutlined className="ml-2" />
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       <div className="bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] text-white">
@@ -86,35 +143,119 @@ export default function ResourcesPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        {sections.map((section) => (
-          <div key={section.id} className={`${section.bgColor} rounded-2xl p-8 lg:p-10 border ${section.borderColor}`}>
-            <div className="flex flex-col lg:flex-row items-start gap-8">
-              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${section.color} text-white flex-shrink-0`}>
-                {section.icon}
-              </div>
-              <div className="flex-1">
-                <h2 className={`text-2xl font-bold ${section.textColor} mb-3`}>{section.title}</h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">{section.desc}</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-                  {section.features.map((f, i) => (
-                    <div key={i} className="flex items-center space-x-2 text-sm text-gray-600">
-                      <div className={`w-1.5 h-1.5 rounded-full ${section.textColor.replace('text', 'bg')}`} />
-                      <span>{f}</span>
-                    </div>
-                  ))}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* 身份选择区域 */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-6 text-center">选择您的身份</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {roleOptions.map((role) => (
+              <button
+                key={role.id}
+                onClick={() => setSelectedRole(role.id)}
+                className={`p-6 rounded-xl border-2 text-left transition-all ${
+                  selectedRole === role.id
+                    ? 'border-[#0a2a5c] bg-white shadow-custom'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${role.color} text-white mb-3`}>
+                  {role.icon}
                 </div>
-                <Link
-                  href={user ? '/role-request' : '/register'}
-                  className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${section.color} text-white rounded-xl hover:opacity-90 transition-opacity font-medium`}
-                >
-                  {section.id === 'investor' ? '申请投资人认证' : section.id === 'mentor' ? '成为创业导师' : '发布资源合作'}
-                  <ArrowRightOutlined className="ml-2" />
-                </Link>
-              </div>
-            </div>
+                <h3 className="font-semibold text-[#0a2a5c] mb-1">{role.title}</h3>
+                <p className="text-sm text-gray-500">{role.desc}</p>
+              </button>
+            ))}
           </div>
-        ))}
+        </div>
+
+        {/* 申请表单 */}
+        {selectedRole && (
+          <div className="bg-white rounded-2xl shadow-custom p-8 mb-12">
+            <h2 className="text-xl font-semibold text-[#0a2a5c] mb-6">
+              申请成为 {roleOptions.find(r => r.id === selectedRole)?.title}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">所属机构/单位</label>
+                <input
+                  type="text"
+                  value={form.organization}
+                  onChange={(e) => setForm({ ...form, organization: e.target.value })}
+                  placeholder="请填写您的所属机构"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                />
+              </div>
+
+              {selectedRole === 'mentor' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">专业领域/擅长方向</label>
+                  <textarea
+                    value={form.expertise}
+                    onChange={(e) => setForm({ ...form, expertise: e.target.value })}
+                    placeholder="请描述您的专业领域和擅长方向"
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  />
+                </div>
+              )}
+
+              {selectedRole === 'investor' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">投资方向</label>
+                  <textarea
+                    value={form.investment_focus}
+                    onChange={(e) => setForm({ ...form, investment_focus: e.target.value })}
+                    placeholder="请描述您的投资方向和关注的领域"
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  />
+                </div>
+              )}
+
+              {selectedRole === 'partner' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">服务领域/资源类型</label>
+                  <textarea
+                    value={form.service_area}
+                    onChange={(e) => setForm({ ...form, service_area: e.target.value })}
+                    placeholder="请描述您能提供的资源类型和服务领域"
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">申请说明</label>
+                <textarea
+                  value={form.application_note}
+                  onChange={(e) => setForm({ ...form, application_note: e.target.value })}
+                  placeholder="请补充说明您的申请理由"
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                />
+              </div>
+
+              {message && (
+                <div className={`p-4 rounded-xl text-sm flex items-center ${
+                  message.includes('成功') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                }`}>
+                  {message.includes('成功') && <CheckCircleOutlined className="mr-2" />}
+                  {message}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50"
+              >
+                {submitting ? '提交中...' : '提交申请'}
+              </button>
+            </form>
+          </div>
+        )}
 
         {/* Resource Opportunities */}
         <div>

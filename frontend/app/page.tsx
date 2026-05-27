@@ -9,8 +9,6 @@ import {
   TeamOutlined,
   UserOutlined,
   FundOutlined,
-  ExperimentOutlined,
-  BuildOutlined,
   RightOutlined,
   StarOutlined,
   ArrowRightOutlined,
@@ -82,17 +80,6 @@ export default function HomePage() {
               >
                 申请成为创业团队
                 <ArrowRightOutlined className="ml-2" />
-              </Link>
-            </div>
-            <div className="flex flex-wrap gap-6 mt-10 text-sm text-gray-300">
-              <Link href="/role-request" className="hover:text-[#f59e0b] transition-colors flex items-center">
-                <UserOutlined className="mr-1" /> 我是投资人
-              </Link>
-              <Link href="/role-request" className="hover:text-[#f59e0b] transition-colors flex items-center">
-                <ExperimentOutlined className="mr-1" /> 我是导师
-              </Link>
-              <Link href="/resources" className="hover:text-[#f59e0b] transition-colors flex items-center">
-                <BuildOutlined className="mr-1" /> 我是资源方
               </Link>
             </div>
           </div>
