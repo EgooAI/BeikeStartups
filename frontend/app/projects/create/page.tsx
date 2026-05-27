@@ -1,10 +1,10 @@
 // frontend/app/projects/create/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { projectApi } from '@/lib/api';
+import { projectApi, uploadApi } from '@/lib/api';
 
 export default function CreateProjectPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -18,7 +18,17 @@ export default function CreateProjectPage() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    return () => {
+      if (coverPreview) {
+        URL.revokeObjectURL(coverPreview);
+      }
+    };
+  }, [coverPreview]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
@@ -28,13 +38,31 @@ export default function CreateProjectPage() {
     });
   };
 
+  const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setCoverFile(file);
+    if (file) {
+      setCoverPreview(URL.createObjectURL(file));
+    } else {
+      setCoverPreview('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      await projectApi.create(formData);
+      let coverImageUrl = formData.cover_image;
+      if (coverFile) {
+        const uploadRes = await uploadApi.upload(coverFile);
+        coverImageUrl = uploadRes.data.url;
+      }
+      await projectApi.create({
+        ...formData,
+        cover_image: coverImageUrl,
+      });
       router.push('/my-projects');
     } catch (err: any) {
       setError(err.message || '创建项目失败');
@@ -116,17 +144,23 @@ export default function CreateProjectPage() {
 
           <div>
             <label htmlFor="cover_image" className="block text-sm font-medium text-gray-700 mb-2">
-              封面图片URL
+              封面图片上传
             </label>
             <input
-              type="text"
+              type="file"
               id="cover_image"
               name="cover_image"
-              value={formData.cover_image}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              placeholder="输入封面图片URL（可选）"
+              accept="image/*"
+              onChange={handleCoverFileChange}
+              className="w-full text-sm text-gray-600"
             />
+            {coverPreview && (
+              <img
+                src={coverPreview}
+                alt="封面预览"
+                className="mt-4 w-full max-h-60 object-cover rounded-lg border border-gray-200"
+              />
+            )}
           </div>
 
           <div>

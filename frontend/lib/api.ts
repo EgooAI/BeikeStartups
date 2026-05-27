@@ -74,6 +74,48 @@ class ApiClient {
     });
   }
 
+  async uploadFile<T>(endpoint: string, file: File): Promise<ApiResponse<T>> {
+    const url = `${this.baseURL}${endpoint}`;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const headers: HeadersInit = {};
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      const text = await response.text();
+      let data: any = null;
+
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { message: text };
+        }
+      }
+
+      if (!response.ok) {
+        const message = data?.message || response.statusText || '请求失败';
+        throw new Error(message);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API请求错误:', error);
+      throw error;
+    }
+  }
+
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
@@ -190,6 +232,10 @@ export const projectApi = {
   
   invalidate: (id: number) =>
     api.post(`/api/projects/${id}/invalidate`),
+};
+
+export const uploadApi = {
+  upload: (file: File) => api.uploadFile<{ url: string }>('/api/uploads', file),
 };
 
 export const recruitmentApi = {

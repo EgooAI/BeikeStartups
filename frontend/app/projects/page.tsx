@@ -7,25 +7,18 @@ import { Project } from '@/types';
 import { 
   RocketOutlined, 
   SearchOutlined, 
-  FilterOutlined,
   TeamOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
-
-const industries = ['全部', 'AIGC', '智能硬件', '校园服务', '教育科技', '文创消费', '低空经济', '机器人', 'SaaS', '企业服务'];
-const stages = ['全部阶段', '创意阶段', '种子计划', '原型开发', '产品上线', '营收验证'];
-const recruitStatuses = ['全部', '招募中', '暂不招募'];
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [industry, setIndustry] = useState('全部');
-  const [stage, setStage] = useState('全部阶段');
 
   useEffect(() => {
     fetchProjects();
-  }, [industry, stage]);
+  }, []);
 
   async function fetchProjects() {
     setLoading(true);
@@ -37,11 +30,7 @@ export default function ProjectsPage() {
       });
       if (res.data) {
         const data = res.data as any;
-        let items = data.items || [];
-        if (industry !== '全部') {
-          items = items.filter((p: Project) => p.tags?.includes(industry));
-        }
-        setProjects(items);
+        setProjects(data.items || []);
       }
     } catch (err) {
       console.error('Failed to fetch projects:', err);
@@ -86,47 +75,6 @@ export default function ProjectsPage() {
               <SearchOutlined className="mr-2" />搜索
             </button>
           </form>
-
-          <div className="flex flex-wrap gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                <FilterOutlined className="mr-1" />项目领域
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {industries.map((ind) => (
-                  <button
-                    key={ind}
-                    onClick={() => setIndustry(ind)}
-                    className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
-                      industry === ind
-                        ? 'bg-[#0a2a5c] text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    {ind}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">项目阶段</label>
-              <div className="flex flex-wrap gap-2">
-                {stages.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setStage(s)}
-                    className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
-                      stage === s
-                        ? 'bg-[#0a2a5c] text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Results */}

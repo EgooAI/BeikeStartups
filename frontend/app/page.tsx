@@ -21,8 +21,6 @@ const stats = [
   { value: '20+', label: '投资机构', icon: <FundOutlined />, desc: '家合作投资机构' },
 ];
 
-const industryTags = ['AIGC', '智能硬件', '校园服务', '教育科技', '文创消费', '低空经济', '机器人', 'SaaS'];
-
 export default function HomePage() {
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,17 +107,6 @@ export default function HomePage() {
             <p className="text-gray-500 text-lg max-w-2xl mx-auto">
               发现来自校园的创新力量，看见下一批值得期待的年轻创业团队。
             </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
-            {industryTags.map((tag) => (
-              <Link
-                key={tag}
-                href={`/projects?tag=${tag}`}
-                className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#f59e0b] hover:text-[#f59e0b] transition-colors"
-              >
-                {tag}
-              </Link>
-            ))}
           </div>
           {loading ? (
             <div className="flex justify-center py-12">

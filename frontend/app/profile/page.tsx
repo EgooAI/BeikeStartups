@@ -60,7 +60,7 @@ export default function ProfilePage() {
       setNotification({ type: 'success', text: '密码修改成功' });
       setShowPasswordModal(false);
       setPasswordForm({ old_password: '', new_password: '', confirm_password: '' });
-      setTimeout(() => window.location.href = '/dashboard', 1500);
+      setTimeout(() => window.location.href = '/dashboard', 100);
     } catch (err: any) {
       setPasswordError(err.message || '密码修改失败');
     } finally {
