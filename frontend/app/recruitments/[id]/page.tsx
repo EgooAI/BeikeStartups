@@ -1,20 +1,21 @@
 // frontend/app/recruitments/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { recruitmentApi } from '@/lib/api';
 import { Recruitment } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 
-export default function RecruitmentDetailPage({ params }: { params: { id: string } }) {
+export default function RecruitmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { user, isLoading: authLoading } = useAuth();
   const [recruitment, setRecruitment] = useState<Recruitment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
-  const recruitmentId = parseInt(params.id);
+  const recruitmentId = parseInt(id);
 
   useEffect(() => {
     if (!authLoading && !user) {

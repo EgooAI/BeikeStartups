@@ -12,7 +12,7 @@ export interface User {
   is_active: boolean;
 }
 
-export type UserRole = 'student' | 'mentor' | 'investor' | 'partner' | 'admin';
+export type UserRole = 'student' | 'team' | 'mentor' | 'investor' | 'partner' | 'admin';
 
 export interface Team {
   id: number;

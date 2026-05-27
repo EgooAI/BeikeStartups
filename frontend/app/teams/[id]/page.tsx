@@ -1,20 +1,21 @@
 // frontend/app/teams/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { teamApi } from '@/lib/api';
 import { Team } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 
-export default function TeamDetailPage({ params }: { params: { id: string } }) {
+export default function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { user, isLoading: authLoading } = useAuth();
   const [team, setTeam] = useState<Team | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
-  const teamId = parseInt(params.id);
+  const teamId = parseInt(id);
 
   useEffect(() => {
     if (!authLoading && !user) {

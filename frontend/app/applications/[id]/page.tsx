@@ -1,21 +1,22 @@
 // frontend/app/applications/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { applicationApi } from '@/lib/api';
 import { Application } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 
-export default function ApplicationDetailPage({ params }: { params: { id: string } }) {
+export default function ApplicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { user, isLoading: authLoading } = useAuth();
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [reviewNote, setReviewNote] = useState('');
   const router = useRouter();
-  const appId = parseInt(params.id);
+  const appId = parseInt(id);
 
   useEffect(() => {
     if (!authLoading && !user) {

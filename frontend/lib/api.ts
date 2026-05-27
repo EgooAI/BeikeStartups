@@ -231,3 +231,74 @@ export const responseApi = {
   invalidate: (id: number) =>
     api.post(`/api/responses/${id}/invalidate`),
 };
+
+export const eventApi = {
+  list: (status?: string) =>
+    api.get(`/api/events${status ? `?status=${status}` : ''}`),
+
+  get: (id: number) =>
+    api.get(`/api/events/${id}`),
+
+  create: (data: { title: string; description: string; event_type: string; location: string; start_at: string; end_at: string; status: string }) =>
+    api.post('/api/events', data),
+
+  update: (id: number, data: any) =>
+    api.put(`/api/events/${id}`, data),
+
+  delete: (id: number) =>
+    api.delete(`/api/events/${id}`),
+
+  signup: (id: number) =>
+    api.post(`/api/events/${id}/signup`),
+
+  cancelSignup: (id: number) =>
+    api.delete(`/api/events/${id}/signup`),
+};
+
+export const resourceApi = {
+  list: (params?: { status?: string; resource_type?: string; search?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.status) query.append('status', params.status);
+    if (params?.resource_type) query.append('resource_type', params.resource_type);
+    if (params?.search) query.append('search', params.search);
+    const qs = query.toString();
+    return api.get(`/api/resources${qs ? `?${qs}` : ''}`);
+  },
+
+  get: (id: number) =>
+    api.get(`/api/resources/${id}`),
+
+  create: (data: { title: string; description: string; resource_type: string; tags?: string; contact: string }) =>
+    api.post('/api/resources', data),
+
+  update: (id: number, data: any) =>
+    api.put(`/api/resources/${id}`, data),
+
+  delete: (id: number) =>
+    api.delete(`/api/resources/${id}`),
+};
+
+export const roleApi = {
+  request: (data: { requested_role: string; organization?: string; expertise?: string; investment_focus?: string; service_area?: string; application_note?: string }) =>
+    api.post('/api/auth/role-request', data),
+
+  listRequests: () =>
+    api.get('/api/auth/role-requests'),
+
+  approve: (id: number) =>
+    api.post(`/api/auth/role-requests/${id}/approve`),
+
+  reject: (id: number) =>
+    api.post(`/api/auth/role-requests/${id}/reject`),
+};
+
+export const adminApi = {
+  listUsers: () =>
+    api.get('/api/admin/users'),
+
+  updateUserActive: (id: number, isActive: boolean) =>
+    api.put(`/api/admin/users/${id}/active`, { is_active: isActive }),
+
+  updateUserRole: (id: number, role: string) =>
+    api.put(`/api/admin/users/${id}/role`, { role }),
+};

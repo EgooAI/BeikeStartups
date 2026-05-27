@@ -3,24 +3,62 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #0a2a5c;
+  --primary-light: #1a4a8a;
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+  --gray-light: #f3f4f6;
+  --gray-medium: #9ca3af;
+  --gold: #d4a853;
+  --shell-white: #fafafa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-accent: var(--accent);
+  --color-gold: var(--gold);
+  --color-shell: var(--shell-white);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: linear-gradient(rgba(10, 42, 92, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(10, 42, 92, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #0a2a5c, #1a4a8a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-orange {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .shadow-custom {
+    box-shadow: 0 4px 20px rgba(10, 42, 92, 0.08);
+  }
+  .shadow-custom-lg {
+    box-shadow: 0 8px 40px rgba(10, 42, 92, 0.12);
+  }
+  .bg-primary-gradient {
+    background: linear-gradient(135deg, #0a2a5c 0%, #1a4a8a 100%);
+  }
+  .bg-warm-gradient {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fef3c7 100%);
+  }
 }
