@@ -49,9 +49,9 @@ func SetupRouter() *gin.Engine {
 		auth.GET("/me", middleware.RequireAuth(), handler.GetCurrentUser)
 		auth.PUT("/me", middleware.RequireAuth(), handler.UpdateCurrentUser)
 		auth.POST("/role-request", middleware.RequireAuth(), handler.RequestUserRole)
-		auth.GET("/role-requests", middleware.RequireRole(model.RoleAdmin), handler.ListRoleRequests)
-		auth.POST("/role-requests/:id/approve", middleware.RequireRole(model.RoleAdmin), handler.ApproveRoleRequest)
-		auth.POST("/role-requests/:id/reject", middleware.RequireRole(model.RoleAdmin), handler.RejectRoleRequest)
+		auth.GET("/role-requests", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ListRoleRequests)
+		auth.POST("/role-requests/:id/approve", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveRoleRequest)
+		auth.POST("/role-requests/:id/reject", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.RejectRoleRequest)
 	}
 
 	users := router.Group("/api/users")
@@ -82,8 +82,8 @@ func SetupRouter() *gin.Engine {
 		applications.DELETE("/:id", handler.DeleteApplication)
 		applications.GET("", handler.ListApplications)
 		applications.POST("/:id/submit", handler.SubmitApplication)
-		applications.POST("/:id/approve", middleware.RequireRole(model.RoleAdmin), handler.ApproveApplication)
-		applications.POST("/:id/reject", middleware.RequireRole(model.RoleAdmin), handler.RejectApplication)
+		applications.POST("/:id/approve", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveApplication)
+		applications.POST("/:id/reject", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.RejectApplication)
 	}
 
 	teams := router.Group("/api/teams").Use(middleware.RequireAuth())
@@ -102,8 +102,8 @@ func SetupRouter() *gin.Engine {
 		teams.POST("/:id/join-requests/:request_id/approve", handler.ApproveTeamJoinRequest)
 		teams.POST("/:id/join-requests/:request_id/reject", handler.RejectTeamJoinRequest)
 		teams.POST("/:id/transfer-owner", handler.TransferTeamOwnership)
-		teams.POST("/:id/approve", middleware.RequireRole(model.RoleAdmin), handler.ApproveTeam)
-		teams.POST("/:id/reject", middleware.RequireRole(model.RoleAdmin), handler.RejectTeam)
+		teams.POST("/:id/approve", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveTeam)
+		teams.POST("/:id/reject", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.RejectTeam)
 	}
 
 	projects := router.Group("/api/projects").Use(middleware.RequireAuth())
@@ -114,11 +114,11 @@ func SetupRouter() *gin.Engine {
 		projects.PUT("/:id", handler.UpdateProject)
 		projects.DELETE("/:id", handler.DeleteProject)
 		projects.POST("/:id/request-online", handler.RequestProjectOnline)
-		projects.POST("/:id/approve-online", middleware.RequireRole(model.RoleAdmin), handler.ApproveProjectOnline)
-		projects.POST("/:id/reject-online", middleware.RequireRole(model.RoleAdmin), handler.RejectProjectOnline)
+		projects.POST("/:id/approve-online", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveProjectOnline)
+		projects.POST("/:id/reject-online", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.RejectProjectOnline)
 		projects.POST("/:id/request-offline", handler.RequestProjectOffline)
-		projects.POST("/:id/approve-offline", middleware.RequireRole(model.RoleAdmin), handler.ApproveProjectOffline)
-		projects.POST("/:id/reject-offline", middleware.RequireRole(model.RoleAdmin), handler.RejectProjectOffline)
+		projects.POST("/:id/approve-offline", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveProjectOffline)
+		projects.POST("/:id/reject-offline", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.RejectProjectOffline)
 		projects.POST("/:id/invalidate", handler.InvalidateProject)
 		projects.POST("/:id/favorite", handler.FavoriteProject)
 		projects.DELETE("/:id/favorite", handler.UnfavoriteProject)
@@ -137,12 +137,12 @@ func SetupRouter() *gin.Engine {
 	{
 		events.GET("", handler.ListEvents)
 		events.GET("/:id", handler.GetEvent)
-		events.POST("", middleware.RequireRole(model.RoleAdmin), handler.CreateEvent)
-		events.PUT("/:id", middleware.RequireRole(model.RoleAdmin), handler.UpdateEvent)
-		events.DELETE("/:id", middleware.RequireRole(model.RoleAdmin), handler.DeleteEvent)
+		events.POST("", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.CreateEvent)
+		events.PUT("/:id", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.UpdateEvent)
+		events.DELETE("/:id", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.DeleteEvent)
 		events.POST("/:id/signup", handler.SignUpEvent)
 		events.DELETE("/:id/signup", handler.CancelEventSignup)
-		events.GET("/:id/signups", middleware.RequireRole(model.RoleAdmin), handler.ListEventSignups)
+		events.GET("/:id/signups", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ListEventSignups)
 	}
 
 	recruitments := router.Group("/api/recruitments").Use(middleware.RequireAuth())

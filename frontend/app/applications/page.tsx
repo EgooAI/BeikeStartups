@@ -31,7 +31,8 @@ export default function ApplicationsPage() {
     try {
       const response = await applicationApi.list();
       if (response.data) {
-        setApplications(response.data as Application[]);
+        const data = response.data as any;
+        setApplications(data.items || data || []);
       }
     } catch (err: any) {
       setError(err.message || '加载申请列表失败');

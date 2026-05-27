@@ -9,11 +9,12 @@ import (
 type UserRole string
 
 const (
-	RoleStudent  UserRole = "student"
-	RoleMentor   UserRole = "mentor"
-	RoleInvestor UserRole = "investor"
-	RolePartner  UserRole = "partner"
-	RoleAdmin    UserRole = "admin"
+	RoleStudent    UserRole = "student"
+	RoleTeam       UserRole = "team"
+	RoleMentor     UserRole = "mentor"
+	RoleInvestor   UserRole = "investor"
+	RolePartner    UserRole = "partner"
+	RoleAdmin      UserRole = "admin"
 	RoleSuperAdmin UserRole = "super_admin"
 )
 

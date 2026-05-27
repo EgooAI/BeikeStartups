@@ -151,7 +151,7 @@ func ListApplications(c *gin.Context) {
 
 	var applications []model.StartupApplication
 	query := database.DB.Preload("User")
-	if user.Role != model.RoleAdmin {
+	if user.Role != model.RoleAdmin && user.Role != model.RoleSuperAdmin {
 		query = query.Where("user_id = ?", user.ID)
 	}
 
@@ -219,19 +219,49 @@ func ApproveApplication(c *gin.Context) {
 		return
 	}
 
-	user := c.MustGet("user").(*model.User)
+	adminUser := c.MustGet("user").(*model.User)
 	now := time.Now()
-	application.Status = model.AppStatusApproved
-	application.ReviewNote = req.Note
-	application.ReviewedBy = &user.ID
-	application.ReviewedAt = &now
 
-	if err := database.DB.Save(&application).Error; err != nil {
-		response.InternalError(c, "审批失败")
+	// 更新用户角色为创业团队
+	var applicant model.User
+	if err := database.DB.First(&applicant, application.UserID).Error; err != nil {
+		response.InternalError(c, "获取申请人信息失败")
+		return
+	}
+	applicant.Role = model.RoleTeam
+	if err := database.DB.Save(&applicant).Error; err != nil {
+		response.InternalError(c, "更新用户角色失败")
 		return
 	}
 
-	response.SuccessWithMessage(c, "审批通过", application)
+	// 创建已批准的团队
+	team := model.Team{
+		Name:        application.Title,
+		Description: application.Description,
+		Status:      model.TeamStatusApproved,
+		Stage:       model.TeamStageSeedPlan,
+		OwnerID:     application.UserID,
+		ReviewNote:  req.Note,
+		ReviewedBy:  &adminUser.ID,
+		ReviewedAt:  &now,
+	}
+	if err := database.DB.Create(&team).Error; err != nil {
+		response.InternalError(c, "创建团队失败")
+		return
+	}
+
+	// 更新申请状态
+	application.Status = model.AppStatusApproved
+	application.ReviewNote = req.Note
+	application.ReviewedBy = &adminUser.ID
+	application.ReviewedAt = &now
+
+	if err := database.DB.Save(&application).Error; err != nil {
+		response.InternalError(c, "更新申请状态失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "审批通过，用户身份已更新为创业团队", application)
 }
 
 func RejectApplication(c *gin.Context) {
