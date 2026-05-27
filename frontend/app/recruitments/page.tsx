@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import { recruitmentApi } from '@/lib/api';
 import { Recruitment } from '@/types';
 import {
@@ -10,15 +11,19 @@ import {
   ClockCircleOutlined,
   EnvironmentOutlined,
   UserOutlined,
+  LoginOutlined,
 } from '@ant-design/icons';
 
 export default function RecruitmentsPage() {
+  const { user, isLoading: authLoading } = useAuth();
   const [recruitments, setRecruitments] = useState<Recruitment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRecruitments();
-  }, []);
+    if (user) {
+      fetchRecruitments();
+    }
+  }, [user]);
 
   async function fetchRecruitments() {
     try {
@@ -32,6 +37,43 @@ export default function RecruitmentsPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-custom-lg p-12 max-w-md text-center">
+          <div className="w-20 h-20 bg-[#0a2a5c]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <UserOutlined className="text-4xl text-[#0a2a5c]" />
+          </div>
+          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-3">登录后查看招募广场</h2>
+          <p className="text-gray-500 mb-8">
+            登录后即可浏览创业团队的招募信息，找到适合你的创业机会。
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+          >
+            <LoginOutlined className="mr-2" />
+            立即登录
+          </Link>
+          <p className="text-sm text-gray-400 mt-4">
+            还没有账号？{' '}
+            <Link href="/register" className="text-[#f59e0b] hover:underline">
+              立即注册
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

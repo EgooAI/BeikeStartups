@@ -23,57 +23,6 @@ const stats = [
   { value: '20+', label: '投资机构', icon: <FundOutlined />, desc: '家合作投资机构' },
 ];
 
-const identities = [
-  {
-    role: '同学',
-    icon: <UserOutlined className="text-3xl" />,
-    desc: '发现校内创业项目，加入感兴趣的团队，从一次尝试开始你的创业旅程。',
-    color: 'from-blue-400 to-blue-600',
-    href: '/projects',
-    btnText: '以同学身份进入',
-  },
-  {
-    role: '创业团队',
-    icon: <RocketOutlined className="text-3xl" />,
-    desc: '展示项目、招募成员、对接导师与投资人，让你的创业项目获得更多资源支持。',
-    color: 'from-orange-400 to-orange-600',
-    href: '/teams/create',
-    btnText: '申请创业团队认证',
-  },
-  {
-    role: '投资人',
-    icon: <FundOutlined className="text-3xl" />,
-    desc: '发现高校早期创新项目，提前连接有潜力的年轻创业团队。',
-    color: 'from-purple-400 to-purple-600',
-    href: '/role-request',
-    btnText: '申请投资人认证',
-  },
-  {
-    role: '校外导师',
-    icon: <ExperimentOutlined className="text-3xl" />,
-    desc: '用你的行业经验，帮助学生创业团队少走弯路。',
-    color: 'from-green-400 to-green-600',
-    href: '/role-request',
-    btnText: '成为创业导师',
-  },
-  {
-    role: '资源方',
-    icon: <BuildOutlined className="text-3xl" />,
-    desc: '提供产业资源、试点场景、服务能力，与校园创新项目建立合作。',
-    color: 'from-teal-400 to-teal-600',
-    href: '/resources',
-    btnText: '发布资源合作',
-  },
-  {
-    role: '种子计划',
-    icon: <StarOutlined className="text-3xl" />,
-    desc: '项目处于创意验证阶段，优先获得项目展示、队员招募、导师建议等支持。',
-    color: 'from-amber-400 to-amber-600',
-    href: '/projects',
-    btnText: '查看种子项目',
-  },
-];
-
 const industryTags = ['AIGC', '智能硬件', '校园服务', '教育科技', '文创消费', '低空经济', '机器人', 'SaaS'];
 
 export default function HomePage() {
@@ -238,39 +187,6 @@ export default function HomePage() {
             >
               查看全部项目 <ArrowRightOutlined className="ml-2" />
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Identity Entry Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#0a2a5c] mb-4">选择你的身份，进入校园创投生态</h2>
-            <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-              无论你是谁，都能在这里找到适合自己的位置。
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {identities.map((item, index) => (
-              <div
-                key={index}
-                className="group relative bg-white rounded-2xl shadow-custom hover:shadow-custom-lg transition-all p-8 border border-gray-100 hover:border-transparent overflow-hidden"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
-                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} text-white mb-5`}>
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-bold text-[#0a2a5c] mb-3">{item.role}</h3>
-                <p className="text-gray-500 mb-6 leading-relaxed">{item.desc}</p>
-                <Link
-                  href={item.href}
-                  className={`inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r ${item.color} text-white hover:opacity-90 transition-opacity`}
-                >
-                  {item.btnText} <ArrowRightOutlined className="ml-2 text-xs" />
-                </Link>
-              </div>
-            ))}
           </div>
         </div>
       </section>
