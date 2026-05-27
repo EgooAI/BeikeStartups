@@ -139,3 +139,62 @@ frontend/
     index.ts                # TypeScript 类型定义（User、Team、Project 等）
 
   public/                  # 静态资源
+
+运行与脚本:
+- `npm run dev`  : 启动开发服务器（Next.js dev 模式）
+- `npm run build` : 打包生产构建（Next.js build）
+- `npm run start` : 启动已构建的生产应用（Next.js start）
+- `npm run lint`  : 运行 ESLint
+
+重要环境变量:
+- `NEXT_PUBLIC_API_URL` : 后端基础 URL，示例 `https://api.example.com`。
+- `NODE_ENV` : `development` / `production`，由构建/运行环境设置。
+
+开发约定与风格:
+- 组件以功能或领域划分到 `components/` 子目录（如 `Projects/`, `Teams/`）。文件名使用 `PascalCase`（例如 `ProjectCard.tsx`）。
+- 页面路由使用 App Router 的文件夹结构（`app/projects/[id]/page.tsx`）。动态段用方括号表示。
+- `lib/api.ts` 作为所有后端接口的单一客户端封装，`hooks/useApi.ts` 为请求封装（包含 token 自动注入和错误处理）。
+- 类型声明集中在 `types/index.ts`，尽量在接口层使用明确的 TypeScript 类型并在组件间复用。
+- 样式采用 TailwindCSS，全局样式放在 `app/globals.css`，组件局部样式使用 `className`。
+- 所有网络请求应处理失败情形，统一在 `components/Common/Loading.tsx` 与错误边界 `components/Common/ErrorBoundary.tsx` 上做容错展示。
+
+目录职责（要点）:
+- `app/`：页面与根布局。所有页面放这里，跨页面布局和 Providers 放在 `app/layout.tsx`。
+- `components/`：可复用 UI 组件，按域分文件夹。组件应小且职责单一（展示/容器分离）。
+- `context/`：React Context（例如 `AuthContext.tsx`）用于管理全局状态（用户、主题等）。
+- `hooks/`：可复用 Hook（`useAuth`, `useApi` 等），将副作用逻辑从组件抽离。
+- `lib/`：工具层（`api.ts`, `auth.ts`, `utils.ts`），对外提供清晰的函数接口。
+- `types/`：TS 类型定义（实体与接口返回类型）。
+- `public/`：图片、favicon 等静态资源。
+
+代码质量与 CI 建议:
+- 在 CI 中运行 `npm run build` 与 `npm run lint`，确保构建通过且无明显代码风格问题。
+- 推荐添加 `prettier` 与 `husky` + `lint-staged` 做提交前格式化与静态检查（可选但建议）。
+
+如何本地运行（快速指南）:
+1. 安装依赖（建议使用 pnpm）：
+```powershell
+pnpm install
+```
+2. 在项目根（`frontend/`）创建环境变量文件 `.env.local`，示例内容：
+```
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+3. 启动开发服务器：
+```powershell
+npm run dev
+```
+4. 构建生产包并本地预览：
+```powershell
+npm run build
+npm run start
+```
+
+下一步建议（可选）:
+- 生成并维护一份 `API_REFERENCE.md`（从 `lib/api.ts` 自动或手动同步），包含函数签名、参数说明、返回类型及常见示例。
+- 在 `README.md` 中加入快速上手、常见开发任务和部署说明，便于新成员入门。
+
+如果你同意，我可以：
+1) 基于 `lib/api.ts` 自动抽取接口并生成 `API_REFERENCE.md`，或
+2) 直接在仓库中新增 `frontend/README.md`，写入上述运行与开发说明。
+

@@ -2,6 +2,55 @@
 
 公共前缀: /api（由 NEXT_PUBLIC_API_URL 配置）
 
+环境变量:
+- `NEXT_PUBLIC_API_URL` : 后端基础地址，例如 `https://api.example.com`。前端发起请求时会以此为前缀构造完整 URL（`${NEXT_PUBLIC_API_URL}/api/...`）。
+
+通用说明:
+- 请求默认携带 `Authorization: Bearer {token}`（如已登录），由 `lib/auth.ts` 或 `useApi` 自动注入。
+- 列表接口采用统一分页结构：`{ code, message, data }`，其中 `data` 对于分页为 `{ items: [], meta: { page, limit, total } }`。
+- 错误响应格式统一为 `{ code, message, errors? }`。HTTP 状态码遵循常规语义（200 成功，201 创建成功，400 请求错误，401 未授权，403 禁止访问，404 未找到，500 服务端错误）。
+- 所有写操作支持 `Content-Type: application/json`；文件上传接口使用 `multipart/form-data`。
+
+示例：登录
+请求:
+POST `${NEXT_PUBLIC_API_URL}/api/auth/login`
+Headers: `Content-Type: application/json`
+Body:
+```
+{
+	"email": "user@example.com",
+	"password": "password123"
+}
+```
+
+成功响应:
+```
+{
+	"code": 200,
+	"message": "OK",
+	"data": {
+		"token": "eyJ...",
+		"user": { "id": 1, "name": "示例用户", "email": "user@example.com" }
+	}
+}
+```
+
+示例：获取项目列表（带分页、筛选）
+请求:
+GET `${NEXT_PUBLIC_API_URL}/api/projects?page=1&limit=20&status=published&search=ai`
+
+成功响应（分页）:
+```
+{
+	"code": 200,
+	"message": "OK",
+	"data": {
+		"items": [ { "id": 123, "title": "AI 项目" } ],
+		"meta": { "page": 1, "limit": 20, "total": 42 }
+	}
+}
+```
+
 认证 (authApi):
 - register(data)           → POST /api/auth/register  注册
 - login(data)              → POST /api/auth/login     登录
@@ -124,3 +173,22 @@
 - 列表接口均采用统一返回结构 { code, message, data }
 - data 对于分页返回 { items: [], meta: { page, limit, total } }
 - 管理员接口需登录后访问，超级管理员接口仅 super_admin 角色可访问
+
+快速定位（按模块）:
+- `auth`：`/api/auth/*`（登录、注册、当前用户、角色申请）
+- `users`：`/api/users`（用户列表与详情）
+- `admin`：`/api/admin/*`（管理员操作，如用户、管理员管理）
+- `projects`：`/api/projects/*`（项目的增删改查与线上/下线、收藏、BP/连接请求）
+- `teams`：`/api/teams/*`（团队管理、成员、邀请、加入请求）
+- `applications`：`/api/applications/*`（创业申请）
+- `recruitments`：`/api/recruitments/*`（招募帖）
+- `events`：`/api/events/*`（活动报名与管理）
+- `responses`：`/api/responses/*`（响应与处理）
+- `resources`：`/api/resources/*`（资源机会）
+
+注意事项与约定:
+- 前端对分页/筛选参数命名：`page`, `limit`, `search`, `status`, `is_public`。后端若使用其他命名，需要在 `lib/api.ts` 做映射。
+- 对于需要确认/审核的操作（approve/reject），前端应在 UI 中提示二次确认并展示 `note` 输入（如有）。
+- 管理类接口需在调用前确认用户角色，`useAuth` 可用于读取当前用户角色并做条件渲染/路由保护。
+
+如果需要，我可以把这些接口按照 `lib/api.ts` 的实际函数签名生成一个更详尽的 Markdown 文档（含每个参数、返回类型和 TS 类型映射）。

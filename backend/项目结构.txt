@@ -1,46 +1,66 @@
+backend 项目结构说明
+==================
+
+目录概览
+---
 backend/
-  .env                     # 后端环境配置文件
+  .env                     # 后端环境配置文件，存放本地开发测试所需变量
   .gitignore               # Git 忽略规则
-  go.mod                   # Go 模块描述文件
+  go.mod                   # Go 模块声明
   go.sum                   # Go 依赖校验文件
-  main.go                  # 后端服务入口，启动 Gin 路由
-  server.exe               # 编译后的可执行文件
+  main.go                  # 后端服务入口，初始化配置、数据库、路由并启动服务
+  server.exe               # 编译后的可执行文件（可选产出）
 
   config/
-    config.go              # 配置加载与环境变量处理
+    config.go              # 加载环境变量、CORS origin、JWT secret、数据库配置等
 
   database/
-    database.go            # 数据库连接初始化与全局 DB 对象
+    database.go            # 初始化数据库连接和 GORM 全局 DB 对象
 
   model/
-    models.go              # GORM 数据模型定义：User、Team、Project、Recruitment、Response、Application 等
+    models.go              # GORM 模型定义：User、Team、Project、Recruitment、Response、Application 等实体
 
   middleware/
-    auth.go                # 身份认证、权限检查中间件（RequireAuth、RequireRole）
-    jwt.go                 # JWT Token 生成与解析
+    auth.go                # JWT 认证、中间件、权限控制（RequireAuth、RequireRole）
+    jwt.go                 # JWT Token 生成与验证工具函数
 
   handler/
-    auto.go                # 用户注册、登录、当前用户信息、角色申请、管理员管理、超级管理员管理
-    application.go         # 创业申请 CRUD 与审批流程
-    team.go                # 团队创建、成员管理、邀请、入队申请、审核、转移所有权
-    project.go             # 项目发布、上架/下架审核、作废、分页列表
-    recruitment.go         # 团队招募发布、更新、解决、作废、分页列表
-    response.go            # 对接响应创建、审批、作废
-    resource.go            # 资源机会管理（partner/admin 权限）
-    event.go               # 活动发布、更新、报名、管理员报名列表
-    upload.go              # 文件上传处理
+    auto.go                # 注册、登录、当前用户、角色申请、管理员与超级管理员接口
+    application.go         # 创业申请 CRUD、提交、审批、拒绝等业务接口
+    team.go                # 团队管理、成员管理、邀请、入队申请、审核与所有权转移接口
+    project.go             # 项目发布、更新、上架/下架申请、审批、作废、收藏、BP/对接申请接口
+    recruitment.go         # 招募管理、发布、更新、完成、作废接口
+    response.go            # 对接响应的创建、审批、作废接口
+    resource.go            # 资源机会发布、查询、更新、删除接口
+    event.go               # 活动发布、报名、报名列表、管理端活动操作接口
+    upload.go              # 处理文件上传并返回可访问 URL
 
   repository/
-    application_repository.go  # 申请相关数据库访问
-    team_repository.go         # 团队、成员、邀请、入队申请数据库访问
-    user_repository.go         # 用户查询与更新数据库访问
+    application_repository.go  # 申请相关数据访问层，封装数据库查询与 CRUD
+    team_repository.go         # 团队、成员、邀请、入队申请的数据访问逻辑
+    user_repository.go         # 用户数据访问、查询、更新逻辑
 
   service/
-    auth_service.go         # 注册、登录、角色申请、管理员管理、超级管理员管理业务逻辑
-    team_service.go         # 团队邀请、入队申请、审批与所有权转移业务逻辑
+    auth_service.go         # 认证与用户业务逻辑：注册、登录、角色申请、管理员审批等
+    team_service.go         # 团队业务逻辑：成员变更、邀请、申请、审批、转移所有权
 
   response/
-    response.go            # 统一响应格式封装
+    response.go            # 统一响应结构封装，格式化返回结果
 
   router/
-    router.go              # 路由注册与跨域配置
+    router.go              # 注册路由、CORS 设置、认证中间件挂载、静态文件路由
+
+工作流说明
+---
+1. `main.go` 启动时加载配置、连接数据库、初始化路由。
+2. `router/router.go` 定义所有 `/api` 路径，并将请求分发到 `handler`。
+3. `handler` 负责解析请求、调用 `service`/`repository` 执行业务和返回结果。
+4. 全局响应使用 `response/response.go` 统一返回格式。
+5. `middleware` 处理认证与权限，确保敏感接口仅授权用户可访问。
+
+关键点
+---
+- 路由层与业务层分离，便于后续扩展和单元测试。
+- 上传文件通过 `/uploads` 静态目录暴露，上传逻辑集中在 `upload.go`。
+- 角色与权限控制通过 `middleware.RequireRole` 进行细粒度保护。
+- `model/models.go` 统一定义数据库实体结构和关联关系。
