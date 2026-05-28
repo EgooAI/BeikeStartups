@@ -17,6 +17,9 @@ import {
   ArrowLeftOutlined,
   ShareAltOutlined,
   EnvironmentOutlined,
+  FileTextOutlined,
+  BookOutlined,
+  PauseOutlined,
 } from '@ant-design/icons';
 
 export default function ProjectDetailPage() {
@@ -189,15 +192,15 @@ export default function ProjectDetailPage() {
             <div className="flex flex-wrap gap-3 border-t border-gray-100 pt-6">
               {user ? (
                 <>
-                  <Link
-                    href={user ? `/responses/create?recruitment_id=${recruitments[0]?.id || ''}` : '/login'}
-                    className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 transition-colors font-medium"
-                  >
-                    <UserOutlined className="mr-2" />申请加入团队
-                  </Link>
-                  <button className="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:border-[#0a2a5c]/20 transition-colors font-medium">
-                    <HeartOutlined className="mr-2" />关注项目
-                  </button>
+                  {user.role === 'student' && (
+                    <Link
+                      href={user ? `/responses/create?recruitment_id=${recruitments[0]?.id || ''}` : '/login'}
+                      className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 transition-colors font-medium"
+                    >
+                      <UserOutlined className="mr-2" />申请加入团队
+                    </Link>
+                  )}
+
                 </>
               ) : (
                 <>
@@ -217,27 +220,63 @@ export default function ProjectDetailPage() {
               )}
             </div>
 
-            {/* Role-specific actions */}
-            <div className="mt-6 p-5 bg-amber-50 rounded-xl border border-amber-100">
-              <h3 className="font-semibold text-amber-800 mb-3">资源对接</h3>
-              <p className="text-sm text-amber-600 mb-4">
-                投资人可申请查看BP，导师可申请成为项目导师，资源方可提供资源合作。
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href={user ? `/projects/${project.id}/bp-request` : '/login'}
-                  className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors"
-                >
-                  申请查看BP
-                </Link>
-                <Link
-                  href={user ? `/projects/${project.id}/connect` : '/login'}
-                  className="px-4 py-2 bg-white text-amber-700 text-sm rounded-lg border border-amber-200 hover:bg-amber-50 transition-colors"
-                >
-                  预约项目路演
-                </Link>
+            {/* Role-specific actions - hidden for students and team members */}
+            {user?.role !== 'student' && user?.role !== 'team' && (
+              <div className="mt-6 p-5 bg-amber-50 rounded-xl border border-amber-100">
+                <h3 className="font-semibold text-amber-800 mb-3">资源对接</h3>
+                <p className="text-sm text-amber-600 mb-4">
+                  投资人可申请查看BP，导师可申请成为项目导师，资源方可提供资源合作。
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {user?.role === 'investor' && (
+                    <Link
+                      href={`/projects/${project.id}/connect`}
+                      className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
+                    >
+                      <FileTextOutlined className="mr-2" />申请查看BP
+                    </Link>
+                  )}
+                  {user?.role === 'mentor' && (
+                    <Link
+                      href={`/projects/${project.id}/connect`}
+                      className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
+                    >
+                      <BookOutlined className="mr-2" />申请成为项目导师
+                    </Link>
+                  )}
+                  {user?.role === 'partner' && (
+                    <Link
+                      href={`/projects/${project.id}/connect`}
+                      className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
+                    >
+                      <PauseOutlined className="mr-2" />提供资源合作
+                    </Link>
+                  )}
+                  {(!user || !['investor', 'mentor', 'partner', 'student', 'team'].includes(user.role)) && (
+                    <>
+                      <Link
+                        href={user ? `/projects/${project.id}/connect` : '/login'}
+                        className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
+                      >
+                        <FileTextOutlined className="mr-2" />申请查看BP
+                      </Link>
+                      <Link
+                        href={user ? `/projects/${project.id}/connect` : '/login'}
+                        className="px-4 py-2 bg-white text-amber-700 text-sm rounded-lg border border-amber-200 hover:bg-amber-50 transition-colors flex items-center"
+                      >
+                        <BookOutlined className="mr-2" />申请成为项目导师
+                      </Link>
+                      <Link
+                        href={user ? `/projects/${project.id}/connect` : '/login'}
+                        className="px-4 py-2 bg-white text-amber-700 text-sm rounded-lg border border-amber-200 hover:bg-amber-50 transition-colors flex items-center"
+                      >
+                        <PauseOutlined className="mr-2" />提供资源合作
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

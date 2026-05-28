@@ -105,6 +105,24 @@ export interface Response {
 
 export type ResponseStatus = 'pending' | 'accepted' | 'rejected' | 'invalid';
 
+export interface ConnectionRequest {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  project_id: number;
+  project?: Project;
+  user_id: number;
+  user?: User;
+  request_type: ConnectionRequestType;
+  status: ConnectionRequestStatus;
+  message?: string;
+  review_note?: string;
+}
+
+export type ConnectionRequestType = 'bp_access' | 'become_mentor' | 'resource_partner';
+
+export type ConnectionRequestStatus = 'pending' | 'approved' | 'rejected' | 'expired';
+
 export interface ApiResponse<T = any> {
   code: number;
   message: string;

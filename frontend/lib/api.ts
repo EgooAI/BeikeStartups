@@ -365,3 +365,17 @@ export const superAdminApi = {
   demoteAdmin: (userId: number) =>
     api.post('/api/admin/admins/demote', { user_id: userId }),
 };
+
+export const connectionApi = {
+  create: (projectId: number, data: { request_type: string; message?: string }) =>
+    api.post(`/api/projects/${projectId}/connection-requests`, data),
+
+  list: (projectId: number) =>
+    api.get(`/api/projects/${projectId}/connection-requests`),
+
+  accept: (projectId: number, requestId: number) =>
+    api.post(`/api/projects/${projectId}/connection-requests/${requestId}/accept`),
+
+  reject: (projectId: number, requestId: number) =>
+    api.post(`/api/projects/${projectId}/connection-requests/${requestId}/reject`),
+};
