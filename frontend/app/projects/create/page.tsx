@@ -121,6 +121,24 @@ export default function CreateProjectPage() {
     );
   }
 
+  // 普通学生用户禁止创建项目
+  if (user?.role === 'student') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-custom-lg p-12 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-3">无权创建项目</h2>
+          <p className="text-gray-500 mb-8">普通学生用户无法创建项目，请先申请成为团队角色</p>
+          <button
+            onClick={() => router.push('/my-projects')}
+            className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+          >
+            返回我的项目
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">

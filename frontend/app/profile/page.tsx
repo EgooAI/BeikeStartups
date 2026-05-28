@@ -224,19 +224,29 @@ export default function ProfilePage() {
             )}
 
             <div className="pt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full sm:w-auto px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50"
-              >
-                {saving ? '保存中...' : '保存修改'}
-              </button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50"
+                >
+                  {saving ? '保存中...' : '保存修改'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-medium"
+                >
+                  取消
+                </button>
+              </div>
               <button
                 type="button"
-                onClick={handleCancel}
-                className="w-full sm:w-auto px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-medium"
+                onClick={() => setShowPasswordModal(true)}
+                className="px-6 py-3 border border-[#0a2a5c] text-[#0a2a5c] rounded-xl hover:bg-[#0a2a5c]/5 transition-colors font-medium flex items-center gap-2"
               >
-                取消
+                <LockOutlined />
+                修改密码
               </button>
             </div>
           </form>

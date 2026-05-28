@@ -43,6 +43,12 @@ func CreateProject(c *gin.Context) {
 
 	user := c.MustGet("user").(*model.User)
 
+	// 普通学生用户禁止创建项目草稿
+	if user.Role == model.RoleStudent {
+		response.Forbidden(c, "普通学生用户无法创建项目，请先申请成为团队角色")
+		return
+	}
+
 	// 草稿项目不需要团队认证，申请上架时才需要
 	var teamID uint = 0
 	if user.Role == model.RoleTeam {

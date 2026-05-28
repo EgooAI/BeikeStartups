@@ -110,23 +110,27 @@ export default function TeamProjectsPage() {
             <h1 className="text-3xl font-bold text-[#0a2a5c]">我的项目</h1>
             <p className="text-gray-500 mt-1">管理您团队的所有项目</p>
           </div>
-          <button
-            onClick={() => router.push('/projects/create')}
-            className="px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium flex items-center"
-          >
-            <PlusOutlined className="mr-2" />创建项目
-          </button>
+          {user?.role !== 'student' && (
+            <button
+              onClick={() => router.push('/projects/create')}
+              className="px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium flex items-center"
+            >
+              <PlusOutlined className="mr-2" />创建项目
+            </button>
+          )}
         </div>
 
         {projects.length === 0 ? (
           <div className="bg-white rounded-xl shadow-custom p-12 text-center">
             <p className="text-gray-600 mb-4">暂无项目</p>
-            <button
-              onClick={() => router.push('/projects/create')}
-              className="text-[#0a2a5c] hover:text-[#0a2a5c]/80 font-medium"
-            >
-              创建第一个项目 →
-            </button>
+            {user?.role !== 'student' && (
+              <button
+                onClick={() => router.push('/projects/create')}
+                className="text-[#0a2a5c] hover:text-[#0a2a5c]/80 font-medium"
+              >
+                创建第一个项目 →
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
