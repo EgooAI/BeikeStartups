@@ -280,6 +280,14 @@ const (
 	RequestStatusInvalid  RequestStatus = "invalid"
 )
 
+type RequestType string
+
+const (
+	RequestTypeBPAccess        RequestType = "bp_access"
+	RequestTypeBecomeMentor    RequestType = "become_mentor"
+	RequestTypeResourcePartner RequestType = "resource_partner"
+)
+
 type ProjectFavorite struct {
 	ID        uint           `gorm:"primarykey" json:"id"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -312,13 +320,56 @@ type ProjectConnectionRequest struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	ProjectID  uint          `gorm:"not null;index" json:"project_id"`
-	Project    *Project      `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
-	UserID     uint          `gorm:"not null;index" json:"user_id"`
-	User       *User         `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Message    string        `gorm:"type:text" json:"message"`
-	Status     RequestStatus `gorm:"type:varchar(20);not null;default:'pending'" json:"status"`
-	ReviewNote string        `gorm:"type:text" json:"review_note"`
+	ProjectID   uint          `gorm:"not null;index" json:"project_id"`
+	Project     *Project      `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
+	UserID      uint          `gorm:"not null;index" json:"user_id"`
+	User        *User         `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	RequestType RequestType   `gorm:"type:varchar(30)" json:"request_type"`
+	Message     string        `gorm:"type:text" json:"message"`
+	Status      RequestStatus `gorm:"type:varchar(20);not null;default:'pending'" json:"status"`
+	ReviewNote  string        `gorm:"type:text" json:"review_note"`
+}
+
+// 项目导师关联表
+type ProjectMentor struct {
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+
+	ProjectID uint     `gorm:"not null;index" json:"project_id"`
+	Project   *Project `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
+	UserID    uint     `gorm:"not null;index" json:"user_id"`
+	User      *User    `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Message   string   `gorm:"type:text" json:"message"`
+}
+
+// 项目投资人关联表
+type ProjectInvestor struct {
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+
+	ProjectID uint     `gorm:"not null;index" json:"project_id"`
+	Project   *Project `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
+	UserID    uint     `gorm:"not null;index" json:"user_id"`
+	User      *User    `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Message   string   `gorm:"type:text" json:"message"`
+}
+
+// 项目资源方关联表
+type ProjectPartner struct {
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+
+	ProjectID uint     `gorm:"not null;index" json:"project_id"`
+	Project   *Project `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
+	UserID    uint     `gorm:"not null;index" json:"user_id"`
+	User      *User    `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Message   string   `gorm:"type:text" json:"message"`
 }
 
 type EventStatus string
@@ -357,4 +408,5 @@ type EventSignup struct {
 	Event   *Event `gorm:"foreignKey:EventID" json:"event,omitempty"`
 	UserID  uint   `gorm:"not null;index;uniqueIndex:idx_event_signup_event_user" json:"user_id"`
 	User    *User  `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Status  string `gorm:"type:varchar(20);not null;default:'pending'" json:"status"`
 }

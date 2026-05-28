@@ -35,6 +35,9 @@ func InitDatabase(cfg *config.Config) {
 		&model.ProjectFavorite{},
 		&model.ProjectBPRequest{},
 		&model.ProjectConnectionRequest{},
+		&model.ProjectMentor{},
+		&model.ProjectInvestor{},
+		&model.ProjectPartner{},
 		&model.Event{},
 		&model.EventSignup{},
 	)

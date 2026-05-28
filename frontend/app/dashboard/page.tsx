@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { projectApi, teamApi, recruitmentApi, applicationApi, responseApi, eventApi, resourceApi } from '@/lib/api';
+import { projectApi, teamApi, recruitmentApi, applicationApi, responseApi, eventApi, resourceApi, connectionApi } from '@/lib/api';
 import { Project, Team, Recruitment, Application } from '@/types';
 import Link from 'next/link';
 import {
@@ -27,6 +27,7 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   CrownOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 
 const roleConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -43,6 +44,7 @@ export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [connectedProjects, setConnectedProjects] = useState<Project[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [recruitments, setRecruitments] = useState<Recruitment[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
@@ -68,12 +70,19 @@ export default function DashboardPage() {
 
   async function loadAllData() {
     try {
-      const [projRes, teamRes, recRes, appRes] = await Promise.allSettled([
+      const promises: Promise<any>[] = [
         projectApi.list(),
         teamApi.list(),
         recruitmentApi.list(),
         applicationApi.list(),
-      ]);
+      ];
+      
+      // 投资人/导师/资源方加载对接项目
+      if (user?.role === 'investor' || user?.role === 'mentor' || user?.role === 'partner') {
+        promises.push(connectionApi.getMyConnectedProjects());
+      }
+      
+      const [projRes, teamRes, recRes, appRes, connRes] = await Promise.allSettled(promises);
 
       if (projRes.status === 'fulfilled' && projRes.value.data) {
         setProjects(normalizeData(projRes.value.data));
@@ -86,6 +95,9 @@ export default function DashboardPage() {
       }
       if (appRes.status === 'fulfilled' && appRes.value.data) {
         setApplications(normalizeData(appRes.value.data));
+      }
+      if (connRes?.status === 'fulfilled' && connRes.value.data) {
+        setConnectedProjects(normalizeData(connRes.value.data));
       }
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
@@ -106,6 +118,7 @@ export default function DashboardPage() {
 
   const roleInfo = roleConfig[user.role] || roleConfig.student;
   const RoleIcon = roleInfo.icon;
+  const isInvestorRole = user?.role === 'investor' || user?.role === 'mentor' || user?.role === 'partner';
 
   const pendingApplications = applications.filter((a) => a.status === 'pending');
   const draftApplications = applications.filter((a) => a.status === 'draft');
@@ -133,189 +146,252 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Link
-                href="/projects/create"
-                className="inline-flex items-center px-4 py-2 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 transition-colors text-sm font-medium shadow-sm"
-              >
-                <RocketOutlined className="mr-1.5" /> 发布项目
-              </Link>
-            </div>
+            {!isInvestorRole && (
+              <div className="flex items-center space-x-3">
+                <Link
+                  href="/projects/create"
+                  className="inline-flex items-center px-4 py-2 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 transition-colors text-sm font-medium shadow-sm"
+                >
+                  <RocketOutlined className="mr-1.5" /> 发布项目
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">项目总数</p>
-                <p className="text-2xl font-bold text-[#0a2a5c]">{projects.length}</p>
+        {/* Quick Stats - 投资人/导师/资源方不显示 */}
+        {!isInvestorRole && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">项目总数</p>
+                  <p className="text-2xl font-bold text-[#0a2a5c]">{projects.length}</p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
+                  <ProjectOutlined />
+                </div>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
-                <ProjectOutlined />
+            </div>
+            <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">团队数量</p>
+                  <p className="text-2xl font-bold text-[#0a2a5c]">{teams.length}</p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
+                  <TeamOutlined />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">招募中</p>
+                  <p className="text-2xl font-bold text-[#0a2a5c]">{activeRecruitments.length}</p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
+                  <SolutionOutlined />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">待审申请</p>
+                  <p className="text-2xl font-bold text-[#f59e0b]">{pendingApplications.length}</p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-[#f59e0b]">
+                  <ClockCircleOutlined />
+                </div>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">团队数量</p>
-                <p className="text-2xl font-bold text-[#0a2a5c]">{teams.length}</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
-                <TeamOutlined />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">招募中</p>
-                <p className="text-2xl font-bold text-[#0a2a5c]">{activeRecruitments.length}</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
-                <SolutionOutlined />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">待审申请</p>
-                <p className="text-2xl font-bold text-[#f59e0b]">{pendingApplications.length}</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-[#f59e0b]">
-                <ClockCircleOutlined />
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Projects Section */}
-            <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-[#0a2a5c]">
-                  <ProjectOutlined className="mr-2" />我的项目
-                </h2>
-                <Link href="/projects" className="text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors">
-                  查看全部 <RightOutlined className="text-xs ml-1" />
-                </Link>
-              </div>
-              <div className="p-6">
-                {projects.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
-                    <RocketOutlined className="text-4xl mb-3 block" />
-                    <p className="text-sm">暂无项目</p>
-                    <Link href="/projects/create" className="text-[#f59e0b] text-sm hover:underline mt-2 inline-block">
-                      发布第一个项目 →
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {projects.slice(0, 5).map((project) => (
-                      <Link
-                        key={project.id}
-                        href={`/projects/${project.id}`}
-                        className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c] group-hover:bg-[#0a2a5c]/10 transition-colors">
-                            <RocketOutlined />
-                          </div>
-                          <div>
-                            <p className="font-medium text-[#0a2a5c] group-hover:text-[#f59e0b] transition-colors">
-                              {project.title}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              {project.tags || '未分类'} · {project.view_count} 次浏览
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          project.status === 'online' ? 'bg-green-50 text-green-600' :
-                          project.status === 'pending_online' ? 'bg-amber-50 text-amber-600' :
-                          'bg-gray-100 text-gray-500'
-                        }`}>
-                          {project.status === 'online' ? '已上架' :
-                           project.status === 'pending_online' ? '待审核' :
-                           project.status === 'draft' ? '草稿' : project.status}
-                        </span>
+            {/* Projects Section - 投资人/导师/资源方不显示 */}
+            {!isInvestorRole && (
+              <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-[#0a2a5c]">
+                    <ProjectOutlined className="mr-2" />我的项目
+                  </h2>
+                  <Link href="/projects" className="text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors">
+                    查看全部 <RightOutlined className="text-xs ml-1" />
+                  </Link>
+                </div>
+                <div className="p-6">
+                  {projects.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <RocketOutlined className="text-4xl mb-3 block" />
+                      <p className="text-sm">暂无项目</p>
+                      <Link href="/projects/create" className="text-[#f59e0b] text-sm hover:underline mt-2 inline-block">
+                        发布第一个项目 →
                       </Link>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {projects.slice(0, 5).map((project) => (
+                        <Link
+                          key={project.id}
+                          href={`/projects/${project.id}`}
+                          className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors group"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c] group-hover:bg-[#0a2a5c]/10 transition-colors">
+                              <RocketOutlined />
+                            </div>
+                            <div>
+                              <p className="font-medium text-[#0a2a5c] group-hover:text-[#f59e0b] transition-colors">
+                                {project.title}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {project.tags || '未分类'} · {project.view_count} 次浏览
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                            project.status === 'online' ? 'bg-green-50 text-green-600' :
+                            project.status === 'pending_online' ? 'bg-amber-50 text-amber-600' :
+                            'bg-gray-100 text-gray-500'
+                          }`}>
+                            {project.status === 'online' ? '已上架' :
+                             project.status === 'pending_online' ? '待审核' :
+                             project.status === 'draft' ? '草稿' : project.status}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Applications Section */}
-            <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-[#0a2a5c]">
-                  <FileTextOutlined className="mr-2" />创业申请
-                </h2>
-                <Link href="/applications" className="text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors">
-                  查看全部 <RightOutlined className="text-xs ml-1" />
-                </Link>
+            {/* Connected Projects Section - 仅投资人/导师/资源方显示 */}
+            {isInvestorRole && (
+              <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100">
+                  <h2 className="text-lg font-semibold text-[#0a2a5c]">
+                    <LinkOutlined className="mr-2" />我的对接项目
+                  </h2>
+                </div>
+                <div className="p-6">
+                  {connectedProjects.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <LinkOutlined className="text-4xl mb-3 block" />
+                      <p className="text-sm">暂无对接项目</p>
+                      <Link href="/projects" className="text-[#f59e0b] text-sm hover:underline mt-2 inline-block">
+                        浏览项目库 →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {connectedProjects.slice(0, 5).map((project) => (
+                        <Link
+                          key={project.id}
+                          href={`/projects/${project.id}`}
+                          className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors group"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-100 transition-colors">
+                              <LinkOutlined />
+                            </div>
+                            <div>
+                              <p className="font-medium text-[#0a2a5c] group-hover:text-[#f59e0b] transition-colors">
+                                {project.title}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {project.tags || '未分类'} · {project.view_count} 次浏览
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                            project.status === 'online' ? 'bg-green-50 text-green-600' :
+                            project.status === 'pending_online' ? 'bg-amber-50 text-amber-600' :
+                            'bg-gray-100 text-gray-500'
+                          }`}>
+                            {project.status === 'online' ? '已上架' :
+                             project.status === 'pending_online' ? '待审核' :
+                             project.status === 'draft' ? '草稿' : project.status}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="p-6">
-                {applications.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
-                    <FileTextOutlined className="text-4xl mb-3 block" />
-                    <p className="text-sm">暂无申请记录</p>
-                    <Link href="/applications/create" className="text-[#f59e0b] text-sm hover:underline mt-2 inline-block">
-                      创建创业申请 →
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {applications.slice(0, 5).map((app) => (
-                      <Link
-                        key={app.id}
-                        href={`/applications/${app.id}`}
-                        className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+            )}
+
+            {/* Applications Section - 投资人/导师/资源方不显示 */}
+            {!isInvestorRole && (
+              <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-[#0a2a5c]">
+                    <FileTextOutlined className="mr-2" />创业申请
+                  </h2>
+                  <Link href="/applications" className="text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors">
+                    查看全部 <RightOutlined className="text-xs ml-1" />
+                  </Link>
+                </div>
+                <div className="p-6">
+                  {applications.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <FileTextOutlined className="text-4xl mb-3 block" />
+                      <p className="text-sm">暂无申请记录</p>
+                      <Link href="/applications/create" className="text-[#f59e0b] text-sm hover:underline mt-2 inline-block">
+                        创建创业申请 →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {applications.slice(0, 5).map((app) => (
+                        <Link
+                          key={app.id}
+                          href={`/applications/${app.id}`}
+                          className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors group"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              app.status === 'approved' ? 'bg-green-50 text-green-600' :
+                              app.status === 'rejected' ? 'bg-red-50 text-red-500' :
+                              app.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                              'bg-gray-50 text-gray-400'
+                            }`}>
+                              {app.status === 'approved' ? <CheckCircleOutlined /> :
+                               app.status === 'rejected' ? <ExclamationCircleOutlined /> :
+                               app.status === 'pending' ? <ClockCircleOutlined /> :
+                               <FileTextOutlined />}
+                            </div>
+                            <div>
+                              <p className="font-medium text-[#0a2a5c]">{app.title}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {new Date(app.created_at).toLocaleDateString('zh-CN')}
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                             app.status === 'approved' ? 'bg-green-50 text-green-600' :
                             app.status === 'rejected' ? 'bg-red-50 text-red-500' :
                             app.status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                            'bg-gray-50 text-gray-400'
+                            'bg-gray-100 text-gray-500'
                           }`}>
-                            {app.status === 'approved' ? <CheckCircleOutlined /> :
-                             app.status === 'rejected' ? <ExclamationCircleOutlined /> :
-                             app.status === 'pending' ? <ClockCircleOutlined /> :
-                             <FileTextOutlined />}
-                          </div>
-                          <div>
-                            <p className="font-medium text-[#0a2a5c]">{app.title}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              {new Date(app.created_at).toLocaleDateString('zh-CN')}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          app.status === 'approved' ? 'bg-green-50 text-green-600' :
-                          app.status === 'rejected' ? 'bg-red-50 text-red-500' :
-                          app.status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                          'bg-gray-100 text-gray-500'
-                        }`}>
-                          {app.status === 'draft' ? '草稿' :
-                           app.status === 'pending' ? '审核中' :
-                           app.status === 'approved' ? '已通过' :
-                           app.status === 'rejected' ? '已拒绝' : app.status}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                            {app.status === 'draft' ? '草稿' :
+                             app.status === 'pending' ? '审核中' :
+                             app.status === 'approved' ? '已通过' :
+                             app.status === 'rejected' ? '已拒绝' : app.status}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Recruitments Section */}
             {(user.role === 'team' || user.role === 'admin') && (
@@ -373,40 +449,42 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-              <h3 className="font-semibold text-[#0a2a5c] mb-4">快捷操作</h3>
-              <div className="space-y-3">
-                <Link
-                  href="/projects/create"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-[#0a2a5c]/5 text-[#0a2a5c] hover:bg-[#0a2a5c]/10 transition-colors"
-                >
-                  <RocketOutlined />
-                  <span className="text-sm font-medium">发布新项目</span>
-                </Link>
-                <Link
-                  href="/recruitments/create"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
-                >
-                  <TeamOutlined />
-                  <span className="text-sm font-medium">发布招募信息</span>
-                </Link>
-                <Link
-                  href="/applications/create"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-                >
-                  <FileTextOutlined />
-                  <span className="text-sm font-medium">提交创业申请</span>
-                </Link>
-                <Link
-                  href="/events"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
-                >
-                  <CalendarOutlined />
-                  <span className="text-sm font-medium">报名活动路演</span>
-                </Link>
+            {/* Quick Actions - 投资人/导师/资源方不显示 */}
+            {!isInvestorRole && (
+              <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
+                <h3 className="font-semibold text-[#0a2a5c] mb-4">快捷操作</h3>
+                <div className="space-y-3">
+                  <Link
+                    href="/projects/create"
+                    className="flex items-center space-x-3 p-3 rounded-lg bg-[#0a2a5c]/5 text-[#0a2a5c] hover:bg-[#0a2a5c]/10 transition-colors"
+                  >
+                    <RocketOutlined />
+                    <span className="text-sm font-medium">发布新项目</span>
+                  </Link>
+                  <Link
+                    href="/recruitments/create"
+                    className="flex items-center space-x-3 p-3 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                  >
+                    <TeamOutlined />
+                    <span className="text-sm font-medium">发布招募信息</span>
+                  </Link>
+                  <Link
+                    href="/applications/create"
+                    className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                  >
+                    <FileTextOutlined />
+                    <span className="text-sm font-medium">提交创业申请</span>
+                  </Link>
+                  <Link
+                    href="/events"
+                    className="flex items-center space-x-3 p-3 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+                  >
+                    <CalendarOutlined />
+                    <span className="text-sm font-medium">报名活动路演</span>
+                  </Link>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Role-specific Info */}
             {user.role === 'student' && (

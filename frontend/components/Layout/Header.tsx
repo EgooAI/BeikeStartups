@@ -82,17 +82,19 @@ export default function Header() {
           <div className="hidden lg:flex items-center space-x-2">
             {user ? (
               <>
-                <Link
-                  href="/my-projects"
-                  className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    isActive('/my-projects')
-                      ? 'bg-primary/8 text-primary'
-                      : 'text-gray-600 hover:text-primary hover:bg-gray-50'
-                  }`}
-                >
-                  <RocketOutlined className="text-sm" />
-                  <span>我的项目</span>
-                </Link>
+                {!(user.role === 'investor' || user.role === 'mentor' || user.role === 'partner') && (
+                  <Link
+                    href="/my-projects"
+                    className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      isActive('/my-projects')
+                        ? 'bg-primary/8 text-primary'
+                        : 'text-gray-600 hover:text-primary hover:bg-gray-50'
+                    }`}
+                  >
+                    <RocketOutlined className="text-sm" />
+                    <span>我的项目</span>
+                  </Link>
+                )}
                 
                 <div className="relative">
                   <button

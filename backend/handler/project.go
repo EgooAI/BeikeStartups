@@ -429,7 +429,8 @@ func RejectProjectBPRequest(c *gin.Context) {
 }
 
 type ConnectionRequestInput struct {
-	Message string `json:"message" binding:"required"`
+	RequestType model.RequestType `json:"request_type" binding:"required"`
+	Message     string            `json:"message" binding:"required"`
 }
 
 func CreateProjectConnectionRequest(c *gin.Context) {
@@ -454,10 +455,11 @@ func CreateProjectConnectionRequest(c *gin.Context) {
 	}
 
 	connReq := model.ProjectConnectionRequest{
-		ProjectID: project.ID,
-		UserID:    user.ID,
-		Message:   req.Message,
-		Status:    model.RequestStatusPending,
+		ProjectID:   project.ID,
+		UserID:      user.ID,
+		RequestType: req.RequestType,
+		Message:     req.Message,
+		Status:      model.RequestStatusPending,
 	}
 
 	if err := database.DB.Create(&connReq).Error; err != nil {
@@ -489,7 +491,7 @@ func ListProjectConnectionRequests(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, requests)
+	response.Success(c, gin.H{"items": requests})
 }
 
 func AcceptProjectConnectionRequest(c *gin.Context) {
@@ -512,12 +514,55 @@ func AcceptProjectConnectionRequest(c *gin.Context) {
 		return
 	}
 
+	// 开启事务
+	tx := database.DB.Begin()
+
+	// 更新申请状态
 	connReq.Status = model.RequestStatusAccepted
-	if err := database.DB.Save(&connReq).Error; err != nil {
+	if err := tx.Save(&connReq).Error; err != nil {
+		tx.Rollback()
 		response.InternalError(c, "审批对接申请失败")
 		return
 	}
 
+	// 根据申请类型创建关联记录
+	switch connReq.RequestType {
+	case model.RequestTypeBecomeMentor:
+		mentor := model.ProjectMentor{
+			ProjectID: connReq.ProjectID,
+			UserID:    connReq.UserID,
+			Message:   connReq.Message,
+		}
+		if err := tx.Create(&mentor).Error; err != nil {
+			tx.Rollback()
+			response.InternalError(c, "创建导师关联失败")
+			return
+		}
+	case model.RequestTypeBPAccess:
+		investor := model.ProjectInvestor{
+			ProjectID: connReq.ProjectID,
+			UserID:    connReq.UserID,
+			Message:   connReq.Message,
+		}
+		if err := tx.Create(&investor).Error; err != nil {
+			tx.Rollback()
+			response.InternalError(c, "创建投资人关联失败")
+			return
+		}
+	case model.RequestTypeResourcePartner:
+		partner := model.ProjectPartner{
+			ProjectID: connReq.ProjectID,
+			UserID:    connReq.UserID,
+			Message:   connReq.Message,
+		}
+		if err := tx.Create(&partner).Error; err != nil {
+			tx.Rollback()
+			response.InternalError(c, "创建资源方关联失败")
+			return
+		}
+	}
+
+	tx.Commit()
 	response.SuccessWithMessage(c, "对接申请已接受", connReq)
 }
 
@@ -741,4 +786,55 @@ func InvalidateProject(c *gin.Context) {
 	}
 
 	response.SuccessWithMessage(c, "已作废", project)
+}
+
+// GetUserConnectedProjects 获取用户关联的项目（导师/投资人/资源方）
+func GetUserConnectedProjects(c *gin.Context) {
+	user := c.MustGet("user").(*model.User)
+
+	var projects []model.Project
+
+	switch user.Role {
+	case model.RoleMentor:
+		// 获取导师关联的项目
+		var mentors []model.ProjectMentor
+		if err := database.DB.Preload("Project").Where("user_id = ?", user.ID).Find(&mentors).Error; err != nil {
+			response.InternalError(c, "获取项目失败")
+			return
+		}
+		for _, m := range mentors {
+			if m.Project != nil {
+				projects = append(projects, *m.Project)
+			}
+		}
+	case model.RoleInvestor:
+		// 获取投资人关联的项目
+		var investors []model.ProjectInvestor
+		if err := database.DB.Preload("Project").Where("user_id = ?", user.ID).Find(&investors).Error; err != nil {
+			response.InternalError(c, "获取项目失败")
+			return
+		}
+		for _, i := range investors {
+			if i.Project != nil {
+				projects = append(projects, *i.Project)
+			}
+		}
+	case model.RolePartner:
+		// 获取资源方关联的项目
+		var partners []model.ProjectPartner
+		if err := database.DB.Preload("Project").Where("user_id = ?", user.ID).Find(&partners).Error; err != nil {
+			response.InternalError(c, "获取项目失败")
+			return
+		}
+		for _, p := range partners {
+			if p.Project != nil {
+				projects = append(projects, *p.Project)
+			}
+		}
+	default:
+		response.BadRequest(c, "当前角色没有关联项目功能")
+		return
+	}
+
+	response.Success(c, gin.H{"items": projects})
 }

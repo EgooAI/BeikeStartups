@@ -9,6 +9,10 @@ import {
   EditOutlined,
   DeleteOutlined,
   EnvironmentOutlined,
+  TeamOutlined,
+  UserOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons';
 
 export default function AdminEventsPage() {
@@ -16,6 +20,10 @@ export default function AdminEventsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [showSignups, setShowSignups] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [signups, setSignups] = useState<any[]>([]);
+  const [loadingSignups, setLoadingSignups] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -23,7 +31,7 @@ export default function AdminEventsPage() {
     location: '',
     start_at: '',
     end_at: '',
-    status: 'draft',
+    status: 'active',
   });
 
   useEffect(() => {
@@ -52,7 +60,7 @@ export default function AdminEventsPage() {
       location: '',
       start_at: '',
       end_at: '',
-      status: 'draft',
+      status: 'active',
     });
     setEditingEvent(null);
     setShowForm(false);
@@ -61,10 +69,16 @@ export default function AdminEventsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const submitData = {
+        ...formData,
+        start_at: formData.start_at ? new Date(formData.start_at).toISOString() : '',
+        end_at: formData.end_at ? new Date(formData.end_at).toISOString() : '',
+        status: editingEvent?.status || 'active',
+      };
       if (editingEvent) {
-        await eventApi.update(editingEvent.id, formData);
+        await eventApi.update(editingEvent.id, submitData);
       } else {
-        await eventApi.create(formData);
+        await eventApi.create(submitData);
       }
       resetForm();
       loadEvents();
@@ -94,6 +108,35 @@ export default function AdminEventsPage() {
       loadEvents();
     } catch (err: any) {
       alert(err.message || '删除失败');
+    }
+  };
+
+  const handleViewSignups = async (event: any) => {
+    setSelectedEvent(event);
+    setLoadingSignups(true);
+    setShowSignups(true);
+    try {
+      const res = await eventApi.getSignups(event.id);
+      if (res.data) {
+        setSignups(res.data as any[]);
+      }
+    } catch (err: any) {
+      alert(err.message || '获取报名列表失败');
+    } finally {
+      setLoadingSignups(false);
+    }
+  };
+
+  const handleConfirmSignup = async (signupId: number) => {
+    try {
+      await eventApi.confirmSignup(signupId);
+      const res = await eventApi.getSignups(selectedEvent.id);
+      if (res.data) {
+        setSignups(res.data as any[]);
+      }
+      alert('已确认报名');
+    } catch (err: any) {
+      alert(err.message || '确认失败');
     }
   };
 
@@ -227,17 +270,6 @@ export default function AdminEventsPage() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">状态</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
-                >
-                  <option value="draft">草稿</option>
-                  <option value="active">发布</option>
-                </select>
-              </div>
               <div className="flex space-x-3 pt-4">
                 <button
                   type="submit"
@@ -254,6 +286,78 @@ export default function AdminEventsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showSignups && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowSignups(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold text-[#0a2a5c] mb-2">
+              {selectedEvent?.title} - 报名管理
+            </h2>
+            <p className="text-gray-500 text-sm mb-6">共 {signups.length} 人报名</p>
+
+            {loadingSignups ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#0a2a5c] border-t-transparent" />
+              </div>
+            ) : signups.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <UserOutlined className="text-5xl mb-3 block" />
+                <p>暂无报名人员</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {signups.map((signup) => (
+                  <div key={signup.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 rounded-full bg-[#0a2a5c]/10 flex items-center justify-center">
+                        <UserOutlined className="text-[#0a2a5c] text-lg" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-[#0a2a5c]">
+                          {signup.user?.nickname || signup.user?.username || '未知用户'}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {signup.user?.email || signup.user?.phone || '未提供联系方式'}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          报名时间：{new Date(signup.created_at).toLocaleDateString('zh-CN')} {new Date(signup.created_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        signup.status === 'confirmed' ? 'bg-green-50 text-green-600' :
+                        signup.status === 'cancelled' ? 'bg-red-50 text-red-500' :
+                        'bg-amber-50 text-amber-600'
+                      }`}>
+                        {signup.status === 'confirmed' ? '已确认' :
+                         signup.status === 'cancelled' ? '已取消' : '待确认'}
+                      </span>
+                      {signup.status !== 'confirmed' && signup.status !== 'cancelled' && (
+                        <button
+                          onClick={() => handleConfirmSignup(signup.id)}
+                          className="px-4 py-2 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center"
+                        >
+                          <CheckCircleOutlined className="mr-1" /> 确认
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowSignups(false)}
+                className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                关闭
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -304,6 +408,12 @@ export default function AdminEventsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <button
+                          onClick={() => handleViewSignups(event)}
+                          className="px-3 py-1.5 text-xs bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                        >
+                          <TeamOutlined className="mr-1" /> 报名管理
+                        </button>
+                        <button
                           onClick={() => handleEdit(event)}
                           className="px-3 py-1.5 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
                         >
@@ -313,7 +423,7 @@ export default function AdminEventsPage() {
                           onClick={() => handleDelete(event.id)}
                           className="px-3 py-1.5 text-xs bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
                         >
-                          <DeleteOutlined className="mr-1" /> 删除
+                          <DeleteOutlined className="mr-1" /> 结束活动
                         </button>
                       </div>
                     </td>

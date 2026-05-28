@@ -187,6 +187,19 @@ func SignUpEvent(c *gin.Context) {
 	response.Success(c, signup)
 }
 
+func GetEventSignup(c *gin.Context) {
+	id := c.Param("id")
+	user := c.MustGet("user").(*model.User)
+
+	var signup model.EventSignup
+	if err := database.DB.Where("event_id = ? AND user_id = ?", id, user.ID).First(&signup).Error; err != nil {
+		response.Success(c, nil)
+		return
+	}
+
+	response.Success(c, signup)
+}
+
 func CancelEventSignup(c *gin.Context) {
 	id := c.Param("id")
 	user := c.MustGet("user").(*model.User)
@@ -197,6 +210,24 @@ func CancelEventSignup(c *gin.Context) {
 	}
 
 	response.SuccessWithMessage(c, "已取消报名", nil)
+}
+
+func ConfirmEventSignup(c *gin.Context) {
+	signupID := c.Param("id")
+
+	var signup model.EventSignup
+	if err := database.DB.First(&signup, signupID).Error; err != nil {
+		response.NotFound(c, "报名记录不存在")
+		return
+	}
+
+	signup.Status = "confirmed"
+	if err := database.DB.Save(&signup).Error; err != nil {
+		response.InternalError(c, "确认报名失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "已确认报名", signup)
 }
 
 func ListEventSignups(c *gin.Context) {

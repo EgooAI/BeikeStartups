@@ -3,17 +3,23 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-const menuItems = [
-  { name: '仪表板', href: '/dashboard', icon: '🏠' },
-  { name: '创业申请', href: '/applications', icon: '📝' },
-  { name: '我的团队', href: '/teams', icon: '👥' },
-  { name: '项目展示', href: '/projects', icon: '🚀' },
-  { name: '人才招聘', href: '/recruitments', icon: '💼' },
-];
+import { useAuth } from '@/context/AuthContext';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  // 根据用户角色显示不同的菜单
+  const isInvestorRole = user?.role === 'investor' || user?.role === 'mentor' || user?.role === 'partner';
+  
+  const menuItems = [
+    { name: '仪表板', href: '/dashboard', icon: '🏠' },
+    ...(!isInvestorRole ? [{ name: '创业申请', href: '/applications', icon: '📝' }] : []),
+    ...(!isInvestorRole ? [{ name: '我的团队', href: '/teams', icon: '👥' }] : []),
+    { name: '项目展示', href: '/projects', icon: '🚀' },
+    { name: '人才招聘', href: '/recruitments', icon: '💼' },
+    ...(user?.role === 'team' ? [{ name: '对接审核', href: '/dashboard/review', icon: '✅' }] : []),
+  ];
 
   return (
     <aside className="w-64 bg-white shadow-md h-screen fixed left-0 top-16 overflow-y-auto">

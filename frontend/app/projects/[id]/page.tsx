@@ -6,6 +6,7 @@ import { projectApi, recruitmentApi } from '@/lib/api';
 import { Project, Recruitment } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import ProjectConnectionRequests from '@/components/ProjectConnectionRequests';
 import {
   RocketOutlined,
   TeamOutlined,
@@ -175,12 +176,14 @@ export default function ProjectDetailPage() {
                             <p className="text-sm text-gray-400 mt-2">要求: {rec.requirements}</p>
                           )}
                         </div>
-                        <Link
-                          href={user ? `/responses/create?recruitment_id=${rec.id}` : '/login'}
-                          className="px-5 py-2 bg-[#f59e0b] text-white text-sm rounded-lg hover:bg-[#f59e0b]/90 transition-colors whitespace-nowrap"
-                        >
-                          申请加入
-                        </Link>
+                        {user?.role === 'student' && (
+                          <Link
+                            href={`/responses/create?recruitment_id=${rec.id}`}
+                            className="px-5 py-2 bg-[#f59e0b] text-white text-sm rounded-lg hover:bg-[#f59e0b]/90 transition-colors whitespace-nowrap"
+                          >
+                            申请加入
+                          </Link>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -233,7 +236,7 @@ export default function ProjectDetailPage() {
                       href={`/projects/${project.id}/connect`}
                       className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
                     >
-                      <FileTextOutlined className="mr-2" />申请查看BP
+                      <FileTextOutlined className="mr-2" />申请对接
                     </Link>
                   )}
                   {user?.role === 'mentor' && (
@@ -241,7 +244,7 @@ export default function ProjectDetailPage() {
                       href={`/projects/${project.id}/connect`}
                       className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
                     >
-                      <BookOutlined className="mr-2" />申请成为项目导师
+                      <BookOutlined className="mr-2" />申请对接
                     </Link>
                   )}
                   {user?.role === 'partner' && (
@@ -249,34 +252,16 @@ export default function ProjectDetailPage() {
                       href={`/projects/${project.id}/connect`}
                       className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
                     >
-                      <PauseOutlined className="mr-2" />提供资源合作
+                      <PauseOutlined className="mr-2" />申请对接
                     </Link>
                   )}
-                  {(!user || !['investor', 'mentor', 'partner', 'student', 'team'].includes(user.role)) && (
-                    <>
-                      <Link
-                        href={user ? `/projects/${project.id}/connect` : '/login'}
-                        className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
-                      >
-                        <FileTextOutlined className="mr-2" />申请查看BP
-                      </Link>
-                      <Link
-                        href={user ? `/projects/${project.id}/connect` : '/login'}
-                        className="px-4 py-2 bg-white text-amber-700 text-sm rounded-lg border border-amber-200 hover:bg-amber-50 transition-colors flex items-center"
-                      >
-                        <BookOutlined className="mr-2" />申请成为项目导师
-                      </Link>
-                      <Link
-                        href={user ? `/projects/${project.id}/connect` : '/login'}
-                        className="px-4 py-2 bg-white text-amber-700 text-sm rounded-lg border border-amber-200 hover:bg-amber-50 transition-colors flex items-center"
-                      >
-                        <PauseOutlined className="mr-2" />提供资源合作
-                      </Link>
-                    </>
-                  )}
+                 
                 </div>
               </div>
             )}
+
+            {/* Connection Requests Management - visible only to team members */}
+            <ProjectConnectionRequests projectId={project.id} />
           </div>
         </div>
       </div>

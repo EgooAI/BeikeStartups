@@ -305,6 +305,15 @@ export const eventApi = {
 
   cancelSignup: (id: number) =>
     api.delete(`/api/events/${id}/signup`),
+
+  getMySignup: (id: number) =>
+    api.get(`/api/events/${id}/signup`),
+
+  getSignups: (id: number) =>
+    api.get(`/api/events/${id}/signups`),
+
+  confirmSignup: (signupId: number) =>
+    api.post(`/api/events/signups/${signupId}/confirm`),
 };
 
 export const resourceApi = {
@@ -378,4 +387,7 @@ export const connectionApi = {
 
   reject: (projectId: number, requestId: number) =>
     api.post(`/api/projects/${projectId}/connection-requests/${requestId}/reject`),
+
+  getMyConnectedProjects: () =>
+    api.get('/api/projects/my-connections'),
 };

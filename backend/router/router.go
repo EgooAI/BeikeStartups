@@ -131,6 +131,7 @@ func SetupRouter() *gin.Engine {
 		projects.GET("/:id/connection-requests", handler.ListProjectConnectionRequests)
 		projects.POST("/:id/connection-requests/:request_id/accept", handler.AcceptProjectConnectionRequest)
 		projects.POST("/:id/connection-requests/:request_id/reject", handler.RejectProjectConnectionRequest)
+		projects.GET("/my-connections", handler.GetUserConnectedProjects)
 	}
 
 	// 公开项目接口（无需认证）
@@ -141,12 +142,14 @@ func SetupRouter() *gin.Engine {
 	{
 		events.GET("", handler.ListEvents)
 		events.GET("/:id", handler.GetEvent)
-		events.POST("", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.CreateEvent)
-		events.PUT("/:id", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.UpdateEvent)
-		events.DELETE("/:id", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.DeleteEvent)
+		events.POST("", middleware.RequireRole(model.RoleSuperAdmin), handler.CreateEvent)
+		events.PUT("/:id", middleware.RequireRole(model.RoleSuperAdmin), handler.UpdateEvent)
+		events.DELETE("/:id", middleware.RequireRole(model.RoleSuperAdmin), handler.DeleteEvent)
 		events.POST("/:id/signup", handler.SignUpEvent)
+		events.GET("/:id/signup", handler.GetEventSignup)
 		events.DELETE("/:id/signup", handler.CancelEventSignup)
-		events.GET("/:id/signups", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ListEventSignups)
+		events.POST("/signups/:id/confirm", middleware.RequireRole(model.RoleSuperAdmin), handler.ConfirmEventSignup)
+		events.GET("/:id/signups", middleware.RequireRole(model.RoleSuperAdmin), handler.ListEventSignups)
 	}
 
 	recruitments := router.Group("/api/recruitments").Use(middleware.RequireAuth())
