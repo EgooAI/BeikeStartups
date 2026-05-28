@@ -171,6 +171,16 @@ const (
 	ProjStatusInvalid         ProjectStatus = "invalid"
 )
 
+type ProjectStage string
+
+const (
+	ProjStageIdea      ProjectStage = "idea"
+	ProjStageSeed      ProjectStage = "seed"
+	ProjStagePrototype ProjectStage = "prototype"
+	ProjStageLaunched  ProjectStage = "launched"
+	ProjStageRevenue   ProjectStage = "revenue"
+)
+
 type Project struct {
 	ID        uint           `gorm:"primarykey" json:"id"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -186,12 +196,13 @@ type Project struct {
 	Industry    string        `gorm:"size:100" json:"industry"`
 	FundingNeed string        `gorm:"size:100" json:"funding_need"`
 
-	TeamID    uint   `gorm:"index" json:"team_id"`
-	Team      *Team  `gorm:"foreignKey:TeamID" json:"team,omitempty"`
-	UserID    uint   `gorm:"index" json:"user_id"`
-	User      *User  `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Tags      string `gorm:"size:500" json:"tags"`
-	ViewCount uint   `gorm:"default:0" json:"view_count"`
+	TeamID    uint         `gorm:"index" json:"team_id"`
+	Team      *Team        `gorm:"foreignKey:TeamID" json:"team,omitempty"`
+	UserID    uint         `gorm:"index" json:"user_id"`
+	User      *User        `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Tags      string       `gorm:"size:500" json:"tags"`
+	ViewCount uint         `gorm:"default:0" json:"view_count"`
+	Stage     ProjectStage `gorm:"type:varchar(20);not null;default:'idea'" json:"stage"`
 }
 
 type RecruitmentStatus string

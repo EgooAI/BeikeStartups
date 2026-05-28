@@ -3,27 +3,62 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { projectApi } from '@/lib/api';
-import { Project } from '@/types';
+import { Project, ProjectStage } from '@/types';
 import { 
   RocketOutlined, 
   SearchOutlined, 
   TeamOutlined,
   EyeOutlined,
   ArrowRightOutlined,
-  FilterOutlined,
   AppstoreOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
+
+const STAGE_OPTIONS: { value: ProjectStage | ''; label: string }[] = [
+  { value: '', label: '全部阶段' },
+  { value: 'idea', label: '创意阶段' },
+  { value: 'seed', label: '种子计划' },
+  { value: 'prototype', label: '原型开发' },
+  { value: 'launched', label: '产品上线' },
+  { value: 'revenue', label: '营收验证' },
+];
+
+const STAGE_BADGE_COLORS: Record<ProjectStage, string> = {
+  idea: 'bg-purple-500',
+  seed: 'bg-blue-500',
+  prototype: 'bg-[#0a2a5c]',
+  launched: 'bg-[#f59e0b]',
+  revenue: 'bg-green-500',
+};
+
+const STAGE_LABELS: Record<ProjectStage, string> = {
+  idea: '创意阶段',
+  seed: '种子计划',
+  prototype: '原型开发',
+  launched: '产品上线',
+  revenue: '营收验证',
+};
+
+const INDUSTRY_OPTIONS = [
+  'AI',
+  '教育',
+  '消费',
+  '硬件',
+  '文创',
+  '企业服务',
+];
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [stageFilter, setStageFilter] = useState<string>('');
+  const [industryFilter, setIndustryFilter] = useState<string>('');
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [stageFilter, industryFilter]);
 
   async function fetchProjects() {
     setLoading(true);
@@ -32,10 +67,13 @@ export default function ProjectsPage() {
         status: 'online', 
         is_public: 'true',
         ...(search ? { search } : {}),
+        ...(stageFilter ? { stage: stageFilter } : {}),
+        ...(industryFilter ? { industry: industryFilter } : {}),
       });
       if (res.data) {
         const data = res.data as any;
-        setProjects(data.items || []);
+        const items = data.items || [];
+        setProjects(items);
       }
     } catch (err) {
       console.error('Failed to fetch projects:', err);
@@ -82,7 +120,7 @@ export default function ProjectsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search & Filters */}
         <div className="bg-white rounded-2xl shadow-custom p-6 mb-8">
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
               <SearchOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -100,6 +138,56 @@ export default function ProjectsPage() {
               <SearchOutlined className="mr-2" />搜索
             </button>
           </form>
+
+          {/* 阶段筛选 */}
+          <div className="mb-4">
+            <p className="text-sm text-gray-500 mb-2">项目阶段</p>
+            <div className="flex flex-wrap gap-2">
+              {STAGE_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => setStageFilter(option.value)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    stageFilter === option.value
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 所属领域筛选 */}
+          <div>
+            <p className="text-sm text-gray-500 mb-2">所属领域</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setIndustryFilter('')}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                  industryFilter === ''
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                全部领域
+              </button>
+              {INDUSTRY_OPTIONS.map(industry => (
+                <button
+                  key={industry}
+                  onClick={() => setIndustryFilter(industryFilter === industry ? '' : industry)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                    industryFilter === industry
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  {industry}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Results */}
@@ -127,8 +215,8 @@ export default function ProjectsPage() {
                     <RocketOutlined className="text-5xl text-primary/20" />
                   )}
                   <div className="absolute top-3 right-3">
-                    <span className="px-3 py-1 bg-accent-gradient text-white text-xs rounded-full font-medium shadow-button">
-                      种子计划
+                    <span className={`px-3 py-1 ${STAGE_BADGE_COLORS[project.stage] || 'bg-gray-500'} text-white text-xs rounded-full font-medium shadow-button`}>
+                      {STAGE_LABELS[project.stage] || '未知阶段'}
                     </span>
                   </div>
                 </div>

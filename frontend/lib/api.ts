@@ -191,11 +191,14 @@ export const teamApi = {
 };
 
 export const projectApi = {
-  list: (params?: { status?: string; is_public?: string; search?: string }) => {
+  list: (params?: { status?: string; is_public?: string; search?: string; stage?: string; tag?: string; industry?: string }) => {
     const query = new URLSearchParams();
     if (params?.status) query.append('status', params.status);
     if (params?.is_public) query.append('is_public', params.is_public);
     if (params?.search) query.append('search', params.search);
+    if (params?.stage) query.append('stage', params.stage);
+    if (params?.tag) query.append('tag', params.tag);
+    if (params?.industry) query.append('industry', params.industry);
     const queryString = query.toString();
     return api.get(`/api/projects${queryString ? `?${queryString}` : ''}`);
   },
@@ -203,10 +206,10 @@ export const projectApi = {
   get: (id: number) =>
     api.get(`/api/projects/${id}`),
   
-  create: (data: { title: string; description: string; content?: string; cover_image?: string; is_public?: boolean; tags?: string }) =>
+  create: (data: { title: string; description: string; content?: string; cover_image?: string; is_public?: boolean; tags?: string; industry?: string; stage?: string }) =>
     api.post('/api/projects', data),
   
-  update: (id: number, data: { title?: string; description?: string; content?: string; cover_image?: string; is_public?: boolean; tags?: string }) =>
+  update: (id: number, data: { title?: string; description?: string; content?: string; cover_image?: string; is_public?: boolean; tags?: string; industry?: string; stage?: string }) =>
     api.put(`/api/projects/${id}`, data),
   
   delete: (id: number) =>

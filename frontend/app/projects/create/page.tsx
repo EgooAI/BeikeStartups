@@ -6,6 +6,23 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectApi, uploadApi } from '@/lib/api';
 
+const INDUSTRY_OPTIONS = [
+  'AI',
+  '教育',
+  '消费',
+  '硬件',
+  '文创',
+  '企业服务',
+];
+
+const STAGE_OPTIONS = [
+  { value: 'idea', label: '创意阶段' },
+  { value: 'seed', label: '种子计划' },
+  { value: 'prototype', label: '原型开发' },
+  { value: 'launched', label: '产品上线' },
+  { value: 'revenue', label: '营收验证' },
+];
+
 export default function CreateProjectPage() {
   const { user, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
@@ -15,6 +32,8 @@ export default function CreateProjectPage() {
     cover_image: '',
     is_public: true,
     tags: '',
+    industry: '',
+    stage: 'idea',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +57,20 @@ export default function CreateProjectPage() {
     });
   };
 
+  const handleIndustryChange = (industry: string) => {
+    setFormData(prev => ({
+      ...prev,
+      industry: prev.industry === industry ? '' : industry,
+    }));
+  };
+
+  const handleStageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      stage: e.target.value,
+    });
+  };
+
   const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setCoverFile(file);
@@ -51,12 +84,21 @@ export default function CreateProjectPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!formData.industry) {
+      setError('请选择项目所属领域');
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
       let coverImageUrl = formData.cover_image;
       if (coverFile) {
         const uploadRes = await uploadApi.upload(coverFile);
+        if (!uploadRes.data?.url) {
+          throw new Error('图片上传失败，未返回图片地址');
+        }
         coverImageUrl = uploadRes.data.url;
       }
       await projectApi.create({
@@ -161,6 +203,48 @@ export default function CreateProjectPage() {
                 className="mt-4 w-full max-h-60 object-cover rounded-lg border border-gray-200"
               />
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              项目领域 *
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {INDUSTRY_OPTIONS.map(industry => (
+                <button
+                  key={industry}
+                  type="button"
+                  onClick={() => handleIndustryChange(industry)}
+                  className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-colors ${
+                    formData.industry === industry
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {industry}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="stage" className="block text-sm font-medium text-gray-700 mb-2">
+              项目阶段 *
+            </label>
+            <select
+              id="stage"
+              name="stage"
+              required
+              value={formData.stage}
+              onChange={handleStageChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              {STAGE_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

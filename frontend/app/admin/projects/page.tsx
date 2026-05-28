@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { projectApi } from '@/lib/api';
-import { Project } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { Project, ProjectStage } from '@/types';
 import Link from 'next/link';
 import {
   ProjectOutlined,
-  SearchOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   EyeOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
 
 export default function AdminProjectsPage() {
@@ -60,6 +59,38 @@ export default function AdminProjectsPage() {
       loadProjects();
     } catch (err: any) {
       alert(err.message || '操作失败');
+    }
+  };
+
+  const getStageLabel = (stage: string) => {
+    const labels: Record<ProjectStage, string> = {
+      idea: '创意阶段',
+      seed: '种子计划',
+      prototype: '原型开发',
+      launched: '产品上线',
+      revenue: '营收验证',
+    };
+    return labels[stage as ProjectStage] || stage;
+  };
+
+  const getStageColor = (stage: string) => {
+    const colors: Record<ProjectStage, string> = {
+      idea: 'bg-purple-50 text-purple-600',
+      seed: 'bg-blue-50 text-blue-600',
+      prototype: 'bg-[#0a2a5c]/5 text-[#0a2a5c]',
+      launched: 'bg-amber-50 text-amber-600',
+      revenue: 'bg-green-50 text-green-600',
+    };
+    return colors[stage as ProjectStage] || 'bg-gray-100 text-gray-500';
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('确定要删除此项目吗？此操作不可恢复。')) return;
+    try {
+      await projectApi.delete(id);
+      loadProjects();
+    } catch (err: any) {
+      alert(err.message || '删除失败');
     }
   };
 
@@ -151,6 +182,7 @@ export default function AdminProjectsPage() {
               <tr className="bg-gray-50">
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">项目名称</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">所属团队</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">阶段</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">状态</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">浏览</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">发布时间</th>
@@ -166,6 +198,11 @@ export default function AdminProjectsPage() {
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{project.team?.name || '未关联'}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStageColor(project.stage)}`}>
+                      {getStageLabel(project.stage)}
+                    </span>
+                  </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
                       {getStatusLabel(project.status)}
@@ -207,13 +244,19 @@ export default function AdminProjectsPage() {
                           下架
                         </button>
                       )}
+                      <button
+                        onClick={() => handleDelete(project.id)}
+                        className="px-3 py-1.5 text-xs bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                      >
+                        <DeleteOutlined className="mr-1" /> 删除
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
               {filteredProjects.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
                     <ProjectOutlined className="text-4xl mb-2 block" />
                     暂无项目
                   </td>

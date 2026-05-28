@@ -60,6 +60,9 @@ export interface Project {
   team?: Team;
   tags?: string;
   view_count: number;
+  stage: ProjectStage;
+  industry?: string;
+  funding_need?: string;
 }
 
 export type ProjectStatus = 
@@ -71,6 +74,8 @@ export type ProjectStatus =
   | 'offline' 
   | 'rejected_offline' 
   | 'invalid';
+
+export type ProjectStage = 'idea' | 'seed' | 'prototype' | 'launched' | 'revenue';
 
 export interface Recruitment {
   id: number;

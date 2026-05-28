@@ -17,6 +17,9 @@ type CreateProjectRequest struct {
 	CoverImage  string `json:"cover_image"`
 	IsPublic    bool   `json:"is_public"`
 	Tags        string `json:"tags"`
+	Industry    string `json:"industry"`
+	FundingNeed string `json:"funding_need"`
+	Stage       string `json:"stage"`
 }
 
 type UpdateProjectRequest struct {
@@ -26,6 +29,9 @@ type UpdateProjectRequest struct {
 	CoverImage  *string `json:"cover_image"`
 	IsPublic    *bool   `json:"is_public"`
 	Tags        *string `json:"tags"`
+	Industry    *string `json:"industry"`
+	FundingNeed *string `json:"funding_need"`
+	Stage       *string `json:"stage"`
 }
 
 func CreateProject(c *gin.Context) {
@@ -48,6 +54,11 @@ func CreateProject(c *gin.Context) {
 		teamID = team.ID
 	}
 
+	stage := model.ProjStageIdea
+	if req.Stage != "" {
+		stage = model.ProjectStage(req.Stage)
+	}
+
 	project := model.Project{
 		Title:       req.Title,
 		Description: req.Description,
@@ -58,6 +69,9 @@ func CreateProject(c *gin.Context) {
 		TeamID:      teamID,
 		UserID:      user.ID,
 		Tags:        req.Tags,
+		Industry:    req.Industry,
+		FundingNeed: req.FundingNeed,
+		Stage:       stage,
 	}
 
 	if err := database.DB.Create(&project).Error; err != nil {
@@ -117,21 +131,47 @@ func UpdateProject(c *gin.Context) {
 	}
 
 	var project model.Project
-	if err := database.DB.First(&project, id).Error; err != nil {
+	if err := database.DB.Preload("Team").First(&project, id).Error; err != nil {
 		response.NotFound(c, "项目不存在")
 		return
 	}
 
 	user := c.MustGet("user").(*model.User)
-	var team model.Team
-	if err := database.DB.First(&team, project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+	isTeamOwner := project.Team != nil && project.Team.OwnerID == user.ID
+	isAdmin := user.Role == model.RoleAdmin || user.Role == model.RoleSuperAdmin
+
+	if !isTeamOwner && !isAdmin {
 		response.Forbidden(c, "无权修改此项目")
 		return
 	}
 
-	if project.Status != model.ProjStatusDraft && project.Status != model.ProjStatusRejectedOnline && project.Status != model.ProjStatusRejectedOffline {
-		response.BadRequest(c, "当前状态不允许修改")
-		return
+	// 阶段修改允许在任何项目状态下进行（仅团队负责人和管理员可修改）
+	isOnlyStageUpdate := req.Stage != nil && req.Title == nil && req.Description == nil && req.Content == nil && req.CoverImage == nil && req.IsPublic == nil && req.Tags == nil && req.Industry == nil && req.FundingNeed == nil
+
+	// 非阶段修改需要项目处于可编辑状态
+	if !isOnlyStageUpdate {
+		if project.Status != model.ProjStatusDraft && project.Status != model.ProjStatusRejectedOnline && project.Status != model.ProjStatusRejectedOffline {
+			response.BadRequest(c, "当前状态不允许修改")
+			return
+		}
+	}
+
+	// 验证阶段值是否合法
+	validStages := map[model.ProjectStage]bool{
+		model.ProjStageIdea:      true,
+		model.ProjStageSeed:      true,
+		model.ProjStagePrototype: true,
+		model.ProjStageLaunched:  true,
+		model.ProjStageRevenue:   true,
+	}
+
+	if req.Stage != nil {
+		newStage := model.ProjectStage(*req.Stage)
+		if !validStages[newStage] {
+			response.BadRequest(c, "无效的项目阶段")
+			return
+		}
+		project.Stage = newStage
 	}
 
 	if req.Title != nil {
@@ -152,6 +192,12 @@ func UpdateProject(c *gin.Context) {
 	if req.Tags != nil {
 		project.Tags = *req.Tags
 	}
+	if req.Industry != nil {
+		project.Industry = *req.Industry
+	}
+	if req.FundingNeed != nil {
+		project.FundingNeed = *req.FundingNeed
+	}
 
 	if err := database.DB.Save(&project).Error; err != nil {
 		response.InternalError(c, "更新项目失败")
@@ -165,14 +211,16 @@ func DeleteProject(c *gin.Context) {
 	id := c.Param("id")
 	var project model.Project
 
-	if err := database.DB.First(&project, id).Error; err != nil {
+	if err := database.DB.Preload("Team").First(&project, id).Error; err != nil {
 		response.NotFound(c, "项目不存在")
 		return
 	}
 
 	user := c.MustGet("user").(*model.User)
-	var team model.Team
-	if err := database.DB.First(&team, project.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+	isTeamOwner := project.Team != nil && project.Team.OwnerID == user.ID
+	isAdmin := user.Role == model.RoleAdmin || user.Role == model.RoleSuperAdmin
+
+	if !isTeamOwner && !isAdmin {
 		response.Forbidden(c, "无权删除此项目")
 		return
 	}
@@ -234,6 +282,21 @@ func ListProjects(c *gin.Context) {
 	isPublic := c.Query("is_public")
 	if isPublic == "true" {
 		query = query.Where("is_public = ?", true)
+	}
+
+	stage := c.Query("stage")
+	if stage != "" {
+		query = query.Where("stage = ?", stage)
+	}
+
+	tag := c.Query("tag")
+	if tag != "" {
+		query = query.Where("tags LIKE ?", "%"+tag+"%")
+	}
+
+	industry := c.Query("industry")
+	if industry != "" {
+		query = query.Where("industry = ?", industry)
 	}
 
 	search := c.Query("search")

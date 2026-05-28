@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { projectApi, recruitmentApi } from '@/lib/api';
-import { Project, Recruitment } from '@/types';
+import { Project, ProjectStage, Recruitment } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import ProjectConnectionRequests from '@/components/ProjectConnectionRequests';
@@ -14,14 +14,29 @@ import {
   HeartOutlined,
   CalendarOutlined,
   UserOutlined,
-  MailOutlined,
   ArrowLeftOutlined,
   ShareAltOutlined,
-  EnvironmentOutlined,
   FileTextOutlined,
   BookOutlined,
   PauseOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
+
+const STAGE_OPTIONS: { value: ProjectStage; label: string }[] = [
+  { value: 'idea', label: '创意阶段' },
+  { value: 'seed', label: '种子计划' },
+  { value: 'prototype', label: '原型开发' },
+  { value: 'launched', label: '产品上线' },
+  { value: 'revenue', label: '营收验证' },
+];
+
+const STAGE_COLORS: Record<ProjectStage, string> = {
+  idea: 'bg-purple-500',
+  seed: 'bg-blue-500',
+  prototype: 'bg-[#0a2a5c]',
+  launched: 'bg-[#f59e0b]',
+  revenue: 'bg-green-500',
+};
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -30,6 +45,10 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [recruitments, setRecruitments] = useState<Recruitment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingStage, setEditingStage] = useState(false);
+  const [newStage, setNewStage] = useState<ProjectStage>('idea');
+
+  const canEditStage = user && (user.role === 'admin' || user.role === 'super_admin' || (project?.team && project.team.owner_id === user.id));
 
   useEffect(() => {
     if (params.id) {
@@ -57,6 +76,28 @@ export default function ProjectDetailPage() {
       setLoading(false);
     }
   }
+
+  const handleStartEditStage = () => {
+    setNewStage(project?.stage || 'idea');
+    setEditingStage(true);
+  };
+
+  const handleSaveStage = async () => {
+    if (!project?.id || !newStage) return;
+    try {
+      await projectApi.update(project.id, { stage: newStage });
+      setProject(prev => prev ? { ...prev, stage: newStage } : null);
+      setEditingStage(false);
+    } catch (err) {
+      console.error('Failed to update stage:', err);
+      alert('更新阶段失败');
+    }
+  };
+
+  const handleCancelEditStage = () => {
+    setEditingStage(false);
+    setNewStage('idea');
+  };
 
   if (loading) {
     return (
@@ -96,10 +137,38 @@ export default function ProjectDetailPage() {
             ) : (
               <RocketOutlined className="text-8xl text-white/20" />
             )}
-            <div className="absolute top-4 left-4">
-              <span className="px-4 py-1.5 bg-[#f59e0b] text-white text-sm rounded-full font-medium">
-                种子计划
-              </span>
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              {editingStage ? (
+                <div className="flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full">
+                  <select
+                    value={newStage}
+                    onChange={(e) => setNewStage(e.target.value as ProjectStage)}
+                    className="text-sm bg-transparent border-none focus:outline-none"
+                  >
+                    {STAGE_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleSaveStage}
+                    className="text-[#0a2a5c] hover:text-[#0a2a5c]/80"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={handleCancelEditStage}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <span className={`px-4 py-1.5 ${STAGE_COLORS[project.stage] || 'bg-[#f59e0b]'} text-white text-sm rounded-full font-medium`}>
+                  {STAGE_OPTIONS.find(s => s.value === project.stage)?.label || '未知阶段'}
+                </span>
+              )}
             </div>
           </div>
 
@@ -134,8 +203,76 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
+            {/* 项目阶段 - 独立区块，可编辑 */}
+            <div className="p-6 bg-gray-50 rounded-xl mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-[#0a2a5c]">项目阶段</h2>
+                {canEditStage && !editingStage && (
+                  <button
+                    onClick={handleStartEditStage}
+                    className="px-3 py-1.5 bg-[#0a2a5c] text-white text-sm rounded-lg hover:bg-[#0a2a5c]/90 transition-colors flex items-center gap-1"
+                  >
+                    <EditOutlined className="text-xs" /> 修改阶段
+                  </button>
+                )}
+              </div>
+
+              {editingStage ? (
+                <div className="flex items-center gap-3 bg-white p-4 rounded-lg border border-[#0a2a5c]/20">
+                  <select
+                    value={newStage}
+                    onChange={(e) => setNewStage(e.target.value as ProjectStage)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0a2a5c] focus:border-transparent text-sm"
+                  >
+                    {STAGE_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleSaveStage}
+                    className="px-4 py-2 bg-[#0a2a5c] text-white text-sm rounded-lg hover:bg-[#0a2a5c]/90 transition-colors"
+                  >
+                    保存
+                  </button>
+                  <button
+                    onClick={handleCancelEditStage}
+                    className="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    取消
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  {STAGE_OPTIONS.map(option => (
+                    <div
+                      key={option.value}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                        project.stage === option.value
+                          ? `${STAGE_COLORS[option.value]} text-white shadow-md scale-105`
+                          : 'bg-white text-gray-500 border border-gray-200'
+                      }`}
+                    >
+                      <span className="text-sm font-medium">{option.label}</span>
+                      {project.stage === option.value && (
+                        <span className="text-xs">●</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Project Info Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50 rounded-xl mb-8">
+              <div className="flex items-center space-x-3">
+                <TeamOutlined className="text-xl text-[#0a2a5c]" />
+                <div>
+                  <p className="text-sm text-gray-500">所属团队</p>
+                  <p className="font-medium text-[#0a2a5c]">{project.team?.name || '待定'}</p>
+                </div>
+              </div>
               <div className="flex items-center space-x-3">
                 <TeamOutlined className="text-xl text-[#0a2a5c]" />
                 <div>
