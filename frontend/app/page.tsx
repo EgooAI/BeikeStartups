@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { projectApi } from '@/lib/api';
 import { Project } from '@/types';
+import { isAuthenticated } from '@/lib/auth';
+
 import {
   RocketOutlined,
   TeamOutlined,
@@ -179,10 +181,10 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/register"
+              href={isAuthenticated() ? '/dashboard' : '/register'}
               className="inline-flex items-center px-8 py-4 bg-[#f59e0b] text-[#0a2a5c] font-semibold rounded-xl hover:bg-[#f59e0b]/90 transition-all shadow-lg shadow-[#f59e0b]/25"
             >
-              立即加入 <ArrowRightOutlined className="ml-2" />
+              {isAuthenticated() ? '进入控制台' : '立即加入'} <ArrowRightOutlined className="ml-2" />
             </Link>
             <Link
               href="/about"

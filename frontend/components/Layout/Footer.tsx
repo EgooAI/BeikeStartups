@@ -23,14 +23,6 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-4">身份入口</h4>
-            <ul className="space-y-3">
-              <li><Link href="/register" className="text-gray-300 hover:text-[#f59e0b] transition-colors">同学入口</Link></li>
-              <li><Link href="/teams/create" className="text-gray-300 hover:text-[#f59e0b] transition-colors">创业团队认证</Link></li>
-              <li><Link href="/role-request" className="text-gray-300 hover:text-[#f59e0b] transition-colors">投资人/导师入驻</Link></li>
-            </ul>
-          </div>
-          <div>
             <h4 className="text-lg font-semibold mb-4">关于我们</h4>
             <ul className="space-y-3">
               <li><Link href="/about" className="text-gray-300 hover:text-[#f59e0b] transition-colors">关于贝壳</Link></li>

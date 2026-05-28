@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { authApi } from '@/lib/api';
+import { authApi, api } from '@/lib/api';
 import { UserOutlined, MailOutlined, PhoneOutlined, SmileOutlined, CameraOutlined, CheckCircleOutlined, LockOutlined, CloseOutlined } from '@ant-design/icons';
 
 export default function ProfilePage() {
@@ -15,10 +15,34 @@ export default function ProfilePage() {
   });
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarUploadError, setAvatarUploadError] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ old_password: '', new_password: '', confirm_password: '' });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSaving, setPasswordSaving] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarUploadError('');
+    setAvatarUploading(true);
+
+    try {
+      const response = await api.uploadFile<{ url: string }>('/api/uploads', file);
+      if (response.data?.url) {
+        setForm({ ...form, avatar: response.data.url });
+        setNotification({ type: 'success', text: '头像上传成功' });
+      } else {
+        throw new Error('上传失败，未返回头像地址');
+      }
+    } catch (err: any) {
+      setAvatarUploadError(err.message || '头像上传失败，请重试');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +58,14 @@ export default function ProfilePage() {
       setNotification({ type: 'error', text: err.message || '更新失败，请重试' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/dashboard';
     }
   };
 
@@ -120,17 +152,24 @@ export default function ProfilePage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">头像 URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">上传头像</label>
               <div className="flex items-center space-x-3">
                 <CameraOutlined className="text-gray-400" />
                 <input
-                  type="text"
-                  value={form.avatar}
-                  onChange={(e) => setForm({ ...form, avatar: e.target.value })}
-                  placeholder="请输入头像图片URL"
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  disabled={avatarUploading}
+                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[#0a2a5c] file:text-white file:cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                 />
               </div>
+              <p className="mt-2 text-xs text-gray-500">支持 JPG/PNG 图片上传，上传后自动保存为头像地址。</p>
+              {avatarUploadError ? (
+                <p className="mt-2 text-sm text-red-500">{avatarUploadError}</p>
+              ) : null}
+              {form.avatar ? (
+                <p className="mt-2 text-sm text-gray-500">当前头像地址：{form.avatar}</p>
+              ) : null}
             </div>
 
             <div>
@@ -184,40 +223,23 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <div className="pt-4">
+            <div className="pt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50"
               >
                 {saving ? '保存中...' : '保存修改'}
               </button>
-            </div>
-          </form>
-        </div>
-
-        <div className="mt-6 bg-white rounded-2xl shadow-custom p-8">
-          <h3 className="text-lg font-semibold text-[#0a2a5c] mb-4">账号安全</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div>
-                <p className="font-medium text-gray-800">登录账号</p>
-                <p className="text-sm text-gray-500">{user.username}</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <div>
-                <p className="font-medium text-gray-800">账号密码</p>
-                <p className="text-sm text-gray-500">定期更换密码可以保护账号安全</p>
-              </div>
               <button
-                onClick={() => setShowPasswordModal(true)}
-                className="px-4 py-2 text-sm text-[#0a2a5c] border border-[#0a2a5c] rounded-lg hover:bg-[#0a2a5c]/5 transition-colors"
+                type="button"
+                onClick={handleCancel}
+                className="w-full sm:w-auto px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-medium"
               >
-                修改密码
+                取消
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
 

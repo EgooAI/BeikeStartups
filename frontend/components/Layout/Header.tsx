@@ -85,6 +85,17 @@ export default function Header() {
                   <span>我的项目</span>
                 </Link>
                 <Link
+                  href="/dashboard"
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive('/dashboard')
+                      ? 'bg-[#0a2a5c]/5 text-[#0a2a5c]'
+                      : 'text-gray-600 hover:text-[#0a2a5c] hover:bg-gray-50'
+                  }`}
+                >
+                  <UserOutlined />
+                  <span>个人中心</span>
+                </Link>
+                <Link
                   href="/profile"
                   className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive('/profile')
@@ -93,7 +104,7 @@ export default function Header() {
                   }`}
                 >
                   <UserOutlined />
-                  <span>{user.nickname || user.username}</span>
+                  <span>修改个人信息</span>
                 </Link>
                 {user.role === 'admin' || user.role === 'super_admin' ? (
                   <Link
@@ -160,12 +171,20 @@ export default function Header() {
             {user ? (
               <>
                 <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"
+                >
+                  <UserOutlined />
+                  <span>个人中心</span>
+                </Link>
+                <Link
                   href="/profile"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"
                 >
                   <UserOutlined />
-                  <span>个人中心 ({user.nickname || user.username})</span>
+                  <span>修改个人信息</span>
                 </Link>
                 <button
                   onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
