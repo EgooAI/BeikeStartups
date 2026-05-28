@@ -163,7 +163,7 @@ export default function ProfilePage() {
                   className="flex-1 px-4 py-3 border border-gray-200 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[#0a2a5c] file:text-white file:cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                 />
               </div>
-              <p className="mt-2 text-xs text-gray-500">支持 JPG/PNG 图片上传，上传后自动保存为头像地址。</p>
+              <p className="mt-2 text-xs text-gray-500">支持 JPG/PNG/GIF/WebP 图片，文件大小不超过 5MB，每天最多上传 20 次。</p>
               {avatarUploadError ? (
                 <p className="mt-2 text-sm text-red-500">{avatarUploadError}</p>
               ) : null}

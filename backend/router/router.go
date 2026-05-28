@@ -35,8 +35,8 @@ func SetupRouter() *gin.Engine {
 	// serve uploaded files
 	router.Static("/uploads", "./uploads")
 
-	// upload endpoint
-	router.POST("/api/uploads", handler.UploadFile)
+	// upload endpoint（需要登录）
+	router.POST("/api/uploads", middleware.RequireAuth(), handler.UploadFile)
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})

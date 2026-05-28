@@ -221,6 +221,7 @@ export default function CreateProjectPage() {
                 className="mt-4 w-full max-h-60 object-cover rounded-lg border border-gray-200"
               />
             )}
+            <p className="mt-2 text-xs text-gray-500">支持 JPG/PNG/GIF/WebP 图片，文件大小不超过 5MB，每天最多上传 20 次。</p>
           </div>
 
           <div>
