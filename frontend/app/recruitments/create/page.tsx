@@ -6,14 +6,22 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { recruitmentApi } from '@/lib/api';
 
+const POSITION_OPTIONS = [
+  { value: 'frontend', label: '前端开发', requirement: '熟悉 Vue / React，有项目经验优先' },
+  { value: 'backend', label: '后端开发', requirement: '熟悉 FastAPI / Spring Boot' },
+  { value: 'product', label: '产品经理', requirement: '能做用户调研、原型设计、需求文档' },
+  { value: 'operation', label: '校园运营', requirement: '熟悉社群运营、活动策划、内容推广' },
+  { value: 'other', label: '其他', requirement: '' },
+];
+
 export default function CreateRecruitmentPage() {
   const { user, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    requirements: '',
-    position: '',
-    salary: '',
+    requirements: POSITION_OPTIONS[0]?.requirement || '',
+    position: POSITION_OPTIONS[0]?.value || '',
+    customPosition: '',
     deadline: '',
   });
   const [error, setError] = useState('');
@@ -27,14 +35,29 @@ export default function CreateRecruitmentPage() {
     });
   };
 
+  const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = e.target.value;
+    
+    const selectedOption = POSITION_OPTIONS.find(opt => opt.value === selectedValue);
+    const newRequirements = selectedOption?.requirement || '';
+    
+    setFormData({
+      ...formData,
+      position: selectedValue,
+      requirements: newRequirements,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
+      const submitPosition = formData.position === 'other' ? formData.customPosition : formData.position;
       const data = {
         ...formData,
+        position: submitPosition,
         deadline: formData.deadline || undefined,
       };
       await recruitmentApi.create(data);
@@ -88,20 +111,42 @@ export default function CreateRecruitmentPage() {
 
           <div>
             <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
-              职位名称 *
+              招募岗位 *
             </label>
-            <input
-              type="text"
+            <select
               id="position"
               name="position"
               required
-              maxLength={100}
               value={formData.position}
-              onChange={handleChange}
+              onChange={handlePositionChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              placeholder="例如：前端工程师"
-            />
+            >
+              {POSITION_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {formData.position === 'other' && (
+            <div>
+              <label htmlFor="customPosition" className="block text-sm font-medium text-gray-700 mb-2">
+                自定义岗位名称 *
+              </label>
+              <input
+                type="text"
+                id="customPosition"
+                name="customPosition"
+                required
+                maxLength={100}
+                value={formData.customPosition}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="请输入自定义岗位名称"
+              />
+            </div>
+          )}
 
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
@@ -131,21 +176,6 @@ export default function CreateRecruitmentPage() {
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="列出技能要求、经验要求等"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-2">
-              薪资待遇
-            </label>
-            <input
-              type="text"
-              id="salary"
-              name="salary"
-              value={formData.salary}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              placeholder="例如：面议 / 5000-8000元/月"
             />
           </div>
 
