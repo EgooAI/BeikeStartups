@@ -52,7 +52,7 @@ export default function AdminUsersPage() {
   const getRoleLabel = (role: string) => {
     const labels: Record<string, string> = {
       student: '同学',
-      team: '创业团队',
+      team_owner: '团队负责人',
       investor: '投资人',
       mentor: '导师',
       partner: '资源方',

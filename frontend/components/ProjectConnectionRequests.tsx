@@ -18,7 +18,7 @@ export default function ProjectConnectionRequests({ projectId }: Props) {
   const [project, setProject] = useState<Project | null>(null);
 
   useEffect(() => {
-    if (user?.role === 'team') {
+    if (user?.role === 'team_owner') {
       checkAccessAndFetchRequests();
     }
   }, [user, projectId]);
@@ -132,7 +132,7 @@ export default function ProjectConnectionRequests({ projectId }: Props) {
   const pendingRequests = requests.filter(r => r.status === 'pending');
   const processedRequests = requests.filter(r => r.status !== 'pending');
 
-  if (user?.role !== 'team') {
+  if (user?.role !== 'team_owner') {
     return null;
   }
 

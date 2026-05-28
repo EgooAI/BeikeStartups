@@ -228,7 +228,7 @@ func ApproveApplication(c *gin.Context) {
 		response.InternalError(c, "获取申请人信息失败")
 		return
 	}
-	applicant.Role = model.RoleTeam
+	applicant.Role = model.RoleTeamOwner
 	if err := database.DB.Save(&applicant).Error; err != nil {
 		response.InternalError(c, "更新用户角色失败")
 		return

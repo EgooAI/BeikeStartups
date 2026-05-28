@@ -32,7 +32,7 @@ import {
 
 const roleConfig: Record<string, { label: string; color: string; icon: any }> = {
   student: { label: '同学', color: 'from-blue-400 to-blue-600', icon: UserOutlined },
-  team: { label: '创业团队', color: 'from-orange-400 to-orange-600', icon: RocketOutlined },
+  team_owner: { label: '团队负责人', color: 'from-orange-400 to-orange-600', icon: RocketOutlined },
   investor: { label: '投资人', color: 'from-purple-400 to-purple-600', icon: FundOutlined },
   mentor: { label: '校外导师', color: 'from-green-400 to-green-600', icon: ExperimentOutlined },
   partner: { label: '资源方', color: 'from-teal-400 to-teal-600', icon: BuildOutlined },
@@ -394,7 +394,7 @@ export default function DashboardPage() {
             )}
 
             {/* Recruitments Section */}
-            {(user.role === 'team' || user.role === 'admin') && (
+            {(user.role === 'team_owner' || user.role === 'admin') && (
               <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-[#0a2a5c]">
@@ -510,7 +510,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {user.role === 'team' && (
+            {user.role === 'team_owner' && (
               <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl shadow-custom border border-orange-100 p-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center text-white">

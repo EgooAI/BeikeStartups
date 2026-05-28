@@ -141,7 +141,7 @@ export default function ProfilePage() {
               <p className="text-gray-500 text-sm">@{user.username}</p>
               <span className="inline-block mt-1 px-2 py-0.5 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded text-xs font-medium">
                 {user.role === 'student' ? '学生' : 
-                 user.role === 'team' ? '团队' :
+                 user.role === 'team_owner' ? '团队负责人' :
                  user.role === 'mentor' ? '导师' :
                  user.role === 'investor' ? '投资人' :
                  user.role === 'partner' ? '资源方' :

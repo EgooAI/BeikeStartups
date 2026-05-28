@@ -361,7 +361,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Role-specific actions - hidden for students and team members */}
-            {user?.role !== 'student' && user?.role !== 'team' && (
+            {user?.role !== 'student' && user?.role !== 'team_owner' && (
               <div className="mt-6 p-5 bg-amber-50 rounded-xl border border-amber-100">
                 <h3 className="font-semibold text-amber-800 mb-3">资源对接</h3>
                 <p className="text-sm text-amber-600 mb-4">

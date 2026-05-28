@@ -401,7 +401,7 @@ export default function EventDetailPage() {
             )}
 
             {/* 学生/团队入口 */}
-            {user && (user.role === 'student' || user.role === 'team') && (
+            {user && (user.role === 'student' || user.role === 'team_owner') && (
               <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl shadow-custom border border-amber-100 p-6">
                 <h3 className="text-lg font-semibold text-amber-800 mb-3">创业机会</h3>
                 <p className="text-sm text-amber-600 mb-4">

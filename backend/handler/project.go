@@ -51,7 +51,7 @@ func CreateProject(c *gin.Context) {
 
 	// 草稿项目不需要团队认证，申请上架时才需要
 	var teamID uint = 0
-	if user.Role == model.RoleTeam {
+	if user.Role == model.RoleTeamOwner {
 		team, err := repository.GetTeamByOwnerID(user.ID)
 		if err != nil {
 			response.Forbidden(c, "需要先创建团队")

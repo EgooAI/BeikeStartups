@@ -15,7 +15,7 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user?.role === 'team') {
+    if (user?.role === 'team_owner') {
       fetchProjects();
     }
   }, [user]);
@@ -124,7 +124,7 @@ export default function ReviewPage() {
   const pendingRequests = requests.filter(r => r.status === 'pending');
   const processedRequests = requests.filter(r => r.status !== 'pending');
 
-  if (!user || user.role !== 'team') {
+  if (!user || user.role !== 'team_owner') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
         <div className="text-center">

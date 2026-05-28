@@ -18,7 +18,7 @@ export default function Sidebar() {
     ...(!isInvestorRole ? [{ name: '我的团队', href: '/teams', icon: '👥' }] : []),
     { name: '项目展示', href: '/projects', icon: '🚀' },
     { name: '人才招聘', href: '/recruitments', icon: '💼' },
-    ...(user?.role === 'team' ? [{ name: '对接审核', href: '/dashboard/review', icon: '✅' }] : []),
+    ...(user?.role === 'team_owner' ? [{ name: '对接审核', href: '/dashboard/review', icon: '✅' }] : []),
   ];
 
   return (
