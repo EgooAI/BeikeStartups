@@ -513,9 +513,6 @@ export default function DashboardPage() {
                 <Link href="/events" className="flex items-center space-x-3 p-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                   <CalendarOutlined className="text-[#0a2a5c]" /> <span>活动路演</span>
                 </Link>
-                <Link href="/responses" className="flex items-center space-x-3 p-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                  <MessageOutlined className="text-[#0a2a5c]" /> <span>应聘记录</span>
-                </Link>
               </div>
             </div>
 

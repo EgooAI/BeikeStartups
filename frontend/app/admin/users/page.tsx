@@ -78,11 +78,17 @@ export default function AdminUsersPage() {
   const isSuperAdmin = (role: string) => role === 'super_admin';
   const currentUserIsSuperAdmin = currentUser?.role === 'super_admin';
 
-  const filteredUsers = users.filter(u =>
-    u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.nickname?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(u => {
+    if (u.role === 'super_admin') {
+      return false;
+    }
+    if (!currentUserIsSuperAdmin && u.role === 'admin') {
+      return false;
+    }
+    return u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           u.nickname?.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   if (loading) {
     return (
@@ -178,7 +184,6 @@ export default function AdminUsersPage() {
                           <option value="mentor">导师</option>
                           <option value="partner">资源方</option>
                           {currentUserIsSuperAdmin && <option value="admin">管理员</option>}
-                          {currentUserIsSuperAdmin && <option value="super_admin">超级管理员</option>}
                         </select>
                         <button
                           onClick={() => toggleActive(u.id, u.is_active)}

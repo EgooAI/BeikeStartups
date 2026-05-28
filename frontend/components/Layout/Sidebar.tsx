@@ -10,7 +10,6 @@ const menuItems = [
   { name: '我的团队', href: '/teams', icon: '👥' },
   { name: '项目展示', href: '/projects', icon: '🚀' },
   { name: '人才招聘', href: '/recruitments', icon: '💼' },
-  { name: '应聘记录', href: '/responses', icon: '📋' },
 ];
 
 export default function Sidebar() {

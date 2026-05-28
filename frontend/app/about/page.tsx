@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { isAuthenticated } from '@/lib/auth';
 import {
   RocketOutlined,
   TeamOutlined,
@@ -32,6 +34,12 @@ const offerings = [
 ];
 
 export default function AboutPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(isAuthenticated());
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
@@ -102,10 +110,10 @@ export default function AboutPage() {
             贝壳创业俱乐部，陪伴校园创业团队从种子阶段走向更大的舞台。
           </p>
           <Link
-            href="/register"
+            href={isLoggedIn ? '/dashboard' : '/register'}
             className="inline-flex items-center px-8 py-4 bg-[#f59e0b] text-[#0a2a5c] font-semibold rounded-xl hover:bg-[#f59e0b]/90 transition-all"
           >
-            立即加入 <ArrowRightOutlined className="ml-2" />
+            {isLoggedIn ? '马上行动' : '立即加入'} <ArrowRightOutlined className="ml-2" />
           </Link>
         </section>
       </div>
