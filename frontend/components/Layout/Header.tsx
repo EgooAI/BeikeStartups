@@ -82,7 +82,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center space-x-2">
             {user ? (
               <>
-                {!(user.role === 'investor' || user.role === 'mentor' || user.role === 'partner') && (
+                {(user.role === 'team_owner' || user.role === 'team_member') && (
                   <Link
                     href="/my-projects"
                     className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
@@ -92,7 +92,7 @@ export default function Header() {
                     }`}
                   >
                     <RocketOutlined className="text-sm" />
-                    <span>我的项目</span>
+                    <span>团队项目</span>
                   </Link>
                 )}
                 

@@ -183,6 +183,9 @@ export const teamApi = {
   get: (id: number) =>
     api.get(`/api/teams/${id}`),
   
+  getMyMembers: () =>
+    api.get('/api/teams/my/members'),
+  
   create: (data: { name: string; description?: string; logo?: string }) =>
     api.post('/api/teams', data),
   

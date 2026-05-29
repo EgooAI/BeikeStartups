@@ -51,6 +51,8 @@ export default function DashboardPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [stats, setStats] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const [myTeam, setMyTeam] = useState<any>(null);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -83,7 +85,15 @@ export default function DashboardPage() {
         promises.push(connectionApi.getMyConnectedProjects());
       }
       
-      const [projRes, teamRes, recRes, appRes, connRes] = await Promise.allSettled(promises);
+      // 团队成员和团队所有者加载团队成员信息
+      let teamMembersIndex = -1;
+      if (user?.role === 'team_owner' || user?.role === 'team_member') {
+        teamMembersIndex = promises.length;
+        promises.push(teamApi.getMyMembers());
+      }
+      
+      const results = await Promise.allSettled(promises);
+      const [projRes, teamRes, recRes, appRes, connRes] = results;
 
       if (projRes.status === 'fulfilled' && projRes.value.data) {
         setProjects(normalizeData(projRes.value.data));
@@ -99,6 +109,14 @@ export default function DashboardPage() {
       }
       if (connRes?.status === 'fulfilled' && connRes.value.data) {
         setConnectedProjects(normalizeData(connRes.value.data));
+      }
+      // 处理团队成员数据
+      if (teamMembersIndex >= 0 && results[teamMembersIndex].status === 'fulfilled') {
+        const teamResData = (results[teamMembersIndex] as PromiseFulfilledResult<any>).value?.data;
+        if (teamResData) {
+          setMyTeam(teamResData.team);
+          setTeamMembers(teamResData.members || []);
+        }
       }
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
@@ -220,9 +238,9 @@ export default function DashboardPage() {
               <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-[#0a2a5c]">
-                    <ProjectOutlined className="mr-2" />我的项目
+                    <ProjectOutlined className="mr-2" />团队项目
                   </h2>
-                  <Link href="/projects" className="text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors">
+                  <Link href="/my-projects" className="text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors">
                     查看全部 <RightOutlined className="text-xs ml-1" />
                   </Link>
                 </div>
@@ -501,6 +519,57 @@ export default function DashboardPage() {
                   >
                     发布招募 <RightOutlined className="text-xs" />
                   </Link>
+                </div>
+              </div>
+            )}
+
+            {/* 我的团队模块 - 仅团队所有者和团队成员可见 */}
+            {(user.role === 'team_owner' || user.role === 'team_member') && (
+              <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100">
+                  <h3 className="text-lg font-semibold text-[#0a2a5c] flex items-center">
+                    <TeamOutlined className="mr-2" />我的团队
+                  </h3>
+                </div>
+                <div className="p-6">
+                  {myTeam ? (
+                    <>
+                      <div className="mb-4">
+                        <p className="text-sm font-medium text-gray-700 mb-1">团队名称</p>
+                        <p className="text-lg font-semibold text-[#0a2a5c]">{myTeam.name}</p>
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-sm font-medium text-gray-700 mb-2">团队成员 ({teamMembers.length}人)</p>
+                        <div className="space-y-2">
+                          {teamMembers.slice().sort((a: any, b: any) => {
+                            // 团队负责人排在第一位
+                            if (a.role === 'team_owner') return -1;
+                            if (b.role === 'team_owner') return 1;
+                            return 0;
+                          }).map((member: any) => {
+                            const displayName = member.nickname || member.username || member.name;
+                            return (
+                              <div key={member.id} className="flex items-center space-x-3">
+                                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${roleConfig[member.role]?.color || 'from-gray-400 to-gray-600'} flex items-center justify-center text-white text-sm`}>
+                                  {displayName?.charAt(0) || '?'}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-gray-800">{displayName}</p>
+                                  <p className="text-xs text-gray-500">{roleConfig[member.role]?.label || member.role}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  ) : loading ? (
+                    <div className="flex justify-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#0a2a5c] border-t-transparent" />
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-400 py-4">暂无团队信息</p>
+                  )}
                 </div>
               </div>
             )}

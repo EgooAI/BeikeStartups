@@ -93,6 +93,7 @@ func SetupRouter() *gin.Engine {
 	{
 		teams.GET("", handler.ListTeams)
 		teams.GET("/:id", handler.GetTeam)
+		teams.GET("/my/members", handler.GetMyTeamMembers)
 		teams.GET("/:id/members", handler.ListTeamMembers)
 		teams.GET("/:id/invitations", handler.ListTeamInvitations)
 		teams.GET("/:id/join-requests", handler.ListTeamJoinRequests)
