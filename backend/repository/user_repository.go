@@ -86,13 +86,120 @@ func DeleteRoleRequest(requestID uint) error {
 }
 
 func DeleteUser(userID uint) error {
-	// 先删除 recruitment_responses 关联记录
+	// 删除所有关联记录
+	// 注意：删除顺序很重要，需要先删除依赖其他表的记录
+
+	// 1. team_member_invitations (InvitedUserID 和 InviterID)
+	if err := database.DB.Exec("DELETE FROM team_member_invitations WHERE invited_user_id = ? OR inviter_id = ?", userID, userID).Error; err != nil {
+		return err
+	}
+
+	// 2. team_join_requests
+	if err := database.DB.Exec("DELETE FROM team_join_requests WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 3. startup_applications
+	if err := database.DB.Exec("DELETE FROM startup_applications WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 4. recruitment_responses
 	if err := database.DB.Exec("DELETE FROM recruitment_responses WHERE user_id = ?", userID).Error; err != nil {
 		return err
 	}
-	// 先删除 team_members 关联记录
+
+	// 5. recruitments 通过团队关联删除，在后面处理团队时一起删除
+
+	// 6. resource_opportunities
+	if err := database.DB.Exec("DELETE FROM resource_opportunities WHERE owner_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 7. project_favorites
+	if err := database.DB.Exec("DELETE FROM project_favorites WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 8. project_bp_requests
+	if err := database.DB.Exec("DELETE FROM project_bp_requests WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 9. project_connection_requests
+	if err := database.DB.Exec("DELETE FROM project_connection_requests WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 10. project_mentors
+	if err := database.DB.Exec("DELETE FROM project_mentors WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 11. project_investors
+	if err := database.DB.Exec("DELETE FROM project_investors WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 12. project_partners
+	if err := database.DB.Exec("DELETE FROM project_partners WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 13. event_signups
+	if err := database.DB.Exec("DELETE FROM event_signups WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 14. events
+	if err := database.DB.Exec("DELETE FROM events WHERE owner_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 15. team_members
 	if err := database.DB.Exec("DELETE FROM team_members WHERE user_id = ?", userID).Error; err != nil {
 		return err
 	}
-	return database.DB.Delete(&model.User{}, userID).Error
+
+	// 16. projects (需要在删除teams之前删除，因为projects引用teams)
+	if err := database.DB.Exec("DELETE FROM projects WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+
+	// 17. 删除用户拥有的团队及其关联数据
+	// 先获取用户拥有的团队ID
+	var teamIDs []uint
+	if err := database.DB.Model(&model.Team{}).Where("owner_id = ?", userID).Pluck("id", &teamIDs).Error; err != nil {
+		return err
+	}
+
+	if len(teamIDs) > 0 {
+		// 删除团队关联的projects
+		if err := database.DB.Exec("DELETE FROM projects WHERE team_id IN (?)", teamIDs).Error; err != nil {
+			return err
+		}
+		// 删除团队关联的recruitments
+		if err := database.DB.Exec("DELETE FROM recruitments WHERE team_id IN (?)", teamIDs).Error; err != nil {
+			return err
+		}
+		// 删除团队关联的team_members
+		if err := database.DB.Exec("DELETE FROM team_members WHERE team_id IN (?)", teamIDs).Error; err != nil {
+			return err
+		}
+		// 删除团队关联的team_member_invitations
+		if err := database.DB.Exec("DELETE FROM team_member_invitations WHERE team_id IN (?)", teamIDs).Error; err != nil {
+			return err
+		}
+		// 删除团队关联的team_join_requests
+		if err := database.DB.Exec("DELETE FROM team_join_requests WHERE team_id IN (?)", teamIDs).Error; err != nil {
+			return err
+		}
+		// 最后删除团队
+		if err := database.DB.Exec("DELETE FROM teams WHERE owner_id = ?", userID).Error; err != nil {
+			return err
+		}
+	}
+
+	// 最后删除用户（硬删除）
+	return database.DB.Unscoped().Delete(&model.User{}, userID).Error
 }
