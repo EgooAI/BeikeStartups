@@ -17,7 +17,7 @@ import {
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -31,18 +31,23 @@ export default function AdminLoginPage() {
 
     try {
       await login(username, password);
-
+      
+      // 注意：login 后会触发 AuthContext 的 loadUser，但这里需要立即检查角色
+      // 所以从 token 中解析角色信息
       const token = localStorage.getItem('token');
-      let userData = null;
+      let role = null;
+      
       if (token) {
         try {
+          // JWT token 的 payload 在第二部分
           const payload = JSON.parse(atob(token.split('.')[1]));
-          userData = payload;
-        } catch {}
+          role = payload?.role;
+        } catch (err) {
+          console.error('解析 token 失败:', err);
+        }
       }
-
-      const role = userData?.role || localStorage.getItem('user_role');
-      if (role === 'admin') {
+      
+      if (role === 'admin' || role === 'super_admin') {
         router.push('/admin');
       } else {
         setError('当前账号不是管理员，无法登录管理后台');
