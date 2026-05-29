@@ -53,6 +53,31 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [myTeam, setMyTeam] = useState<any>(null);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [showDisbandModal, setShowDisbandModal] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+
+  async function handleDisbandTeam() {
+    if (!myTeam) return;
+    try {
+      await teamApi.delete(myTeam.id);
+      setShowDisbandModal(false);
+      router.push('/dashboard');
+    } catch (err: any) {
+      alert(err.message || '解散团队失败');
+    }
+  }
+
+  async function handleLeaveTeam() {
+    if (!myTeam) return;
+    try {
+      await teamApi.leave(myTeam.id);
+      setShowLeaveModal(false);
+      // 清除缓存并强制刷新页面以更新用户角色
+      window.location.replace('/dashboard');
+    } catch (err: any) {
+      alert(err.message || '退出团队失败');
+    }
+  }
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -76,9 +101,15 @@ export default function DashboardPage() {
       const promises: Promise<any>[] = [
         projectApi.list(),
         teamApi.list(),
-        recruitmentApi.list(),
         applicationApi.list(),
       ];
+      
+      // 团队负责人加载自己的招募
+      if (user?.role === 'team_owner') {
+        promises.push(recruitmentApi.list(undefined, true));
+      } else {
+        promises.push(recruitmentApi.list());
+      }
       
       // 投资人/导师/资源方加载对接项目
       if (user?.role === 'investor' || user?.role === 'mentor' || user?.role === 'partner') {
@@ -93,7 +124,7 @@ export default function DashboardPage() {
       }
       
       const results = await Promise.allSettled(promises);
-      const [projRes, teamRes, recRes, appRes, connRes] = results;
+      const [projRes, teamRes, appRes, recRes, connRes] = results;
 
       if (projRes.status === 'fulfilled' && projRes.value.data) {
         setProjects(normalizeData(projRes.value.data));
@@ -213,17 +244,6 @@ export default function DashboardPage() {
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-[#0a2a5c]/5 flex items-center justify-center text-[#0a2a5c]">
                   <SolutionOutlined />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl shadow-custom p-5 border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">待审申请</p>
-                  <p className="text-2xl font-bold text-[#f59e0b]">{pendingApplications.length}</p>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-[#f59e0b]">
-                  <ClockCircleOutlined />
                 </div>
               </div>
             </div>
@@ -531,12 +551,28 @@ export default function DashboardPage() {
                     <TeamOutlined className="mr-2" />我的团队
                   </h3>
                   {user.role === 'team_owner' && myTeam && (
-                    <Link
-                      href={`/teams/${myTeam.id}/edit`}
-                      className="flex items-center text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors"
+                    <div className="flex items-center space-x-3">
+                      <Link
+                        href={`/teams/${myTeam.id}/edit`}
+                        className="flex items-center text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors"
+                      >
+                        <SettingOutlined className="mr-1" />修改团队信息
+                      </Link>
+                      <button
+                        onClick={() => setShowDisbandModal(true)}
+                        className="flex items-center text-sm text-red-500 hover:text-red-600 transition-colors"
+                      >
+                        <ExclamationCircleOutlined className="mr-1" />解散团队
+                      </button>
+                    </div>
+                  )}
+                  {user.role === 'team_member' && myTeam && (
+                    <button
+                      onClick={() => setShowLeaveModal(true)}
+                      className="flex items-center text-sm text-red-500 hover:text-red-600 transition-colors"
                     >
-                      <SettingOutlined className="mr-1" />修改团队信息
-                    </Link>
+                      <ExclamationCircleOutlined className="mr-1" />退出团队
+                    </button>
                   )}
                 </div>
                 <div className="p-6">
@@ -664,6 +700,58 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* 解散团队确认弹窗 */}
+      {showDisbandModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">确认解散团队</h3>
+            <p className="text-gray-600 mb-6">
+              解散团队后，团队所有成员将恢复为学生身份，团队的所有项目、招募等信息也将被删除。此操作不可恢复，确定要解散吗？
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDisbandModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleDisbandTeam}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                确认解散
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 退出团队确认弹窗 */}
+      {showLeaveModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">确认退出团队</h3>
+            <p className="text-gray-600 mb-6">
+              退出团队后，您的身份将恢复为同学，将无法再访问该团队的项目。确定要退出吗？
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowLeaveModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleLeaveTeam}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                确认退出
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

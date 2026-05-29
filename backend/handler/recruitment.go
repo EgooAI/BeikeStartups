@@ -76,6 +76,15 @@ func GetRecruitment(c *gin.Context) {
 		return
 	}
 
+	// 自动截止超过时间的招募
+	if recruitment.Status == model.RecruitStatusActive && recruitment.Deadline != nil {
+		now := time.Now()
+		if recruitment.Deadline.Before(now) {
+			recruitment.Status = model.RecruitStatusInvalid
+			database.DB.Model(&recruitment).Update("status", model.RecruitStatusInvalid)
+		}
+	}
+
 	user := c.MustGet("user").(*model.User)
 	if recruitment.Status == model.RecruitStatusInvalid && (user == nil || user.Role != model.RoleAdmin) {
 		var team model.Team
@@ -174,6 +183,12 @@ func ListRecruitments(c *gin.Context) {
 		response.Forbidden(c, "只有学生和项目负责人可以访问招募广场")
 		return
 	}
+
+	// 自动截止超过时间的招募
+	now := time.Now()
+	database.DB.Model(&model.Recruitment{}).
+		Where("status = ? AND deadline IS NOT NULL AND deadline < ?", model.RecruitStatusActive, now).
+		Update("status", model.RecruitStatusInvalid)
 
 	// pagination
 	page := 1

@@ -12,6 +12,7 @@ import {
   EnvironmentOutlined,
   UserOutlined,
   LoginOutlined,
+  PlusCircleOutlined,
 } from '@ant-design/icons';
 
 export default function RecruitmentsPage() {
@@ -103,8 +104,21 @@ export default function RecruitmentsPage() {
     <div className="min-h-screen bg-gray-50/50">
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold text-[#0a2a5c] mb-2">创业团队招募广场</h1>
-          <p className="text-gray-500">汇聚正在招募成员的校内创业团队，找到适合你的创业机会。</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-[#0a2a5c] mb-2">创业团队招募广场</h1>
+              <p className="text-gray-500">汇聚正在招募成员的校内创业团队，找到适合你的创业机会。</p>
+            </div>
+            {user?.role === 'team_owner' && (
+              <Link
+                href="/recruitments/create"
+                className="inline-flex items-center px-5 py-2.5 bg-[#0a2a5c] text-white font-medium rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+              >
+                <PlusCircleOutlined className="mr-2" />
+                发布招募
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 

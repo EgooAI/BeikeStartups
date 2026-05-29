@@ -174,6 +174,25 @@ func DeleteUser(userID uint) error {
 	}
 
 	if len(teamIDs) > 0 {
+		// 先删除团队关联的 projects 的关联数据
+		if err := database.DB.Exec("DELETE FROM project_favorites WHERE project_id IN (SELECT id FROM projects WHERE team_id IN (?))", teamIDs).Error; err != nil {
+			return err
+		}
+		if err := database.DB.Exec("DELETE FROM project_mentors WHERE project_id IN (SELECT id FROM projects WHERE team_id IN (?))", teamIDs).Error; err != nil {
+			return err
+		}
+		if err := database.DB.Exec("DELETE FROM project_investors WHERE project_id IN (SELECT id FROM projects WHERE team_id IN (?))", teamIDs).Error; err != nil {
+			return err
+		}
+		if err := database.DB.Exec("DELETE FROM project_partners WHERE project_id IN (SELECT id FROM projects WHERE team_id IN (?))", teamIDs).Error; err != nil {
+			return err
+		}
+		if err := database.DB.Exec("DELETE FROM project_bp_requests WHERE project_id IN (SELECT id FROM projects WHERE team_id IN (?))", teamIDs).Error; err != nil {
+			return err
+		}
+		if err := database.DB.Exec("DELETE FROM project_connection_requests WHERE project_id IN (SELECT id FROM projects WHERE team_id IN (?))", teamIDs).Error; err != nil {
+			return err
+		}
 		// 删除团队关联的projects
 		if err := database.DB.Exec("DELETE FROM projects WHERE team_id IN (?)", teamIDs).Error; err != nil {
 			return err

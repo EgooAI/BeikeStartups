@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { authApi, api } from '@/lib/api';
-import { UserOutlined, MailOutlined, PhoneOutlined, SmileOutlined, CameraOutlined, CheckCircleOutlined, LockOutlined, CloseOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { authApi, api, teamApi } from '@/lib/api';
+import { UserOutlined, MailOutlined, PhoneOutlined, SmileOutlined, CameraOutlined, CheckCircleOutlined, LockOutlined, CloseOutlined, DeleteOutlined, ExclamationCircleOutlined, RightOutlined } from '@ant-design/icons';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -25,6 +26,25 @@ export default function ProfilePage() {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [myTeam, setMyTeam] = useState<any>(null);
+
+  useEffect(() => {
+    if (user && (user.role === 'team_owner' || user.role === 'team_member')) {
+      loadMyTeam();
+    }
+  }, [user]);
+
+  async function loadMyTeam() {
+    try {
+      const res = await teamApi.getMyMembers();
+      if (res.data) {
+        const data = res.data as any;
+        setMyTeam(data.team || null);
+      }
+    } catch (err) {
+      console.error('Failed to load team:', err);
+    }
+  }
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -105,6 +125,11 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
+    if (user?.role === 'team_owner' && myTeam) {
+      setDeleteError('您是团队负责人，请先解散团队再注销账号');
+      return;
+    }
+
     if (deleteConfirm !== '删除账号') {
       setDeleteError('请输入正确的确认信息');
       return;
@@ -399,6 +424,19 @@ export default function ProfilePage() {
               </button>
             </div>
             <div className="p-6 space-y-4">
+              {user?.role === 'team_owner' && myTeam && (
+                <div className="bg-amber-50 rounded-xl p-4">
+                  <p className="text-amber-700 text-sm mb-3">
+                    <strong>提示：</strong>您是团队"<span className="font-medium">{myTeam.name}</span>"的负责人，注销账号前需要先解散团队。
+                  </p>
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center text-amber-700 hover:text-amber-800 text-sm font-medium"
+                  >
+                    前往解散团队 <RightOutlined className="ml-1 text-xs" />
+                  </Link>
+                </div>
+              )}
               <div className="bg-red-50 rounded-xl p-4">
                 <p className="text-red-700 text-sm">
                   <strong>警告：</strong>此操作将永久删除您的账号及所有相关数据，包括项目、申请记录等。此操作不可撤销！
@@ -417,7 +455,7 @@ export default function ProfilePage() {
                     deleteError ? 'border-red-300 focus:ring-red-200 focus:border-red-500' : 'border-gray-200 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]'
                   }`}
                 />
-                {deleteError && (
+                {deleteError && !deleteError.includes('团队负责人') && (
                   <p className="text-red-500 text-sm mt-1">{deleteError}</p>
                 )}
               </div>
@@ -436,7 +474,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={handleDeleteAccount}
-                  disabled={deleteLoading}
+                  disabled={deleteLoading || (user?.role === 'team_owner' && myTeam)}
                   className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
                 >
                   {deleteLoading ? '处理中...' : '确认注销'}

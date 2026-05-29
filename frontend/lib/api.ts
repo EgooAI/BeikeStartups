@@ -194,6 +194,9 @@ export const teamApi = {
   
   delete: (id: number) =>
     api.delete(`/api/teams/${id}`),
+  
+  leave: (id: number) =>
+    api.post(`/api/teams/${id}/leave`),
 };
 
 export const projectApi = {

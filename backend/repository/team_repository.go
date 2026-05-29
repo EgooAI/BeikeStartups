@@ -42,6 +42,75 @@ func UpdateTeam(team *model.Team) error {
 }
 
 func DeleteTeam(team *model.Team) error {
+	teamID := team.ID
+
+	// 1. 将团队成员的 role 变更为 student
+	if err := database.DB.Model(&model.User{}).Where("id IN (SELECT user_id FROM team_members WHERE team_id = ?)", teamID).Update("role", model.RoleStudent).Error; err != nil {
+		return err
+	}
+
+	// 2. 删除团队关联的 recruitments
+	if err := database.DB.Exec("DELETE FROM recruitments WHERE team_id = ?", teamID).Error; err != nil {
+		return err
+	}
+
+	// 3. 删除团队关联的 recruitment_responses
+	if err := database.DB.Exec("DELETE FROM recruitment_responses WHERE recruitment_id IN (SELECT id FROM recruitments WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 4. 先删除 projects 的关联数据，再删除 projects
+	// 4.1 删除 project_favorites
+	if err := database.DB.Exec("DELETE FROM project_favorites WHERE project_id IN (SELECT id FROM projects WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 4.2 删除 project_mentors
+	if err := database.DB.Exec("DELETE FROM project_mentors WHERE project_id IN (SELECT id FROM projects WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 4.3 删除 project_investors
+	if err := database.DB.Exec("DELETE FROM project_investors WHERE project_id IN (SELECT id FROM projects WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 4.4 删除 project_partners
+	if err := database.DB.Exec("DELETE FROM project_partners WHERE project_id IN (SELECT id FROM projects WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 4.5 删除 project_bp_requests
+	if err := database.DB.Exec("DELETE FROM project_bp_requests WHERE project_id IN (SELECT id FROM projects WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 4.6 删除 project_connection_requests
+	if err := database.DB.Exec("DELETE FROM project_connection_requests WHERE project_id IN (SELECT id FROM projects WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 4.7 删除 projects
+	if err := database.DB.Exec("DELETE FROM projects WHERE team_id = ?", teamID).Error; err != nil {
+		return err
+	}
+
+	// 5. 删除团队关联的 team_member_invitations
+	if err := database.DB.Exec("DELETE FROM team_member_invitations WHERE team_id = ?", teamID).Error; err != nil {
+		return err
+	}
+
+	// 6. 删除团队关联的 team_join_requests
+	if err := database.DB.Exec("DELETE FROM team_join_requests WHERE team_id = ?", teamID).Error; err != nil {
+		return err
+	}
+
+	// 7. 删除团队关联的 team_members
+	if err := database.DB.Exec("DELETE FROM team_members WHERE team_id = ?", teamID).Error; err != nil {
+		return err
+	}
+
+	// 8. 最后删除团队
 	return database.DB.Delete(team).Error
 }
 

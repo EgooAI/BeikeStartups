@@ -58,7 +58,7 @@ export default function CreateRecruitmentPage() {
       const data = {
         ...formData,
         position: submitPosition,
-        deadline: formData.deadline || undefined,
+        deadline: formData.deadline ? new Date(formData.deadline).toISOString() : undefined,
       };
       await recruitmentApi.create(data);
       router.push('/recruitments');

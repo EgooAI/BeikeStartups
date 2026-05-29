@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { teamApi } from '@/lib/api';
 import { Team } from '@/types';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
-import { TeamOutlined, SearchOutlined, CheckCircleOutlined, ClockCircleOutlined, RightOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { TeamOutlined, SearchOutlined, CheckCircleOutlined, ClockCircleOutlined, RightOutlined, ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export default function AdminTeamsPage() {
   const { user: currentUser } = useAuth();
+  const router = useRouter();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [disbandTeam, setDisbandTeam] = useState<Team | null>(null);
+  const [disbandLoading, setDisbandLoading] = useState(false);
 
   useEffect(() => {
     loadTeams();
@@ -29,6 +33,20 @@ export default function AdminTeamsPage() {
       console.error('Failed to load teams:', err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleConfirmDisband() {
+    if (!disbandTeam) return;
+    setDisbandLoading(true);
+    try {
+      await teamApi.delete(disbandTeam.id);
+      setDisbandTeam(null);
+      loadTeams();
+    } catch (err: any) {
+      alert(err.message || '解散团队失败');
+    } finally {
+      setDisbandLoading(false);
     }
   }
 
@@ -138,10 +156,16 @@ export default function AdminTeamsPage() {
                     <td className="px-6 py-4">
                       <Link
                         href={`/teams/${team.id}`}
-                        className="inline-flex items-center text-[#0a2a5c] hover:text-[#0a2a5c]/80 text-sm font-medium transition-colors"
+                        className="inline-flex items-center text-[#0a2a5c] hover:text-[#0a2a5c]/80 text-sm font-medium transition-colors mr-4"
                       >
                         查看详情 <RightOutlined className="ml-1 text-xs" />
                       </Link>
+                      <button
+                        onClick={() => setDisbandTeam(team)}
+                        className="inline-flex items-center text-red-500 hover:text-red-600 text-sm font-medium transition-colors"
+                      >
+                        <ExclamationCircleOutlined className="mr-1" />解散
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -150,6 +174,34 @@ export default function AdminTeamsPage() {
           </table>
         </div>
       </div>
+
+      {/* 解散团队确认弹窗 */}
+      {disbandTeam && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">确认解散团队</h3>
+            <p className="text-gray-600 mb-6">
+              解散团队后，团队"<span className="font-medium">{disbandTeam.name}</span>"的所有成员将恢复为学生身份，团队的所有项目、招募等信息也将被删除。此操作不可恢复，确定要解散吗？
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setDisbandTeam(null)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                disabled={disbandLoading}
+              >
+                取消
+              </button>
+              <button
+                onClick={handleConfirmDisband}
+                disabled={disbandLoading}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {disbandLoading ? '解散中...' : '确认解散'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

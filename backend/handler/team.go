@@ -96,20 +96,28 @@ func DeleteTeam(c *gin.Context) {
 		return
 	}
 
-	if err := repository.DeleteTeam(team); err != nil {
-		response.InternalError(c, "删除团队失败")
+	user := c.MustGet("user").(*model.User)
+
+	// 只有团队负责人、管理员或超级管理员才能解散团队
+	if team.OwnerID != user.ID && user.Role != model.RoleAdmin && user.Role != model.RoleSuperAdmin {
+		response.Forbidden(c, "只有团队负责人、管理员或超级管理员才能解散团队")
 		return
 	}
 
-	response.SuccessWithMessage(c, "删除成功", nil)
+	if err := repository.DeleteTeam(team); err != nil {
+		response.InternalError(c, "解散团队失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "解散成功", nil)
 }
 
 func GetMyTeamMembers(c *gin.Context) {
 	user := c.MustGet("user").(*model.User)
-	
+
 	var team model.Team
 	var err error
-	
+
 	// 根据用户角色查找所属团队
 	if user.Role == model.RoleTeamOwner {
 		err = database.DB.Where("owner_id = ?", user.ID).First(&team).Error
@@ -124,20 +132,20 @@ func GetMyTeamMembers(c *gin.Context) {
 		response.Forbidden(c, "只有团队成员可以访问")
 		return
 	}
-	
+
 	if err != nil {
 		response.InternalError(c, "获取团队信息失败")
 		return
 	}
-	
+
 	// 获取团队成员
 	if err := database.DB.Preload("Members").First(&team, team.ID).Error; err != nil {
 		response.InternalError(c, "获取团队成员失败")
 		return
 	}
-	
+
 	response.Success(c, gin.H{
-		"team": team,
+		"team":    team,
 		"members": team.Members,
 	})
 }
@@ -473,8 +481,34 @@ func LeaveTeam(c *gin.Context) {
 		return
 	}
 
+	// 删除该用户在该团队的所有招募申请记录
+	// 先找到该团队的所有招募
+	var recruitments []model.Recruitment
+	if err := database.DB.Where("team_id = ?", teamID).Find(&recruitments).Error; err != nil {
+		response.InternalError(c, "获取团队招募失败")
+		return
+	}
+
+	// 删除用户在这些招募中的所有申请记录
+	if len(recruitments) > 0 {
+		recruitmentIDs := make([]uint, len(recruitments))
+		for i, rec := range recruitments {
+			recruitmentIDs[i] = rec.ID
+		}
+		if err := database.DB.Where("user_id = ? AND recruitment_id IN ?", user.ID, recruitmentIDs).Delete(&model.RecruitmentResponse{}).Error; err != nil {
+			response.InternalError(c, "清理申请记录失败")
+			return
+		}
+	}
+
 	if err := repository.RemoveTeamMember(teamID, user.ID); err != nil {
 		response.InternalError(c, "退出团队失败: "+err.Error())
+		return
+	}
+
+	// 将用户角色改回 student
+	if err := database.DB.Model(&model.User{}).Where("id = ?", user.ID).Update("role", model.RoleStudent).Error; err != nil {
+		response.InternalError(c, "更新用户角色失败")
 		return
 	}
 
