@@ -365,3 +365,19 @@ func AdminResetRoleRequest(c *gin.Context) {
 
 	response.SuccessWithMessage(c, "角色申请状态已重置，用户可重新申请", user)
 }
+
+func DeleteUserAccount(c *gin.Context) {
+	user := c.MustGet("user").(*model.User)
+
+	if user.Role == model.RoleAdmin || user.Role == model.RoleSuperAdmin {
+		response.Forbidden(c, "管理员账号不能自行注销")
+		return
+	}
+
+	if err := service.DeleteUser(user.ID); err != nil {
+		response.InternalError(c, "注销失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "账号已成功注销", nil)
+}

@@ -27,8 +27,14 @@ export default function RecruitmentsPage() {
 
   async function fetchRecruitments() {
     try {
-      const res = await recruitmentApi.list('active');
-      if (res.data) {
+      let res;
+      // 学生查看所有招募，项目负责人查看自己发布的招募
+      if (user?.role === 'student') {
+        res = await recruitmentApi.list('active');
+      } else if (user?.role === 'team_owner') {
+        res = await recruitmentApi.list('active', true);
+      }
+      if (res && res.data) {
         const data = res.data as any;
         setRecruitments(data.items || []);
       }
@@ -47,30 +53,47 @@ export default function RecruitmentsPage() {
     );
   }
 
-  if (!user) {
+  const isAllowedRole = user?.role === 'student' || user?.role === 'team_owner';
+  
+  if (!user || !isAllowedRole) {
     return (
       <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-custom-lg p-12 max-w-md text-center">
           <div className="w-20 h-20 bg-[#0a2a5c]/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <UserOutlined className="text-4xl text-[#0a2a5c]" />
           </div>
-          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-3">登录后查看招募广场</h2>
+          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-3">
+            {!user ? '登录后查看招募广场' : '权限不足'}
+          </h2>
           <p className="text-gray-500 mb-8">
-            登录后即可浏览创业团队的招募信息，找到适合你的创业机会。
+            {!user 
+              ? '登录后即可浏览创业团队的招募信息，找到适合你的创业机会。' 
+              : '只有学生和项目负责人可以访问招募广场'}
           </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
-          >
-            <LoginOutlined className="mr-2" />
-            立即登录
-          </Link>
-          <p className="text-sm text-gray-400 mt-4">
-            还没有账号？{' '}
-            <Link href="/register" className="text-[#f59e0b] hover:underline">
-              立即注册
+          {!user ? (
+            <>
+              <Link
+                href="/login"
+                className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+              >
+                <LoginOutlined className="mr-2" />
+                立即登录
+              </Link>
+              <p className="text-sm text-gray-400 mt-4">
+                还没有账号？{' '}
+                <Link href="/register" className="text-[#f59e0b] hover:underline">
+                  立即注册
+                </Link>
+              </p>
+            </>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+            >
+              返回首页
             </Link>
-          </p>
+          )}
         </div>
       </div>
     );

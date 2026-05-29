@@ -143,6 +143,9 @@ export const authApi = {
   updateProfile: (data: { nickname?: string; avatar?: string; phone?: string; email?: string }) =>
     api.put('/api/auth/me', data),
 
+  deleteAccount: () =>
+    api.delete('/api/auth/me'),
+
   changePassword: (data: { old_password: string; new_password: string }) =>
     api.post('/api/auth/change-password', data),
 };
@@ -242,8 +245,14 @@ export const uploadApi = {
 };
 
 export const recruitmentApi = {
-  list: (status?: string) =>
-    api.get(`/api/recruitments${status ? `?status=${status}` : ''}`),
+  list: (status?: string, myRecruitments?: boolean) => {
+    let url = '/api/recruitments';
+    const params: string[] = [];
+    if (status) params.push(`status=${status}`);
+    if (myRecruitments) params.push('my=true');
+    if (params.length > 0) url += `?${params.join('&')}`;
+    return api.get(url);
+  },
   
   get: (id: number) =>
     api.get(`/api/recruitments/${id}`),
@@ -262,6 +271,21 @@ export const recruitmentApi = {
   
   invalidate: (id: number) =>
     api.post(`/api/recruitments/${id}/invalidate`),
+  
+  apply: (id: number, data: { cover_letter: string; resume?: string }) =>
+    api.post(`/api/recruitments/${id}/apply`, data),
+  
+  getResponses: (id: number) =>
+    api.get(`/api/recruitments/${id}/responses`),
+  
+  acceptResponse: (id: number, responseId: number) =>
+    api.post(`/api/recruitments/${id}/responses/${responseId}/accept`),
+  
+  rejectResponse: (id: number, responseId: number) =>
+    api.post(`/api/recruitments/${id}/responses/${responseId}/reject`),
+  
+  getMyApplications: () =>
+    api.get('/api/responses/my'),
 };
 
 export const responseApi = {

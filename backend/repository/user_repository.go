@@ -77,3 +77,15 @@ func ListUsers(role model.UserRole, status model.UserStatus, active *bool) ([]mo
 
 	return users, nil
 }
+
+func DeleteUser(userID uint) error {
+	// 先删除 recruitment_responses 关联记录
+	if err := database.DB.Exec("DELETE FROM recruitment_responses WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+	// 先删除 team_members 关联记录
+	if err := database.DB.Exec("DELETE FROM team_members WHERE user_id = ?", userID).Error; err != nil {
+		return err
+	}
+	return database.DB.Delete(&model.User{}, userID).Error
+}

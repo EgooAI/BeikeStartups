@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { authApi, api } from '@/lib/api';
-import { UserOutlined, MailOutlined, PhoneOutlined, SmileOutlined, CameraOutlined, CheckCircleOutlined, LockOutlined, CloseOutlined } from '@ant-design/icons';
+import { UserOutlined, MailOutlined, PhoneOutlined, SmileOutlined, CameraOutlined, CheckCircleOutlined, LockOutlined, CloseOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -21,6 +21,10 @@ export default function ProfilePage() {
   const [passwordForm, setPasswordForm] = useState({ old_password: '', new_password: '', confirm_password: '' });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,6 +104,26 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== '删除账号') {
+      setDeleteError('请输入正确的确认信息');
+      return;
+    }
+
+    setDeleteLoading(true);
+    setDeleteError('');
+
+    try {
+      await authApi.deleteAccount();
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    } catch (error) {
+      setDeleteError((error as Error).message || '注销失败，请稍后重试');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
@@ -141,6 +165,7 @@ export default function ProfilePage() {
               <p className="text-gray-500 text-sm">@{user.username}</p>
               <span className="inline-block mt-1 px-2 py-0.5 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded text-xs font-medium">
                 {user.role === 'student' ? '学生' : 
+                 user.role === 'team_member' ? '团队成员' :
                  user.role === 'team_owner' ? '团队负责人' :
                  user.role === 'mentor' ? '导师' :
                  user.role === 'investor' ? '投资人' :
@@ -249,6 +274,17 @@ export default function ProfilePage() {
                 修改密码
               </button>
             </div>
+
+            <div className="pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full px-6 py-3 border border-red-200 text-red-500 rounded-xl hover:bg-red-50 transition-colors font-medium flex items-center gap-2 justify-center"
+              >
+                <DeleteOutlined />
+                注销账号
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -338,6 +374,75 @@ export default function ProfilePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 注销账号弹窗 */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-red-600 flex items-center gap-2">
+                <ExclamationCircleOutlined className="text-xl" />
+                注销账号
+              </h3>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteError('');
+                  setDeleteConfirm('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <CloseOutlined />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-red-50 rounded-xl p-4">
+                <p className="text-red-700 text-sm">
+                  <strong>警告：</strong>此操作将永久删除您的账号及所有相关数据，包括项目、申请记录等。此操作不可撤销！
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  请输入"删除账号"确认此操作
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  placeholder="请输入'删除账号'"
+                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 ${
+                    deleteError ? 'border-red-300 focus:ring-red-200 focus:border-red-500' : 'border-gray-200 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]'
+                  }`}
+                />
+                {deleteError && (
+                  <p className="text-red-500 text-sm mt-1">{deleteError}</p>
+                )}
+              </div>
+              <div className="flex space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteError('');
+                    setDeleteConfirm('');
+                  }}
+                  className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteAccount}
+                  disabled={deleteLoading}
+                  className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
+                >
+                  {deleteLoading ? '处理中...' : '确认注销'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

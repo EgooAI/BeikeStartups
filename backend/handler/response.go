@@ -258,3 +258,15 @@ func InvalidateResponse(c *gin.Context) {
 
 	response.SuccessWithMessage(c, "已作废", resp)
 }
+
+func GetMyResponses(c *gin.Context) {
+	user := c.MustGet("user").(*model.User)
+
+	var responses []model.RecruitmentResponse
+	if err := database.DB.Preload("Recruitment").Where("user_id = ?", user.ID).Find(&responses).Error; err != nil {
+		response.InternalError(c, "获取申请列表失败")
+		return
+	}
+
+	response.Success(c, gin.H{"items": responses})
+}

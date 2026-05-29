@@ -48,6 +48,7 @@ func SetupRouter() *gin.Engine {
 		auth.POST("/login", handler.Login)
 		auth.GET("/me", middleware.RequireAuth(), handler.GetCurrentUser)
 		auth.PUT("/me", middleware.RequireAuth(), handler.UpdateCurrentUser)
+		auth.DELETE("/me", middleware.RequireAuth(), handler.DeleteUserAccount)
 		auth.POST("/change-password", middleware.RequireAuth(), handler.ChangePassword)
 		auth.POST("/role-request", middleware.RequireAuth(), handler.RequestUserRole)
 		auth.GET("/role-requests", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ListRoleRequests)
@@ -161,6 +162,10 @@ func SetupRouter() *gin.Engine {
 		recruitments.DELETE("/:id", handler.DeleteRecruitment)
 		recruitments.POST("/:id/solve", handler.SolveRecruitment)
 		recruitments.POST("/:id/invalidate", handler.InvalidateRecruitment)
+		recruitments.POST("/:id/apply", handler.ApplyRecruitment)
+		recruitments.GET("/:id/responses", handler.GetRecruitmentResponses)
+		recruitments.POST("/:id/responses/:response_id/accept", handler.AcceptRecruitmentResponse)
+		recruitments.POST("/:id/responses/:response_id/reject", handler.RejectRecruitmentResponse)
 	}
 
 	responses := router.Group("/api/responses").Use(middleware.RequireAuth())
@@ -171,6 +176,7 @@ func SetupRouter() *gin.Engine {
 		responses.DELETE("/:id", handler.DeleteResponse)
 		responses.POST("/:id/accept", handler.AcceptResponse)
 		responses.POST("/:id/reject", handler.RejectResponse)
+		responses.GET("/my", handler.GetMyResponses)
 		responses.POST("/:id/invalidate", handler.InvalidateResponse)
 	}
 

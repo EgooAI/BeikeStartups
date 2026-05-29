@@ -32,6 +32,7 @@ import {
 
 const roleConfig: Record<string, { label: string; color: string; icon: any }> = {
   student: { label: '同学', color: 'from-blue-400 to-blue-600', icon: UserOutlined },
+  team_member: { label: '团队成员', color: 'from-amber-400 to-amber-600', icon: TeamOutlined },
   team_owner: { label: '团队负责人', color: 'from-orange-400 to-orange-600', icon: RocketOutlined },
   investor: { label: '投资人', color: 'from-purple-400 to-purple-600', icon: FundOutlined },
   mentor: { label: '校外导师', color: 'from-green-400 to-green-600', icon: ExperimentOutlined },
@@ -214,8 +215,8 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Projects Section - 投资人/导师/资源方不显示 */}
-            {!isInvestorRole && (
+            {/* Projects Section - 只有团队角色显示 */}
+            {(user?.role === 'team_owner' || user?.role === 'team_member') && (
               <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-[#0a2a5c]">
@@ -327,8 +328,8 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Applications Section - 投资人/导师/资源方不显示 */}
-            {!isInvestorRole && (
+            {/* Applications Section - 只有学生显示 */}
+            {user.role === 'student' && (
               <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-[#0a2a5c]">
@@ -449,43 +450,6 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions - 投资人/导师/资源方不显示 */}
-            {!isInvestorRole && (
-              <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-                <h3 className="font-semibold text-[#0a2a5c] mb-4">快捷操作</h3>
-                <div className="space-y-3">
-                  <Link
-                    href="/projects/create"
-                    className="flex items-center space-x-3 p-3 rounded-lg bg-[#0a2a5c]/5 text-[#0a2a5c] hover:bg-[#0a2a5c]/10 transition-colors"
-                  >
-                    <RocketOutlined />
-                    <span className="text-sm font-medium">发布新项目</span>
-                  </Link>
-                  <Link
-                    href="/recruitments/create"
-                    className="flex items-center space-x-3 p-3 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
-                  >
-                    <TeamOutlined />
-                    <span className="text-sm font-medium">发布招募信息</span>
-                  </Link>
-                  <Link
-                    href="/applications/create"
-                    className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-                  >
-                    <FileTextOutlined />
-                    <span className="text-sm font-medium">提交创业申请</span>
-                  </Link>
-                  <Link
-                    href="/events"
-                    className="flex items-center space-x-3 p-3 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
-                  >
-                    <CalendarOutlined />
-                    <span className="text-sm font-medium">报名活动路演</span>
-                  </Link>
-                </div>
-              </div>
-            )}
-
             {/* Role-specific Info */}
             {user.role === 'student' && (
               <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl shadow-custom border border-blue-100 p-6">

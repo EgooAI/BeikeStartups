@@ -317,6 +317,10 @@ func ResetRoleRequestStatus(userID uint) (*model.User, error) {
 	return user, nil
 }
 
+func DeleteUser(userID uint) error {
+	return repository.DeleteUser(userID)
+}
+
 func ChangePassword(userID uint, oldPassword, newPassword string) error {
 	if oldPassword == "" || newPassword == "" {
 		return errors.New("旧密码和新密码不能为空")

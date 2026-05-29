@@ -167,6 +167,14 @@ func DeleteRecruitment(c *gin.Context) {
 }
 
 func ListRecruitments(c *gin.Context) {
+	user := c.MustGet("user").(*model.User)
+
+	// 检查权限：学生或项目负责人
+	if user.Role != model.RoleStudent && user.Role != model.RoleTeamOwner {
+		response.Forbidden(c, "只有学生和项目负责人可以访问招募广场")
+		return
+	}
+
 	// pagination
 	page := 1
 	limit := 20
@@ -185,6 +193,16 @@ func ListRecruitments(c *gin.Context) {
 		query = query.Where("status = ?", status)
 	} else {
 		query = query.Where("status = ?", model.RecruitStatusActive)
+	}
+
+	// 如果是项目负责人查看自己发布的招募
+	if c.Query("my") == "true" && user.Role == model.RoleTeamOwner {
+		team, err := repository.GetTeamByOwnerID(user.ID)
+		if err != nil {
+			response.InternalError(c, "获取团队信息失败")
+			return
+		}
+		query = query.Where("team_id = ?", team.ID)
 	}
 
 	var total int64
@@ -255,4 +273,200 @@ func InvalidateRecruitment(c *gin.Context) {
 	}
 
 	response.SuccessWithMessage(c, "已作废", recruitment)
+}
+
+type ApplyRecruitmentRequest struct {
+	CoverLetter string `json:"cover_letter" binding:"required"`
+	Resume      string `json:"resume"`
+}
+
+func ApplyRecruitment(c *gin.Context) {
+	id := c.Param("id")
+	var req ApplyRecruitmentRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "请求参数错误: "+err.Error())
+		return
+	}
+
+	var recruitment model.Recruitment
+	if err := database.DB.First(&recruitment, id).Error; err != nil {
+		response.NotFound(c, "招募不存在")
+		return
+	}
+
+	if recruitment.Status != model.RecruitStatusActive {
+		response.BadRequest(c, "该招募已结束")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+
+	if user.Role != model.RoleStudent {
+		response.Forbidden(c, "只有学生可以申请招募")
+		return
+	}
+
+	var existingResponse model.RecruitmentResponse
+	if err := database.DB.Where("user_id = ? AND status IN (?, ?)", user.ID, model.RespStatusPending, model.RespStatusAccepted).First(&existingResponse).Error; err == nil {
+		response.BadRequest(c, "您已经有申请在处理中，请等待审核完成")
+		return
+	}
+
+	recruitmentResponse := model.RecruitmentResponse{
+		CoverLetter:   req.CoverLetter,
+		Resume:        req.Resume,
+		Status:        model.RespStatusPending,
+		RecruitmentID: recruitment.ID,
+		UserID:        user.ID,
+	}
+
+	if err := database.DB.Create(&recruitmentResponse).Error; err != nil {
+		response.InternalError(c, "申请失败")
+		return
+	}
+
+	response.Success(c, recruitmentResponse)
+}
+
+func GetRecruitmentResponses(c *gin.Context) {
+	id := c.Param("id")
+	var recruitment model.Recruitment
+
+	if err := database.DB.First(&recruitment, id).Error; err != nil {
+		response.NotFound(c, "招募不存在")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, recruitment.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权查看此招募的申请")
+		return
+	}
+
+	var responses []model.RecruitmentResponse
+	if err := database.DB.Preload("User").Where("recruitment_id = ?", id).Find(&responses).Error; err != nil {
+		response.InternalError(c, "获取申请列表失败")
+		return
+	}
+
+	response.Success(c, gin.H{"items": responses})
+}
+
+func AcceptRecruitmentResponse(c *gin.Context) {
+	id := c.Param("id")
+	responseID := c.Param("response_id")
+
+	var recruitment model.Recruitment
+	if err := database.DB.First(&recruitment, id).Error; err != nil {
+		response.NotFound(c, "招募不存在")
+		return
+	}
+
+	var resp model.RecruitmentResponse
+	if err := database.DB.Preload("User").First(&resp, responseID).Error; err != nil {
+		response.NotFound(c, "申请不存在")
+		return
+	}
+
+	if resp.RecruitmentID != recruitment.ID {
+		response.BadRequest(c, "申请不属于该招募")
+		return
+	}
+
+	if resp.Status != model.RespStatusPending {
+		response.BadRequest(c, "只能处理待审核的申请")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, recruitment.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权处理此申请")
+		return
+	}
+
+	tx := database.DB.Begin()
+
+	resp.Status = model.RespStatusAccepted
+	if err := tx.Save(&resp).Error; err != nil {
+		tx.Rollback()
+		response.InternalError(c, "处理申请失败")
+		return
+	}
+
+	if err := tx.Model(&resp.User).Update("role", model.RoleTeamMember).Error; err != nil {
+		tx.Rollback()
+		response.InternalError(c, "更新用户角色失败")
+		return
+	}
+
+	// 先检查用户是否已经是团队成员
+	var exists int64
+	if err := tx.Table("team_members").Where("team_id = ? AND user_id = ?", recruitment.TeamID, resp.User.ID).Count(&exists).Error; err != nil {
+		tx.Rollback()
+		response.InternalError(c, "检查成员状态失败")
+		return
+	}
+
+	if exists > 0 {
+		// 用户已经是团队成员，跳过添加
+	} else {
+		// 直接插入 team_members 中间表
+		if err := tx.Exec("INSERT INTO team_members (team_id, user_id) VALUES (?, ?)", recruitment.TeamID, resp.User.ID).Error; err != nil {
+			tx.Rollback()
+			response.InternalError(c, "添加团队成员失败: "+err.Error())
+			return
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		response.InternalError(c, "提交事务失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "已通过申请，用户已成为团队成员", resp)
+}
+
+func RejectRecruitmentResponse(c *gin.Context) {
+	id := c.Param("id")
+	responseID := c.Param("response_id")
+
+	var recruitment model.Recruitment
+	if err := database.DB.First(&recruitment, id).Error; err != nil {
+		response.NotFound(c, "招募不存在")
+		return
+	}
+
+	var resp model.RecruitmentResponse
+	if err := database.DB.First(&resp, responseID).Error; err != nil {
+		response.NotFound(c, "申请不存在")
+		return
+	}
+
+	if resp.RecruitmentID != recruitment.ID {
+		response.BadRequest(c, "申请不属于该招募")
+		return
+	}
+
+	if resp.Status != model.RespStatusPending {
+		response.BadRequest(c, "只能处理待审核的申请")
+		return
+	}
+
+	user := c.MustGet("user").(*model.User)
+	var team model.Team
+	if err := database.DB.First(&team, recruitment.TeamID).Error; err != nil || (team.OwnerID != user.ID && user.Role != model.RoleAdmin) {
+		response.Forbidden(c, "无权处理此申请")
+		return
+	}
+
+	resp.Status = model.RespStatusRejected
+	if err := database.DB.Save(&resp).Error; err != nil {
+		response.InternalError(c, "处理申请失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "已拒绝申请", resp)
 }

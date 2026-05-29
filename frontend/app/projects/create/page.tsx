@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectApi, uploadApi } from '@/lib/api';
 
-const INDUSTRY_OPTIONS = [
-  'AI',
-  '教育',
-  '消费',
-  '硬件',
-  '文创',
-  '企业服务',
+const DOMAIN_OPTIONS = [
+  { value: 'ai', label: 'AI' },
+  { value: 'education', label: '教育' },
+  { value: 'consumer', label: '消费' },
+  { value: 'hardware', label: '硬件' },
+  { value: 'culture', label: '文创' },
+  { value: 'enterprise', label: '企业服务' },
 ];
 
 const STAGE_OPTIONS = [
@@ -32,7 +32,7 @@ export default function CreateProjectPage() {
     cover_image: '',
     is_public: true,
     tags: '',
-    industry: '',
+    domains: [] as string[],
     stage: 'idea',
   });
   const [error, setError] = useState('');
@@ -57,10 +57,12 @@ export default function CreateProjectPage() {
     });
   };
 
-  const handleIndustryChange = (industry: string) => {
+  const handleDomainChange = (domain: string) => {
     setFormData(prev => ({
       ...prev,
-      industry: prev.industry === industry ? '' : industry,
+      domains: prev.domains.includes(domain)
+        ? prev.domains.filter(d => d !== domain)
+        : [...prev.domains, domain],
     }));
   };
 
@@ -85,8 +87,8 @@ export default function CreateProjectPage() {
     e.preventDefault();
     setError('');
     
-    if (!formData.industry) {
-      setError('请选择项目所属领域');
+    if (formData.domains.length === 0) {
+      setError('请至少选择一个项目领域');
       return;
     }
     
@@ -96,10 +98,7 @@ export default function CreateProjectPage() {
       let coverImageUrl = formData.cover_image;
       if (coverFile) {
         const uploadRes = await uploadApi.upload(coverFile);
-        if (!uploadRes.data?.url) {
-          throw new Error('图片上传失败，未返回图片地址');
-        }
-        coverImageUrl = uploadRes.data.url;
+        coverImageUrl = uploadRes.data?.url || '';
       }
       await projectApi.create({
         ...formData,
@@ -117,24 +116,6 @@ export default function CreateProjectPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
-
-  // 普通学生用户禁止创建项目
-  if (user?.role === 'student') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-custom-lg p-12 max-w-md text-center">
-          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-3">无权创建项目</h2>
-          <p className="text-gray-500 mb-8">普通学生用户无法创建项目，请先申请成为团队角色</p>
-          <button
-            onClick={() => router.push('/my-projects')}
-            className="inline-flex items-center px-8 py-3 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
-          >
-            返回我的项目
-          </button>
-        </div>
       </div>
     );
   }
@@ -221,7 +202,6 @@ export default function CreateProjectPage() {
                 className="mt-4 w-full max-h-60 object-cover rounded-lg border border-gray-200"
               />
             )}
-            <p className="mt-2 text-xs text-gray-500">支持 JPG/PNG/GIF/WebP 图片，文件大小不超过 5MB，每天最多上传 20 次。</p>
           </div>
 
           <div>
@@ -229,19 +209,23 @@ export default function CreateProjectPage() {
               项目领域 *
             </label>
             <div className="flex flex-wrap gap-2">
-              {INDUSTRY_OPTIONS.map(industry => (
-                <button
-                  key={industry}
-                  type="button"
-                  onClick={() => handleIndustryChange(industry)}
+              {DOMAIN_OPTIONS.map(option => (
+                <label
+                  key={option.value}
                   className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-colors ${
-                    formData.industry === industry
+                    formData.domains.includes(option.value)
                       ? 'bg-indigo-600 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  {industry}
-                </button>
+                  <input
+                    type="checkbox"
+                    checked={formData.domains.includes(option.value)}
+                    onChange={() => handleDomainChange(option.value)}
+                    className="sr-only"
+                  />
+                  {option.label}
+                </label>
               ))}
             </div>
           </div>

@@ -104,6 +104,44 @@ func DeleteTeam(c *gin.Context) {
 	response.SuccessWithMessage(c, "删除成功", nil)
 }
 
+func GetMyTeamMembers(c *gin.Context) {
+	user := c.MustGet("user").(*model.User)
+	
+	var team model.Team
+	var err error
+	
+	// 根据用户角色查找所属团队
+	if user.Role == model.RoleTeamOwner {
+		err = database.DB.Where("owner_id = ?", user.ID).First(&team).Error
+	} else if user.Role == model.RoleTeamMember {
+		var teamMember struct {
+			TeamID uint
+		}
+		if err = database.DB.Table("team_members").Select("team_id").Where("user_id = ?", user.ID).First(&teamMember).Error; err == nil {
+			err = database.DB.First(&team, teamMember.TeamID).Error
+		}
+	} else {
+		response.Forbidden(c, "只有团队成员可以访问")
+		return
+	}
+	
+	if err != nil {
+		response.InternalError(c, "获取团队信息失败")
+		return
+	}
+	
+	// 获取团队成员
+	if err := database.DB.Preload("Members").First(&team, team.ID).Error; err != nil {
+		response.InternalError(c, "获取团队成员失败")
+		return
+	}
+	
+	response.Success(c, gin.H{
+		"team": team,
+		"members": team.Members,
+	})
+}
+
 func ListTeams(c *gin.Context) {
 	// pagination
 	page := 1

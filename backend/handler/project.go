@@ -273,8 +273,34 @@ func ListProjects(c *gin.Context) {
 		// 检查用户是否已登录
 		if userValue, exists := c.Get("user"); exists && userValue != nil {
 			if user, ok := userValue.(*model.User); ok {
-				// 对于登录用户，显示自己的所有项目（通过 UserID 过滤）
-				query = query.Where("user_id = ?", user.ID)
+				// 对于团队所有者和团队成员，显示所在团队的所有项目
+				if user.Role == model.RoleTeamOwner || user.Role == model.RoleTeamMember {
+					var team model.Team
+					if user.Role == model.RoleTeamOwner {
+						// 团队所有者
+						if err := database.DB.Where("owner_id = ?", user.ID).First(&team).Error; err == nil {
+							query = query.Where("team_id = ?", team.ID)
+						} else {
+							query = query.Where("1=0") // 没有团队，返回空
+						}
+					} else {
+						// 团队成员：先查询用户所属的团队
+						var teamMember struct {
+							TeamID uint
+						}
+						if err := database.DB.Table("team_members").
+							Select("team_id").
+							Where("user_id = ?", user.ID).
+							First(&teamMember).Error; err == nil {
+							query = query.Where("team_id = ?", teamMember.TeamID)
+						} else {
+							query = query.Where("1=0") // 不在任何团队中，返回空
+						}
+					}
+				} else {
+					// 对于其他用户，显示自己创建的项目
+					query = query.Where("user_id = ?", user.ID)
+				}
 			} else {
 				// 未登录用户只显示已上架的项目
 				query = query.Where("status = ?", model.ProjStatusOnline)
