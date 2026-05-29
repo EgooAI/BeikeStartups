@@ -100,6 +100,7 @@ func SetupRouter() *gin.Engine {
 		teams.GET("/:id/join-requests", handler.ListTeamJoinRequests)
 		teams.POST("", handler.CreateTeam)
 		teams.PUT("/:id", handler.UpdateTeam)
+		teams.DELETE("/:id", handler.DeleteTeam)
 		teams.POST("/:id/members", handler.AddTeamMember)
 		teams.POST("/:id/invite", handler.InviteTeamMember)
 		teams.POST("/:id/invitations/:invite_id/accept", handler.AcceptTeamInvitation)

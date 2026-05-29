@@ -43,19 +43,25 @@ func UpdateTeam(team *model.Team) error {
 
 func DeleteTeam(team *model.Team) error {
 	teamID := team.ID
+	ownerID := team.OwnerID
 
 	// 1. 将团队成员的 role 变更为 student
 	if err := database.DB.Model(&model.User{}).Where("id IN (SELECT user_id FROM team_members WHERE team_id = ?)", teamID).Update("role", model.RoleStudent).Error; err != nil {
 		return err
 	}
 
-	// 2. 删除团队关联的 recruitments
-	if err := database.DB.Exec("DELETE FROM recruitments WHERE team_id = ?", teamID).Error; err != nil {
+	// 1.1 将团队负责人的 role 也变更为 student
+	if err := database.DB.Model(&model.User{}).Where("id = ?", ownerID).Update("role", model.RoleStudent).Error; err != nil {
 		return err
 	}
 
-	// 3. 删除团队关联的 recruitment_responses
+	// 2. 先删除 recruitment_responses（必须在删除 recruitments 之前）
 	if err := database.DB.Exec("DELETE FROM recruitment_responses WHERE recruitment_id IN (SELECT id FROM recruitments WHERE team_id = ?)", teamID).Error; err != nil {
+		return err
+	}
+
+	// 3. 删除团队关联的 recruitments
+	if err := database.DB.Exec("DELETE FROM recruitments WHERE team_id = ?", teamID).Error; err != nil {
 		return err
 	}
 
