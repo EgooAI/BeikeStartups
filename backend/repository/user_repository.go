@@ -78,6 +78,13 @@ func ListUsers(role model.UserRole, status model.UserStatus, active *bool) ([]mo
 	return users, nil
 }
 
+func DeleteRoleRequest(requestID uint) error {
+	return database.DB.Model(&model.User{}).Where("id = ?", requestID).Updates(map[string]interface{}{
+		"requested_role": "",
+		"role_status":    model.UserStatusRejected,
+	}).Error
+}
+
 func DeleteUser(userID uint) error {
 	// 先删除 recruitment_responses 关联记录
 	if err := database.DB.Exec("DELETE FROM recruitment_responses WHERE user_id = ?", userID).Error; err != nil {

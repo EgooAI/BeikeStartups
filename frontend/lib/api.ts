@@ -381,6 +381,9 @@ export const roleApi = {
 
   reject: (id: number) =>
     api.post(`/api/auth/role-requests/${id}/reject`),
+
+  deleteRequest: (id: number) =>
+    api.delete(`/api/auth/role-requests/${id}`),
 };
 
 export const adminApi = {

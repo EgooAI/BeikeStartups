@@ -131,6 +131,12 @@ export default function ApplicationsPage() {
                   
                   {app.status === 'draft' && (
                     <>
+                      <Link
+                        href={`/applications/create?id=${app.id}`}
+                        className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                      >
+                        编辑
+                      </Link>
                       <button
                         onClick={() => handleSubmit(app.id)}
                         className="text-green-600 hover:text-green-700 font-medium text-sm"

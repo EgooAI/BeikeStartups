@@ -175,6 +175,10 @@ func RejectRoleRequest(userID uint) (*model.User, error) {
 	return user, nil
 }
 
+func DeleteRoleRequest(requestID uint) error {
+	return repository.DeleteRoleRequest(requestID)
+}
+
 func AdminListUsers(role model.UserRole, status model.UserStatus, active *bool) ([]model.User, error) {
 	return repository.ListUsers(role, status, active)
 }

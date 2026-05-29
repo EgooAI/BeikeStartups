@@ -123,7 +123,7 @@ func DeleteApplication(c *gin.Context) {
 	}
 
 	user := c.MustGet("user").(*model.User)
-	if application.UserID != user.ID && user.Role != model.RoleAdmin {
+	if application.UserID != user.ID && user.Role != model.RoleAdmin && user.Role != model.RoleSuperAdmin {
 		response.Forbidden(c, "无权删除此申请")
 		return
 	}

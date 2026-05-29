@@ -213,6 +213,19 @@ func RejectRoleRequest(c *gin.Context) {
 	response.Success(c, updated)
 }
 
+func DeleteRoleRequest(c *gin.Context) {
+	id := c.Param("id")
+	var requestID uint
+	_, _ = fmt.Sscan(id, &requestID)
+
+	if err := service.DeleteRoleRequest(requestID); err != nil {
+		response.BadRequest(c, err.Error())
+		return
+	}
+
+	response.Success(c, gin.H{"message": "删除成功"})
+}
+
 func ListUsers(c *gin.Context) {
 	role := model.UserRole(c.Query("role"))
 	users, err := service.ListApprovedUsersByRole(role)

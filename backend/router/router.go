@@ -54,6 +54,7 @@ func SetupRouter() *gin.Engine {
 		auth.GET("/role-requests", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ListRoleRequests)
 		auth.POST("/role-requests/:id/approve", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveRoleRequest)
 		auth.POST("/role-requests/:id/reject", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.RejectRoleRequest)
+		auth.DELETE("/role-requests/:id", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.DeleteRoleRequest)
 	}
 
 	users := router.Group("/api/users")
@@ -98,6 +99,7 @@ func SetupRouter() *gin.Engine {
 		teams.GET("/:id/invitations", handler.ListTeamInvitations)
 		teams.GET("/:id/join-requests", handler.ListTeamJoinRequests)
 		teams.POST("", handler.CreateTeam)
+		teams.PUT("/:id", handler.UpdateTeam)
 		teams.POST("/:id/members", handler.AddTeamMember)
 		teams.POST("/:id/invite", handler.InviteTeamMember)
 		teams.POST("/:id/invitations/:invite_id/accept", handler.AcceptTeamInvitation)

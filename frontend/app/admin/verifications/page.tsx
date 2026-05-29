@@ -10,6 +10,7 @@ import {
   ClockCircleOutlined,
   FileTextOutlined,
   UserOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
 
@@ -99,6 +100,26 @@ export default function AdminVerificationsPage() {
       loadData();
     } catch (err: any) {
       alert(err.message || '操作失败');
+    }
+  };
+
+  const handleDeleteApp = async (id: number) => {
+    if (!confirm('确定要删除这条创业认证申请吗？')) return;
+    try {
+      await applicationApi.delete(id);
+      loadData();
+    } catch (err: any) {
+      alert(err.message || '删除失败');
+    }
+  };
+
+  const handleDeleteRole = async (id: number) => {
+    if (!confirm('确定要删除这条身份认证申请吗？')) return;
+    try {
+      await roleApi.deleteRequest(id);
+      loadData();
+    } catch (err: any) {
+      alert(err.message || '删除失败');
     }
   };
 
@@ -205,15 +226,8 @@ export default function AdminVerificationsPage() {
                   </div>
                 )}
 
-                {app.status === 'pending' && (
-                  <div className="border-t border-gray-100 pt-4">
-                    <textarea
-                      placeholder="输入审核意见..."
-                      value={reviewNotes[app.id] || ''}
-                      onChange={(e) => setReviewNotes(prev => ({ ...prev, [app.id]: e.target.value }))}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] mb-3"
-                      rows={2}
-                    />
+                <div className="border-t border-gray-100 pt-4 flex justify-between items-center">
+                  {app.status === 'pending' && (
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleApproveApp(app.id)}
@@ -228,8 +242,15 @@ export default function AdminVerificationsPage() {
                         <CloseCircleOutlined className="mr-1" /> 拒绝
                       </button>
                     </div>
-                  </div>
-                )}
+                  )}
+                  {app.status !== 'pending' && <div></div>}
+                  <button
+                    onClick={() => handleDeleteApp(app.id)}
+                    className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    <DeleteOutlined className="mr-1" /> 删除
+                  </button>
+                </div>
               </div>
             ))
           )}
@@ -311,22 +332,31 @@ export default function AdminVerificationsPage() {
                   )}
                 </div>
 
-                {req.role_status === 'pending' && (
-                  <div className="flex space-x-3 border-t border-gray-100 pt-4">
-                    <button
-                      onClick={() => handleApproveRole(req.id)}
-                      className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-                    >
-                      <CheckCircleOutlined className="mr-1" /> 通过认证
-                    </button>
-                    <button
-                      onClick={() => handleRejectRole(req.id)}
-                      className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
-                    >
-                      <CloseCircleOutlined className="mr-1" /> 拒绝
-                    </button>
-                  </div>
-                )}
+                <div className="flex justify-between items-center border-t border-gray-100 pt-4">
+                  {req.role_status === 'pending' && (
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => handleApproveRole(req.id)}
+                        className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                      >
+                        <CheckCircleOutlined className="mr-1" /> 通过认证
+                      </button>
+                      <button
+                        onClick={() => handleRejectRole(req.id)}
+                        className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
+                      >
+                        <CloseCircleOutlined className="mr-1" /> 拒绝
+                      </button>
+                    </div>
+                  )}
+                  {req.role_status !== 'pending' && <div></div>}
+                  <button
+                    onClick={() => handleDeleteRole(req.id)}
+                    className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    <DeleteOutlined className="mr-1" /> 删除
+                  </button>
+                </div>
               </div>
             ))
           )}

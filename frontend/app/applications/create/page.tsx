@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { applicationApi } from '@/lib/api';
 import Link from 'next/link';
@@ -46,6 +46,10 @@ const stages = [
 export default function CreateApplicationPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const params = useParams();
+  const editId = params?.id ? parseInt(params.id as string) : null;
+  const isEditMode = !!editId;
+  
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -65,6 +69,53 @@ export default function CreateApplicationPage() {
   });
 
   const totalSteps = 4;
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadApplication();
+    }
+  }, [isEditMode]);
+
+  async function loadApplication() {
+    try {
+      const response = await applicationApi.get(editId!);
+      if (response.data) {
+        const data = response.data;
+        // 解析 description 中的结构化数据
+        const desc = (data as any).description || '';
+        const categoryMatch = desc.match(/【项目类别】(.+)/);
+        const teamSizeMatch = desc.match(/【团队规模】(.+)/);
+        const stageMatch = desc.match(/【项目阶段】(.+)/);
+        const marketMatch = desc.match(/【市场分析】\n([\s\S]*?)(?=\n【|$)/);
+        const advantageMatch = desc.match(/【竞争优势】\n([\s\S]*?)(?=\n【|$)/);
+        const teamMatch = desc.match(/【团队介绍】\n([\s\S]*?)(?=\n【|$)/);
+        const emailMatch = desc.match(/邮箱：(.+)/);
+        const phoneMatch = desc.match(/电话：(.+)/);
+        const tagsMatch = desc.match(/标签：(.+)/);
+        
+        // 提取项目简介（在项目阶段之后，市场分析之前）
+        const descMatch = desc.match(/【项目阶段】.+\n\n([\s\S]*?)(?=\n\n【市场分析】)/);
+        
+        setFormData({
+          title: (data as any).title || '',
+          description: descMatch ? descMatch[1].trim() : '',
+          business_plan: (data as any).business_plan || '',
+          category: categoryMatch ? categoryMatch[1].trim() : '',
+          team_size: teamSizeMatch ? teamSizeMatch[1].trim() : '',
+          stage: stageMatch ? stageMatch[1].trim() : '',
+          market_analysis: marketMatch ? marketMatch[1].trim() : '',
+          competitive_advantage: advantageMatch ? advantageMatch[1].trim() : '',
+          team_introduction: teamMatch ? teamMatch[1].trim() : '',
+          contact_email: emailMatch ? emailMatch[1].trim() : '',
+          contact_phone: phoneMatch ? phoneMatch[1].trim() : '',
+          tags: tagsMatch ? tagsMatch[1].trim() : '',
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load application:', err);
+      setError('加载申请信息失败');
+    }
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -103,10 +154,14 @@ ${formData.team_introduction}
         business_plan: formData.business_plan,
       };
 
-      await applicationApi.create(submitData);
+      if (isEditMode) {
+        await applicationApi.update(editId!, submitData);
+      } else {
+        await applicationApi.create(submitData);
+      }
       router.push('/applications');
     } catch (err: any) {
-      setError(err.message || '创建申请失败');
+      setError(err.message || (isEditMode ? '更新申请失败' : '创建申请失败'));
     } finally {
       setIsLoading(false);
     }
@@ -161,8 +216,12 @@ ${formData.team_introduction}
               <TeamOutlined className="text-2xl text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-[#0a2a5c]">创业团队认证申请</h1>
-              <p className="text-gray-500 mt-1">提交你的创业想法，开启校园创业之旅</p>
+              <h1 className="text-3xl font-bold text-[#0a2a5c]">
+                {isEditMode ? '修改创业团队申请' : '创业团队认证申请'}
+              </h1>
+              <p className="text-gray-500 mt-1">
+                {isEditMode ? '修改你的创业申请信息' : '提交你的创业想法，开启校园创业之旅'}
+              </p>
             </div>
           </div>
         </div>
@@ -549,12 +608,12 @@ ${formData.team_introduction}
                   {isLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                      提交中...
+                      {isEditMode ? '保存中...' : '提交中...'}
                     </>
                   ) : (
                     <>
                       <CheckCircleOutlined className="mr-2" />
-                      提交申请
+                      {isEditMode ? '保存修改' : '提交申请'}
                     </>
                   )}
                 </button>

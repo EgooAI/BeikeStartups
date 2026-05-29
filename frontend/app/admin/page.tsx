@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { projectApi, recruitmentApi, applicationApi, eventApi, resourceApi, adminApi, roleApi } from '@/lib/api';
+import { projectApi, recruitmentApi, applicationApi, eventApi, resourceApi, adminApi, roleApi, teamApi } from '@/lib/api';
 import Link from 'next/link';
 import {
   UserOutlined,
@@ -28,6 +28,7 @@ export default function AdminDashboardPage() {
     totalEvents: 0,
     totalRecruitments: 0,
     totalResources: 0,
+    totalTeams: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +46,7 @@ export default function AdminDashboardPage() {
         eventApi.list(),
         recruitmentApi.list(),
         resourceApi.list(),
+        teamApi.list(),
       ]);
 
       const newStats = { ...stats };
@@ -79,6 +81,10 @@ export default function AdminDashboardPage() {
         const data = results[6].value.data as any;
         newStats.totalResources = data.items?.length || 0;
       }
+      if (results[7].status === 'fulfilled' && results[7].value.data) {
+        const data = results[7].value.data as any;
+        newStats.totalTeams = data.items?.length || 0;
+      }
 
       setStats(newStats);
     } catch (err) {
@@ -96,6 +102,7 @@ export default function AdminDashboardPage() {
     { label: '活动数量', value: stats.totalEvents, icon: <CalendarOutlined />, color: 'bg-green-500', href: '/admin/events' },
     { label: '招募数量', value: stats.totalRecruitments, icon: <TeamOutlined />, color: 'bg-orange-500', href: '/admin/verifications' },
     { label: '资源数量', value: stats.totalResources, icon: <BuildOutlined />, color: 'bg-teal-500', href: '/admin/resources' },
+    { label: '团队数量', value: stats.totalTeams, icon: <TeamOutlined />, color: 'bg-indigo-500', href: '/admin/teams' },
   ];
 
   if (loading) {
@@ -213,6 +220,10 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-sm text-gray-600">资源合作</span>
               <span className="font-semibold text-[#0a2a5c]">{stats.totalResources} 条</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">创业团队</span>
+              <span className="font-semibold text-[#0a2a5c]">{stats.totalTeams} 个</span>
             </div>
           </div>
         </div>

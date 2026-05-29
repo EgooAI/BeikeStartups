@@ -526,10 +526,18 @@ export default function DashboardPage() {
             {/* 我的团队模块 - 仅团队所有者和团队成员可见 */}
             {(user.role === 'team_owner' || user.role === 'team_member') && (
               <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
-                <div className="px-6 py-5 border-b border-gray-100">
+                <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-[#0a2a5c] flex items-center">
                     <TeamOutlined className="mr-2" />我的团队
                   </h3>
+                  {user.role === 'team_owner' && myTeam && (
+                    <Link
+                      href={`/teams/${myTeam.id}/edit`}
+                      className="flex items-center text-sm text-[#f59e0b] hover:text-[#f59e0b]/80 transition-colors"
+                    >
+                      <SettingOutlined className="mr-1" />修改团队信息
+                    </Link>
+                  )}
                 </div>
                 <div className="p-6">
                   {myTeam ? (
