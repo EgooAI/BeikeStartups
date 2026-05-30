@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { responseApi } from '@/lib/api';
 import { Response as RecruitmentResponse } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
+import { message } from 'antd';
 
 export default function ResponseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -44,51 +45,55 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
 
   const handleAccept = async () => {
     if (!reviewNote.trim()) {
-      alert('请输入回复意见');
+      message.warning('请输入回复意见');
       return;
     }
     try {
       await responseApi.accept(responseId, reviewNote);
       loadResponse();
       setReviewNote('');
+      message.success('已通过申请');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
   const handleReject = async () => {
     if (!reviewNote.trim()) {
-      alert('请输入回复意见');
+      message.warning('请输入回复意见');
       return;
     }
     try {
       await responseApi.reject(responseId, reviewNote);
       loadResponse();
       setReviewNote('');
+      message.success('已拒绝申请');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
   const handleInvalidate = async () => {
     if (!confirm('确定要作废这个应聘吗？')) return;
-    
+
     try {
       await responseApi.invalidate(responseId);
       loadResponse();
+      message.success('应聘已作废');
     } catch (err: any) {
-      alert(err.message || '作废失败');
+      message.error(err.message || '作废失败');
     }
   };
 
   const handleDelete = async () => {
     if (!confirm('确定要删除这个应聘记录吗？')) return;
-    
+
     try {
       await responseApi.delete(responseId);
       router.push('/responses');
+      message.success('应聘记录已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

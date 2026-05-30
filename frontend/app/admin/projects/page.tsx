@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { projectApi } from '@/lib/api';
 import { Project, ProjectStage } from '@/types';
 import Link from 'next/link';
+import { message } from 'antd';
 import {
   ProjectOutlined,
   CheckCircleOutlined,
@@ -39,8 +40,9 @@ export default function AdminProjectsPage() {
     try {
       await projectApi.approveOnline(id);
       loadProjects();
+      message.success('已通过上架申请');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -48,8 +50,9 @@ export default function AdminProjectsPage() {
     try {
       await projectApi.rejectOnline(id);
       loadProjects();
+      message.success('已拒绝上架申请');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -57,8 +60,9 @@ export default function AdminProjectsPage() {
     try {
       await projectApi.invalidate(id);
       loadProjects();
+      message.success('项目已下架');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -89,8 +93,9 @@ export default function AdminProjectsPage() {
     try {
       await projectApi.delete(id);
       loadProjects();
+      message.success('项目已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

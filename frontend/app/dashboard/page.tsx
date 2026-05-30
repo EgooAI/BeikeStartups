@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectApi, teamApi, recruitmentApi, applicationApi, responseApi, eventApi, resourceApi, connectionApi } from '@/lib/api';
 import { Project, Team, Recruitment, Application } from '@/types';
+import { message } from 'antd';
 import Link from 'next/link';
 import {
   RocketOutlined,
@@ -62,8 +63,9 @@ export default function DashboardPage() {
       await teamApi.delete(myTeam.id);
       setShowDisbandModal(false);
       router.push('/dashboard');
+      message.success('团队已解散');
     } catch (err: any) {
-      alert(err.message || '解散团队失败');
+      message.error(err.message || '解散团队失败');
     }
   }
 
@@ -72,10 +74,10 @@ export default function DashboardPage() {
     try {
       await teamApi.leave(myTeam.id);
       setShowLeaveModal(false);
-      // 清除缓存并强制刷新页面以更新用户角色
       window.location.replace('/dashboard');
+      message.success('已退出团队');
     } catch (err: any) {
-      alert(err.message || '退出团队失败');
+      message.error(err.message || '退出团队失败');
     }
   }
 

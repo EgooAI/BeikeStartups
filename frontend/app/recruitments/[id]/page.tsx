@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { recruitmentApi } from '@/lib/api';
 import { Recruitment, Response } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
+import { message } from 'antd';
 
 export default function RecruitmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -67,7 +68,7 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
 
   const handleApply = async () => {
     if (!coverLetter.trim()) {
-      alert('请填写自我介绍');
+      message.warning('请填写自我介绍');
       return;
     }
 
@@ -77,9 +78,9 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       setCoverLetter('');
       setHasApplied(true);
       setMyApplicationStatus('pending');
-      alert('申请提交成功');
+      message.success('申请提交成功');
     } catch (err: any) {
-      alert(err.message || '申请失败');
+      message.error(err.message || '申请失败');
     }
   };
 
@@ -87,30 +88,33 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
     try {
       await recruitmentApi.solve(recruitmentId);
       loadRecruitment();
+      message.success('招募已开启');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
   const handleInvalidate = async () => {
     if (!confirm('确定要作废这个招募吗？')) return;
-    
+
     try {
       await recruitmentApi.invalidate(recruitmentId);
       loadRecruitment();
+      message.success('招募已作废');
     } catch (err: any) {
-      alert(err.message || '作废失败');
+      message.error(err.message || '作废失败');
     }
   };
 
   const handleDelete = async () => {
     if (!confirm('确定要删除这个招募吗？')) return;
-    
+
     try {
       await recruitmentApi.delete(recruitmentId);
       router.push('/recruitments');
+      message.success('招募已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 
@@ -123,31 +127,32 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       }
       setShowResponses(true);
     } catch (err: any) {
-      alert(err.message || '获取申请列表失败');
+      message.error(err.message || '获取申请列表失败');
     }
   };
 
   const handleAcceptResponse = async (responseId: number) => {
     if (!confirm('确定要通过该申请吗？通过后该学生将加入您的团队。')) return;
-    
+
     try {
       await recruitmentApi.acceptResponse(recruitmentId, responseId);
       loadResponses();
       loadRecruitment();
-      alert('申请已通过，该学生已加入您的团队');
+      message.success('申请已通过，该学生已加入您的团队');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
   const handleRejectResponse = async (responseId: number) => {
     if (!confirm('确定要拒绝该申请吗？')) return;
-    
+
     try {
       await recruitmentApi.rejectResponse(recruitmentId, responseId);
       loadResponses();
+      message.success('已拒绝申请');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 

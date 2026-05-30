@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { teamApi } from '@/lib/api';
 import { Team } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
+import { message } from 'antd';
 
 export default function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -43,12 +44,13 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
 
   const handleDelete = async () => {
     if (!confirm('确定要删除这个团队吗？')) return;
-    
+
     try {
       await teamApi.delete(teamId);
       router.push('/teams');
+      message.success('团队已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

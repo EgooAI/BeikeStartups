@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { applicationApi } from '@/lib/api';
 import { Application } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
+import { message } from 'antd';
 import Link from 'next/link';
 
 export default function ApplicationsPage() {
@@ -45,19 +46,21 @@ export default function ApplicationsPage() {
     try {
       await applicationApi.submit(id);
       loadApplications();
+      message.success('创业申请已提交');
     } catch (err: any) {
-      alert(err.message || '提交失败');
+      message.error(err.message || '提交失败');
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除这个申请吗？')) return;
-    
+
     try {
       await applicationApi.delete(id);
       loadApplications();
+      message.success('申请已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

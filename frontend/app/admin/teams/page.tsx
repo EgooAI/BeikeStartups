@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { teamApi } from '@/lib/api';
 import { Team } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { message } from 'antd';
 import Link from 'next/link';
 import { TeamOutlined, SearchOutlined, CheckCircleOutlined, ClockCircleOutlined, RightOutlined, ArrowLeftOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
@@ -43,8 +44,9 @@ export default function AdminTeamsPage() {
       await teamApi.delete(disbandTeam.id);
       setDisbandTeam(null);
       loadTeams();
+      message.success('团队已解散');
     } catch (err: any) {
-      alert(err.message || '解散团队失败');
+      message.error(err.message || '解散团队失败');
     } finally {
       setDisbandLoading(false);
     }

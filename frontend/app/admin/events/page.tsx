@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { eventApi } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
+import { message } from 'antd';
 import {
   CalendarOutlined,
   PlusOutlined,
@@ -77,13 +78,15 @@ export default function AdminEventsPage() {
       };
       if (editingEvent) {
         await eventApi.update(editingEvent.id, submitData);
+        message.success('活动已更新');
       } else {
         await eventApi.create(submitData);
+        message.success('活动已创建');
       }
       resetForm();
       loadEvents();
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -106,8 +109,9 @@ export default function AdminEventsPage() {
     try {
       await eventApi.delete(id);
       loadEvents();
+      message.success('活动已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 
@@ -121,7 +125,7 @@ export default function AdminEventsPage() {
         setSignups(res.data as any[]);
       }
     } catch (err: any) {
-      alert(err.message || '获取报名列表失败');
+      message.error(err.message || '获取报名列表失败');
     } finally {
       setLoadingSignups(false);
     }
@@ -134,9 +138,9 @@ export default function AdminEventsPage() {
       if (res.data) {
         setSignups(res.data as any[]);
       }
-      alert('已确认报名');
+      message.success('已确认报名');
     } catch (err: any) {
-      alert(err.message || '确认失败');
+      message.error(err.message || '确认失败');
     }
   };
 

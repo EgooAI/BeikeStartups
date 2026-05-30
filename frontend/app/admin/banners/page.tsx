@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { bannerApi, api } from '@/lib/api';
+import { message } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
@@ -78,8 +79,8 @@ export default function AdminBannersPage() {
       resetForm();
       loadBanners();
     } catch (err: any) {
-      alert(err.message || '操作失败');
-    }
+        message.error(err.message || '操作失败');
+      }
   };
 
   const handleEdit = (banner: Banner) => {
@@ -99,8 +100,8 @@ export default function AdminBannersPage() {
       await bannerApi.delete(id);
       loadBanners();
     } catch (err: any) {
-      alert(err.message || '删除失败');
-    }
+        message.error(err.message || '删除失败');
+      }
   };
 
   const handleToggleStatus = async (banner: Banner) => {
@@ -108,8 +109,9 @@ export default function AdminBannersPage() {
     try {
       await bannerApi.update(banner.id, { status: newStatus });
       loadBanners();
+      message.success(newStatus === 'active' ? '已显示' : '已隐藏');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 

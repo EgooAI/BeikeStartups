@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { adminApi } from '@/lib/api';
 import { User } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { message } from 'antd';
 import { UserOutlined, SearchOutlined, CheckCircleOutlined, ExclamationCircleOutlined, CrownOutlined } from '@ant-design/icons';
 
 export default function AdminUsersPage() {
@@ -35,8 +36,9 @@ export default function AdminUsersPage() {
     try {
       await adminApi.updateUserActive(userId, !currentActive);
       setUsers(users.map(u => u.id === userId ? { ...u, is_active: !currentActive } : u));
+      message.success(!currentActive ? '已启用用户' : '已禁用用户');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -44,8 +46,9 @@ export default function AdminUsersPage() {
     try {
       await adminApi.updateUserRole(userId, newRole);
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as any } : u));
+      message.success('角色已更新');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 

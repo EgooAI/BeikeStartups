@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectApi, connectionApi } from '@/lib/api';
 import { Project, ConnectionRequestType } from '@/types';
+import { message as antdMessage } from 'antd';
 import { ArrowLeftOutlined, FileTextOutlined, BookOutlined, InboxOutlined, SendOutlined } from '@ant-design/icons';
 
 export default function ConnectPage() {
@@ -59,8 +60,9 @@ export default function ConnectPage() {
         message: message || undefined,
       });
       setSuccess(true);
+      antdMessage.success('对接申请已提交');
     } catch (err: any) {
-      alert(err.message || '提交失败');
+      antdMessage.error(err.message || '提交失败');
     } finally {
       setSubmitting(false);
     }

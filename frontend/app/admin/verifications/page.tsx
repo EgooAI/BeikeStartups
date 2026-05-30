@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { applicationApi, roleApi } from '@/lib/api';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
+import { message } from 'antd';
 import {
   SafetyOutlined,
   CheckCircleOutlined,
@@ -68,20 +69,22 @@ export default function AdminVerificationsPage() {
       await applicationApi.approve(id, note);
       loadData();
       setReviewNotes(prev => ({ ...prev, [id]: '' }));
+      message.success('已通过创业团队申请');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
   const handleRejectApp = async (id: number) => {
     const note = reviewNotes[id] || '';
-    if (!note) { alert('请输入拒绝理由'); return; }
+    if (!note) { message.warning('请输入拒绝理由'); return; }
     try {
       await applicationApi.reject(id, note);
       loadData();
       setReviewNotes(prev => ({ ...prev, [id]: '' }));
+      message.success('已拒绝申请');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -89,8 +92,9 @@ export default function AdminVerificationsPage() {
     try {
       await roleApi.approve(id);
       loadData();
+      message.success('已通过身份认证');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -98,8 +102,9 @@ export default function AdminVerificationsPage() {
     try {
       await roleApi.reject(id);
       loadData();
+      message.success('已拒绝身份认证');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -108,8 +113,9 @@ export default function AdminVerificationsPage() {
     try {
       await applicationApi.delete(id);
       loadData();
+      message.success('已删除创业认证申请');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 
@@ -118,8 +124,9 @@ export default function AdminVerificationsPage() {
     try {
       await roleApi.deleteRequest(id);
       loadData();
+      message.success('已删除身份认证申请');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

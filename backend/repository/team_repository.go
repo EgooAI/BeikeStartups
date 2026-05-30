@@ -55,6 +55,11 @@ func DeleteTeam(team *model.Team) error {
 		return err
 	}
 
+	// 1.2 删除团队负责人的创业申请
+	if err := database.DB.Exec("DELETE FROM startup_applications WHERE user_id = ?", ownerID).Error; err != nil {
+		return err
+	}
+
 	// 2. 先删除 recruitment_responses（必须在删除 recruitments 之前）
 	if err := database.DB.Exec("DELETE FROM recruitment_responses WHERE recruitment_id IN (SELECT id FROM recruitments WHERE team_id = ?)", teamID).Error; err != nil {
 		return err

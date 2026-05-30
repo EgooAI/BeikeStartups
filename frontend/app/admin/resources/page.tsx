@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { resourceApi } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
+import { message } from 'antd';
 import {
   BuildOutlined,
   PlusOutlined,
@@ -58,13 +59,15 @@ export default function AdminResourcesPage() {
     try {
       if (editingResource) {
         await resourceApi.update(editingResource.id, formData);
+        message.success('资源已更新');
       } else {
         await resourceApi.create(formData);
+        message.success('资源已创建');
       }
       resetForm();
       loadResources();
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 
@@ -85,8 +88,9 @@ export default function AdminResourcesPage() {
     try {
       await resourceApi.delete(id);
       loadResources();
+      message.success('资源已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

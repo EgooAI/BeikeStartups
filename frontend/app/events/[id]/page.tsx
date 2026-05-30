@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { eventApi } from '@/lib/api';
 import Link from 'next/link';
+import { message } from 'antd';
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
@@ -112,9 +113,9 @@ export default function EventDetailPage() {
     try {
       await eventApi.signup(Number(params.id));
       setSignedUp(true);
-      alert('报名成功！');
+      message.success('报名成功！');
     } catch (err: any) {
-      alert(err.message || '报名失败，请重试');
+      message.error(err.message || '报名失败，请重试');
     } finally {
       setSigningUp(false);
     }

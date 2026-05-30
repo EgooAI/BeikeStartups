@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { adminApi, superAdminApi } from '@/lib/api';
 import { User } from '@/types';
+import { message } from 'antd';
 import { CrownOutlined, UserOutlined, SearchOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
 export default function AdminAdminsPage() {
@@ -49,8 +50,9 @@ export default function AdminAdminsPage() {
       setShowAddModal(false);
       setSelectedUserId(null);
       await loadData();
+      message.success('已设置该用户为管理员');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     } finally {
       setPromoting(false);
     }
@@ -61,8 +63,9 @@ export default function AdminAdminsPage() {
     try {
       await superAdminApi.demoteAdmin(userId);
       await loadData();
+      message.success('已撤销管理员权限');
     } catch (err: any) {
-      alert(err.message || '操作失败');
+      message.error(err.message || '操作失败');
     }
   };
 

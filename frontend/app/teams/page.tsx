@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { teamApi } from '@/lib/api';
 import { Team } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
+import { message } from 'antd';
 import Link from 'next/link';
 
 export default function TeamsPage() {
@@ -42,12 +43,13 @@ export default function TeamsPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除这个团队吗？')) return;
-    
+
     try {
       await teamApi.delete(id);
       loadTeams();
+      message.success('团队已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

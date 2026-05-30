@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { projectApi, connectionApi } from '@/lib/api';
 import { Project, ConnectionRequest, ConnectionRequestType, ConnectionRequestStatus } from '@/types';
+import { message } from 'antd';
 import { FileTextOutlined, BookOutlined, PauseOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, RocketOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 
@@ -61,9 +62,10 @@ export default function ReviewPage() {
     try {
       await connectionApi.accept(selectedProject.id, requestId);
       fetchRequests(selectedProject.id);
+      message.success('已通过对接申请');
     } catch (err) {
       console.error('Failed to accept request:', err);
-      alert('操作失败');
+      message.error('操作失败');
     }
   }
 
@@ -72,9 +74,10 @@ export default function ReviewPage() {
     try {
       await connectionApi.reject(selectedProject.id, requestId);
       fetchRequests(selectedProject.id);
+      message.success('已拒绝对接申请');
     } catch (err) {
       console.error('Failed to reject request:', err);
-      alert('操作失败');
+      message.error('操作失败');
     }
   }
 

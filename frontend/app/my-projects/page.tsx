@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { projectApi } from '@/lib/api';
 import { Project } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { message } from 'antd';
 import { 
   PlusOutlined, 
   EditOutlined, 
@@ -48,21 +49,22 @@ export default function TeamProjectsPage() {
   const handleRequestOnline = async (projectId: number) => {
     try {
       await projectApi.requestOnline(projectId);
-      alert('已提交上架申请，请等待管理员审核');
+      message.success('已提交上架申请，请等待管理员审核');
       loadProjects();
     } catch (err: any) {
-      alert(err.message || '申请上架失败');
+      message.error(err.message || '申请上架失败');
     }
   };
 
   const handleDelete = async (projectId: number) => {
     if (!confirm('确定要删除这个项目吗？')) return;
-    
+
     try {
       await projectApi.delete(projectId);
       loadProjects();
+      message.success('项目已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

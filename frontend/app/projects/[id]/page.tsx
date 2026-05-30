@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { projectApi, recruitmentApi } from '@/lib/api';
 import { Project, ProjectStage, Recruitment } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import { message } from 'antd';
 import Link from 'next/link';
 import ProjectConnectionRequests from '@/components/ProjectConnectionRequests';
 import {
@@ -88,9 +89,10 @@ export default function ProjectDetailPage() {
       await projectApi.update(project.id, { stage: newStage });
       setProject(prev => prev ? { ...prev, stage: newStage } : null);
       setEditingStage(false);
+      message.success('项目阶段已更新');
     } catch (err) {
       console.error('Failed to update stage:', err);
-      alert('更新阶段失败');
+      message.error('更新阶段失败');
     }
   };
 

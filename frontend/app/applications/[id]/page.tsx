@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { applicationApi } from '@/lib/api';
 import { Application } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
+import { message } from 'antd';
 
 export default function ApplicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -46,47 +47,51 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
     try {
       await applicationApi.submit(appId);
       loadApplication();
+      message.success('创业申请已提交');
     } catch (err: any) {
-      alert(err.message || '提交失败');
+      message.error(err.message || '提交失败');
     }
   };
 
   const handleApprove = async () => {
     if (!reviewNote.trim()) {
-      alert('请输入审核意见');
+      message.warning('请输入审核意见');
       return;
     }
     try {
       await applicationApi.approve(appId, reviewNote);
       loadApplication();
       setReviewNote('');
+      message.success('已通过创业申请');
     } catch (err: any) {
-      alert(err.message || '审批失败');
+      message.error(err.message || '审批失败');
     }
   };
 
   const handleReject = async () => {
     if (!reviewNote.trim()) {
-      alert('请输入审核意见');
+      message.warning('请输入审核意见');
       return;
     }
     try {
       await applicationApi.reject(appId, reviewNote);
       loadApplication();
       setReviewNote('');
+      message.success('已拒绝创业申请');
     } catch (err: any) {
-      alert(err.message || '拒绝失败');
+      message.error(err.message || '拒绝失败');
     }
   };
 
   const handleDelete = async () => {
     if (!confirm('确定要删除这个申请吗？')) return;
-    
+
     try {
       await applicationApi.delete(appId);
       router.push('/applications');
+      message.success('申请已删除');
     } catch (err: any) {
-      alert(err.message || '删除失败');
+      message.error(err.message || '删除失败');
     }
   };
 

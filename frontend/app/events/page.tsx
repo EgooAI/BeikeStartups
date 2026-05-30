@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { eventApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import { message } from 'antd';
 import {
   CalendarOutlined,
   EnvironmentOutlined,
@@ -70,9 +71,9 @@ export default function EventsPage() {
     try {
       await eventApi.signup(eventId);
       setSignedUpEventIds(prev => new Set([...prev, eventId]));
-      alert('报名成功！');
+      message.success('报名成功！');
     } catch (err: any) {
-      alert(err.message || '报名失败，请重试');
+      message.error(err.message || '报名失败，请重试');
     } finally {
       setSigningUpId(null);
     }
