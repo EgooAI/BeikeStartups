@@ -24,26 +24,15 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
   const router = useRouter();
   const recruitmentId = parseInt(id);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-
-    if (user) {
-      loadRecruitment();
-      checkApplication();
-    }
-  }, [user, authLoading]);
-
   const loadRecruitment = async () => {
     try {
       const response = await recruitmentApi.get(recruitmentId);
       if (response.data) {
         setRecruitment(response.data as Recruitment);
       }
-    } catch (err: any) {
-      setError(err.message || '加载招募详情失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '加载招募详情失败';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -53,9 +42,8 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
     try {
       const res = await recruitmentApi.getMyApplications();
       if (res.data) {
-        const data = res.data as any;
-        const items = data.items || data;
-        const application = items.find((r: any) => r.recruitment_id === recruitmentId);
+        const data = res.data as Response[];
+        const application = data.find((r: Response) => r.recruitment_id === recruitmentId);
         if (application) {
           setHasApplied(true);
           setMyApplicationStatus(application.status);
@@ -65,6 +53,20 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       console.error('Failed to check application:', err);
     }
   };
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (user) {
+      requestAnimationFrame(() => {
+        loadRecruitment();
+        checkApplication();
+      });
+    }
+  }, [user, authLoading]);
 
   const handleApply = async () => {
     if (!coverLetter.trim()) {
@@ -79,8 +81,11 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       setHasApplied(true);
       setMyApplicationStatus('pending');
       message.success('申请提交成功');
-    } catch (err: any) {
-      message.error(err.message || '申请失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '申请失败';
+      message.error(errorMessage);
+      const errorMsg = err instanceof Error ? err.message : '申请失败';
+      message.error(errorMsg);
     }
   };
 
@@ -89,8 +94,11 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       await recruitmentApi.solve(recruitmentId);
       loadRecruitment();
       message.success('招募已开启');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      const errorMsg = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
+      message.error(errorMsg);
     }
   };
 
@@ -101,8 +109,11 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       await recruitmentApi.invalidate(recruitmentId);
       loadRecruitment();
       message.success('招募已作废');
-    } catch (err: any) {
-      message.error(err.message || '作废失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '作废失败';
+      const errorMsg = err instanceof Error ? err.message : '作废失败';
+      message.error(errorMessage);
+      message.error(errorMsg);
     }
   };
 
@@ -113,8 +124,8 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       await recruitmentApi.delete(recruitmentId);
       router.push('/recruitments');
       message.success('招募已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
     }
   };
 
@@ -122,12 +133,13 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
     try {
       const res = await recruitmentApi.getResponses(recruitmentId);
       if (res.data) {
-        const data = res.data as any;
-        setResponses(data.items || []);
+        const data = res.data as Response[];
+        setResponses(data || []);
       }
       setShowResponses(true);
-    } catch (err: any) {
-      message.error(err.message || '获取申请列表失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '获取申请列表失败';
+      setError(errorMessage);
     }
   };
 
@@ -139,8 +151,11 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       loadResponses();
       loadRecruitment();
       message.success('申请已通过，该学生已加入您的团队');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      const errorMsg = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
+      message.error(errorMsg);
     }
   };
 
@@ -151,8 +166,11 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
       await recruitmentApi.rejectResponse(recruitmentId, responseId);
       loadResponses();
       message.success('已拒绝申请');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      const errorMsg = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
+      message.error(errorMsg);
     }
   };
 
@@ -278,19 +296,17 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
 
           {user?.role === 'student' && hasApplied && (
             <div className="mt-8 pt-8 border-t border-gray-200">
-              <div className={`p-4 rounded-lg ${
-                myApplicationStatus === 'pending' ? 'bg-yellow-50' :
+              <div className={`p-4 rounded-lg ${myApplicationStatus === 'pending' ? 'bg-yellow-50' :
                 myApplicationStatus === 'accepted' ? 'bg-green-50' :
-                myApplicationStatus === 'rejected' ? 'bg-red-50' : 'bg-gray-50'
-              }`}>
-                <p className={`font-semibold ${
-                  myApplicationStatus === 'pending' ? 'text-yellow-800' :
-                  myApplicationStatus === 'accepted' ? 'text-green-800' :
-                  myApplicationStatus === 'rejected' ? 'text-red-800' : 'text-gray-800'
+                  myApplicationStatus === 'rejected' ? 'bg-red-50' : 'bg-gray-50'
                 }`}>
+                <p className={`font-semibold ${myApplicationStatus === 'pending' ? 'text-yellow-800' :
+                  myApplicationStatus === 'accepted' ? 'text-green-800' :
+                    myApplicationStatus === 'rejected' ? 'text-red-800' : 'text-gray-800'
+                  }`}>
                   {myApplicationStatus === 'pending' ? '申请已提交，等待审核' :
-                   myApplicationStatus === 'accepted' ? '申请已通过，你已加入该团队！' :
-                   myApplicationStatus === 'rejected' ? '申请已被拒绝' : '申请状态未知'}
+                    myApplicationStatus === 'accepted' ? '申请已通过，你已加入该团队！' :
+                      myApplicationStatus === 'rejected' ? '申请已被拒绝' : '申请状态未知'}
                 </p>
               </div>
             </div>
@@ -299,7 +315,7 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
           {canManage && (
             <div className="mt-8 pt-8 border-t border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">管理操作</h3>
-              
+
               {!showResponses ? (
                 <div className="flex flex-wrap gap-4">
                   {recruitment.status === 'active' && (
@@ -310,14 +326,14 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                       >
                         查看申请列表
                       </button>
-                      
+
                       <button
                         onClick={handleSolve}
                         className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         标记为已解决
                       </button>
-                      
+
                       <button
                         onClick={handleInvalidate}
                         className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
@@ -344,9 +360,9 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                   >
                     ← 返回管理
                   </button>
-                  
+
                   <h4 className="text-md font-semibold text-gray-700 mb-4">申请列表 ({responses.length})</h4>
-                  
+
                   {responses.length > 0 ? (
                     <div className="space-y-4">
                       {responses.map((response) => (
@@ -360,14 +376,13 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                                 {response.user?.email}
                               </p>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              response.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${response.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                               response.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                              response.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
+                                response.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                              }`}>
                               {response.status === 'pending' ? '待审核' :
-                               response.status === 'accepted' ? '已通过' :
-                               response.status === 'rejected' ? '已拒绝' : response.status}
+                                response.status === 'accepted' ? '已通过' :
+                                  response.status === 'rejected' ? '已拒绝' : response.status}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 mb-3">{response.cover_letter}</p>

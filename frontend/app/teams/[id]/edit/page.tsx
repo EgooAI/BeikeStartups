@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { teamApi } from '@/lib/api';
+import { Team } from '@/types';
 import Link from 'next/link';
 import {
   TeamOutlined,
@@ -46,7 +47,7 @@ export default function EditTeamPage() {
   const router = useRouter();
   const params = useParams();
   const teamId = params?.id ? parseInt(params.id as string) : null;
-  
+
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -66,24 +67,13 @@ export default function EditTeamPage() {
   });
 
   const totalSteps = 4;
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-    if (user && teamId) {
-      loadTeam();
-    }
-  }, [user, authLoading, teamId]);
-
   async function loadTeam() {
     try {
       const response = await teamApi.get(teamId!);
       if (response.data) {
-        const team = response.data;
+        const team = response.data as Team;
         // 解析 description 中的结构化数据
-        const desc = (team as any).description || '';
+        const desc = team.description || '';
         const categoryMatch = desc.match(/【项目类别】(.+)/);
         const teamSizeMatch = desc.match(/【团队规模】(.+)/);
         const stageMatch = desc.match(/【项目阶段】(.+)/);
@@ -94,9 +84,9 @@ export default function EditTeamPage() {
         const phoneMatch = desc.match(/电话：(.+)/);
         const tagsMatch = desc.match(/标签：(.+)/);
         const descMatch = desc.match(/【项目阶段】.+\n\n([\s\S]*?)(?=\n\n【市场分析】)/);
-        
+
         setFormData({
-          name: (team as any).name || '',
+          name: team.name || '',
           description: descMatch ? descMatch[1].trim() : '',
           category: categoryMatch ? categoryMatch[1].trim() : '',
           team_size: teamSizeMatch ? teamSizeMatch[1].trim() : '',
@@ -116,6 +106,19 @@ export default function EditTeamPage() {
       setIsLoading(false);
     }
   }
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+    if (user && teamId) {
+      requestAnimationFrame(() => {
+        loadTeam();
+      });
+    }
+  }, [user, authLoading, teamId]);
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -155,8 +158,9 @@ ${formData.team_introduction}
 
       await teamApi.update(teamId!, submitData);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || '更新团队信息失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '更新团队信息失败';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -222,9 +226,8 @@ ${formData.team_introduction}
           <div className="flex items-center justify-between">
             {[1, 2, 3, 4].map((s) => (
               <div key={s} className="flex items-center">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-lg transition-all ${
-                  s <= step ? 'bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] text-white' : 'bg-gray-100 text-gray-400'
-                }`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-lg transition-all ${s <= step ? 'bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] text-white' : 'bg-gray-100 text-gray-400'
+                  }`}>
                   {s <= step ? <CheckCircleOutlined className="w-6 h-6" /> : s}
                 </div>
                 {s < totalSteps && (
@@ -406,7 +409,7 @@ ${formData.team_introduction}
             <div className="space-y-6">
               <div className="bg-[#0a2a5c]/5 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-[#0a2a5c] mb-4">确认信息</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
                     <p className="text-sm text-gray-500">团队名称</p>

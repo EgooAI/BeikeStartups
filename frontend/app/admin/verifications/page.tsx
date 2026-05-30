@@ -70,11 +70,11 @@ export default function AdminVerificationsPage() {
       ]);
 
       if (appRes.status === 'fulfilled' && appRes.value.data) {
-        const data = appRes.value.data as any;
+        const data = appRes.value.data as Application[] | { items: Application[] };
         setApplications(Array.isArray(data) ? data : data.items || []);
       }
       if (roleRes.status === 'fulfilled' && roleRes.value.data) {
-        const data = roleRes.value.data as any;
+        const data = roleRes.value.data as RoleRequest[] | { items: RoleRequest[] };
         setRoleRequests(Array.isArray(data) ? data : data.items || []);
       }
     } catch (err) {
@@ -91,8 +91,9 @@ export default function AdminVerificationsPage() {
       loadData();
       setReviewNotes(prev => ({ ...prev, [id]: '' }));
       message.success('已通过创业团队申请');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -104,8 +105,9 @@ export default function AdminVerificationsPage() {
       loadData();
       setReviewNotes(prev => ({ ...prev, [id]: '' }));
       message.success('已拒绝申请');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -114,8 +116,9 @@ export default function AdminVerificationsPage() {
       await roleApi.approve(id);
       loadData();
       message.success('已通过身份认证');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -124,8 +127,9 @@ export default function AdminVerificationsPage() {
       await roleApi.reject(id);
       loadData();
       message.success('已拒绝身份认证');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -135,8 +139,9 @@ export default function AdminVerificationsPage() {
       await applicationApi.delete(id);
       loadData();
       message.success('已删除创业认证申请');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      message.error(errorMessage);
     }
   };
 
@@ -146,8 +151,9 @@ export default function AdminVerificationsPage() {
       await roleApi.deleteRequest(id);
       loadData();
       message.success('已删除身份认证申请');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      message.error(errorMessage);
     }
   };
 
@@ -237,10 +243,10 @@ export default function AdminVerificationsPage() {
 
                 <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{app.description}</p>
-                  {app.business_plan && (
+                  {(app as Application & { business_plan?: string }).business_plan && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
                       <p className="text-xs text-gray-500 mb-1">商业计划：</p>
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{app.business_plan}</p>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{(app as Application & { business_plan?: string }).business_plan}</p>
                     </div>
                   )}
                 </div>

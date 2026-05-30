@@ -12,40 +12,45 @@ export default function ApplicationList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadApplications();
-  }, []);
-
   const loadApplications = async () => {
     try {
       const response = await applicationApi.list();
       if (response.data) {
         setApplications(response.data as Application[]);
       }
-    } catch (err: any) {
-      setError(err.message || '加载申请列表失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '加载申请列表失败';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      loadApplications();
+    });
+  }, []);
+
   const handleSubmit = async (id: number) => {
     try {
       await applicationApi.submit(id);
       loadApplications();
-    } catch (err: any) {
-      alert(err.message || '提交失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '提交失败';
+      alert(errorMessage);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除这个申请吗？')) return;
-    
+
     try {
       await applicationApi.delete(id);
       loadApplications();
-    } catch (err: any) {
-      alert(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      alert(errorMessage);
     }
   };
 

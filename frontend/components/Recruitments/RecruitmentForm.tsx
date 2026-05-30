@@ -48,10 +48,10 @@ export default function RecruitmentForm({ initialData, onSuccess }: RecruitmentF
 
   const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;
-    
+
     const selectedOption = POSITION_OPTIONS.find(opt => opt.value === selectedValue);
     const newRequirements = selectedOption?.requirement || '';
-    
+
     setFormData({
       ...formData,
       position: selectedValue,
@@ -77,8 +77,9 @@ export default function RecruitmentForm({ initialData, onSuccess }: RecruitmentF
       } else {
         router.push('/recruitments');
       }
-    } catch (err: any) {
-      setError(err.message || '创建招募失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '创建招募失败';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

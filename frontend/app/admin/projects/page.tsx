@@ -26,8 +26,8 @@ export default function AdminProjectsPage() {
     try {
       const res = await projectApi.list();
       if (res.data) {
-        const data = res.data as any;
-        setProjects(data.items || []);
+        const data = res.data as Project[];
+        setProjects(data || []);
       }
     } catch (err) {
       console.error('Failed to load projects:', err);
@@ -41,8 +41,9 @@ export default function AdminProjectsPage() {
       await projectApi.approveOnline(id);
       loadProjects();
       message.success('已通过上架申请');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -51,8 +52,9 @@ export default function AdminProjectsPage() {
       await projectApi.rejectOnline(id);
       loadProjects();
       message.success('已拒绝上架申请');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -61,8 +63,9 @@ export default function AdminProjectsPage() {
       await projectApi.invalidate(id);
       loadProjects();
       message.success('项目已下架');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -94,8 +97,9 @@ export default function AdminProjectsPage() {
       await projectApi.delete(id);
       loadProjects();
       message.success('项目已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      message.error(errorMessage);
     }
   };
 
@@ -149,33 +153,29 @@ export default function AdminProjectsPage() {
         <div className="p-4 border-b border-gray-100 flex flex-wrap items-center gap-3">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'all' ? 'bg-[#0a2a5c] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'all' ? 'bg-[#0a2a5c] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
           >
             全部 ({projects.length})
           </button>
           <button
             onClick={() => setFilter('pending_online')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'pending_online' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'pending_online' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+              }`}
           >
             待审核 ({pendingProjects.length})
           </button>
           <button
             onClick={() => setFilter('online')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'online' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'online' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100'
+              }`}
           >
             已上架
           </button>
           <button
             onClick={() => setFilter('invalid')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'invalid' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'invalid' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'
+              }`}
           >
             已作废
           </button>

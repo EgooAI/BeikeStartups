@@ -27,8 +27,8 @@ export default function AdminTeamsPage() {
     try {
       const res = await teamApi.list();
       if (res.data) {
-        const data = res.data as any;
-        setTeams(data.items || data || []);
+        const data = res.data as Team[];
+        setTeams(data || []);
       }
     } catch (err) {
       console.error('Failed to load teams:', err);
@@ -45,8 +45,9 @@ export default function AdminTeamsPage() {
       setDisbandTeam(null);
       loadTeams();
       message.success('团队已解散');
-    } catch (err: any) {
-      message.error(err.message || '解散团队失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '解散团队失败';
+      message.error(errorMessage);
     } finally {
       setDisbandLoading(false);
     }
@@ -73,7 +74,7 @@ export default function AdminTeamsPage() {
   const filteredTeams = teams.filter(team => {
     const searchLower = searchTerm.toLowerCase();
     return (team.name?.toLowerCase().includes(searchLower) || false) ||
-           (team.description?.toLowerCase().includes(searchLower) || false);
+      (team.description?.toLowerCase().includes(searchLower) || false);
   });
 
   if (loading) {
@@ -183,7 +184,7 @@ export default function AdminTeamsPage() {
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">确认解散团队</h3>
             <p className="text-gray-600 mb-6">
-              解散团队后，团队"<span className="font-medium">{disbandTeam.name}</span>"的所有成员将恢复为学生身份，团队的所有项目、招募等信息也将被删除。此操作不可恢复，确定要解散吗？
+              解散团队后，团队&quot;<span className="font-medium">{disbandTeam.name}</span>&quot;的所有成员将恢复为学生身份，团队的所有项目、招募等信息也将被删除。此操作不可恢复，确定要解散吗？
             </p>
             <div className="flex justify-end space-x-3">
               <button

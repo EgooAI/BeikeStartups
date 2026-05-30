@@ -15,6 +15,20 @@ export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await adminApi.listUsers();
+        if (res.data) {
+          const data = res.data as { items?: User[]; } & User[];
+          setUsers(data.items || data || []);
+        }
+      } catch (err) {
+        console.error('Failed to load users:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadUsers();
   }, []);
 
@@ -22,7 +36,7 @@ export default function AdminUsersPage() {
     try {
       const res = await adminApi.listUsers();
       if (res.data) {
-        const data = res.data as any;
+        const data = res.data as { items?: User[]; } & User[];
         setUsers(data.items || data || []);
       }
     } catch (err) {
@@ -37,18 +51,20 @@ export default function AdminUsersPage() {
       await adminApi.updateUserActive(userId, !currentActive);
       setUsers(users.map(u => u.id === userId ? { ...u, is_active: !currentActive } : u));
       message.success(!currentActive ? '已启用用户' : '已禁用用户');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
   const changeRole = async (userId: number, newRole: string) => {
     try {
       await adminApi.updateUserRole(userId, newRole);
-      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as any } : u));
+      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as User['role'] } : u));
       message.success('角色已更新');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
@@ -89,8 +105,8 @@ export default function AdminUsersPage() {
       return false;
     }
     return u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           u.nickname?.toLowerCase().includes(searchTerm.toLowerCase());
+      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.nickname?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   if (loading) {
@@ -139,9 +155,8 @@ export default function AdminUsersPage() {
                 <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                        isSuperAdmin(u.role) ? 'bg-yellow-50 text-yellow-600' : 'bg-[#0a2a5c]/5 text-[#0a2a5c]'
-                      }`}>
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isSuperAdmin(u.role) ? 'bg-yellow-50 text-yellow-600' : 'bg-[#0a2a5c]/5 text-[#0a2a5c]'
+                        }`}>
                         {isSuperAdmin(u.role) ? <CrownOutlined /> : <UserOutlined />}
                       </div>
                       <div>
@@ -162,9 +177,8 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{u.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center space-x-1 text-xs font-medium ${
-                      u.is_active ? 'text-green-600' : 'text-red-400'
-                    }`}>
+                    <span className={`inline-flex items-center space-x-1 text-xs font-medium ${u.is_active ? 'text-green-600' : 'text-red-400'
+                      }`}>
                       {u.is_active ? <CheckCircleOutlined /> : <ExclamationCircleOutlined />}
                       <span>{u.is_active ? '正常' : '冻结'}</span>
                     </span>
@@ -190,11 +204,10 @@ export default function AdminUsersPage() {
                         </select>
                         <button
                           onClick={() => toggleActive(u.id, u.is_active)}
-                          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${
-                            u.is_active
+                          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${u.is_active
                               ? 'bg-red-50 text-red-600 hover:bg-red-100'
                               : 'bg-green-50 text-green-600 hover:bg-green-100'
-                          }`}
+                            }`}
                         >
                           {u.is_active ? '冻结' : '解冻'}
                         </button>

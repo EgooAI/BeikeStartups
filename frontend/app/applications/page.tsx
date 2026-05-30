@@ -17,6 +17,21 @@ export default function ApplicationsPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const loadApplications = async () => {
+    try {
+      const response = await applicationApi.list();
+      if (response.data) {
+        const data = response.data as Application[];
+        setApplications(data || []);
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '加载申请列表失败';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -24,31 +39,20 @@ export default function ApplicationsPage() {
     }
 
     if (user) {
-      loadApplications();
+      requestAnimationFrame(() => {
+        loadApplications();
+      });
     }
   }, [user, authLoading]);
-
-  const loadApplications = async () => {
-    try {
-      const response = await applicationApi.list();
-      if (response.data) {
-        const data = response.data as any;
-        setApplications(data.items || data || []);
-      }
-    } catch (err: any) {
-      setError(err.message || '加载申请列表失败');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmit = async (id: number) => {
     try {
       await applicationApi.submit(id);
       loadApplications();
       message.success('创业申请已提交');
-    } catch (err: any) {
-      message.error(err.message || '提交失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '提交失败';
+      message.error(errorMessage);
     }
   };
 
@@ -59,8 +63,9 @@ export default function ApplicationsPage() {
       await applicationApi.delete(id);
       loadApplications();
       message.success('申请已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      message.error(errorMessage);
     }
   };
 
@@ -131,7 +136,7 @@ export default function ApplicationsPage() {
                   >
                     查看详情
                   </Link>
-                  
+
                   {app.status === 'draft' && (
                     <>
                       <Link

@@ -33,6 +33,64 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const results = await Promise.allSettled([
+          adminApi.listUsers(),
+          projectApi.list(),
+          applicationApi.list(),
+          roleApi.listRequests(),
+          eventApi.list(),
+          recruitmentApi.list(),
+          resourceApi.list(),
+          teamApi.list(),
+        ]);
+
+        const newStats = { ...stats };
+
+        if (results[0].status === 'fulfilled' && results[0].value.data) {
+          const data = results[0].value.data as { items?: unknown[]; length?: number };
+          newStats.totalUsers = data.items?.length || data.length || 0;
+        }
+        if (results[1].status === 'fulfilled' && results[1].value.data) {
+          const data = results[1].value.data as { items?: unknown[]; length?: number };
+          newStats.totalProjects = data.items?.length || data.length || 0;
+        }
+        if (results[2].status === 'fulfilled' && results[2].value.data) {
+          const data = results[2].value.data as { items?: unknown[]; length?: number };
+          const apps = Array.isArray(data) ? data : data.items || [];
+          newStats.pendingApplications = apps.filter((a: { status: string }) => a.status === 'pending').length;
+        }
+        if (results[3].status === 'fulfilled' && results[3].value.data) {
+          const data = results[3].value.data as { items?: unknown[]; length?: number };
+          const requests = Array.isArray(data) ? data : data.items || [];
+          newStats.pendingVerifications = requests.filter((r: { status: string }) => r.status === 'pending').length;
+        }
+        if (results[4].status === 'fulfilled' && results[4].value.data) {
+          const data = results[4].value.data as { items?: unknown[]; length?: number };
+          newStats.totalEvents = data.items?.length || 0;
+        }
+        if (results[5].status === 'fulfilled' && results[5].value.data) {
+          const data = results[5].value.data as { items?: unknown[]; length?: number };
+          newStats.totalRecruitments = data.items?.length || 0;
+        }
+        if (results[6].status === 'fulfilled' && results[6].value.data) {
+          const data = results[6].value.data as { items?: unknown[]; length?: number };
+          newStats.totalResources = data.items?.length || 0;
+        }
+        if (results[7].status === 'fulfilled' && results[7].value.data) {
+          const data = results[7].value.data as { items?: unknown[]; length?: number };
+          newStats.totalTeams = data.items?.length || 0;
+        }
+
+        setStats(newStats);
+      } catch (err) {
+        console.error('Failed to load admin stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadStats();
   }, []);
 
@@ -52,37 +110,37 @@ export default function AdminDashboardPage() {
       const newStats = { ...stats };
 
       if (results[0].status === 'fulfilled' && results[0].value.data) {
-        const data = results[0].value.data as any;
+        const data = results[0].value.data as { items?: unknown[]; length?: number };
         newStats.totalUsers = data.items?.length || data.length || 0;
       }
       if (results[1].status === 'fulfilled' && results[1].value.data) {
-        const data = results[1].value.data as any;
+        const data = results[1].value.data as { items?: unknown[]; length?: number };
         newStats.totalProjects = data.items?.length || 0;
       }
       if (results[2].status === 'fulfilled' && results[2].value.data) {
-        const data = results[2].value.data as any;
+        const data = results[2].value.data as { items?: unknown[]; length?: number };
         const apps = Array.isArray(data) ? data : data.items || [];
-        newStats.pendingApplications = apps.filter((a: any) => a.status === 'pending').length;
+        newStats.pendingApplications = apps.filter((a: { status: string }) => a.status === 'pending').length;
       }
       if (results[3].status === 'fulfilled' && results[3].value.data) {
-        const data = results[3].value.data as any;
+        const data = results[3].value.data as { items?: unknown[]; length?: number };
         const requests = Array.isArray(data) ? data : data.items || [];
-        newStats.pendingVerifications = requests.filter((r: any) => r.status === 'pending').length;
+        newStats.pendingVerifications = requests.filter((r: { status: string }) => r.status === 'pending').length;
       }
       if (results[4].status === 'fulfilled' && results[4].value.data) {
-        const data = results[4].value.data as any;
+        const data = results[4].value.data as { items?: unknown[]; length?: number };
         newStats.totalEvents = data.items?.length || 0;
       }
       if (results[5].status === 'fulfilled' && results[5].value.data) {
-        const data = results[5].value.data as any;
+        const data = results[5].value.data as { items?: unknown[]; length?: number };
         newStats.totalRecruitments = data.items?.length || 0;
       }
       if (results[6].status === 'fulfilled' && results[6].value.data) {
-        const data = results[6].value.data as any;
+        const data = results[6].value.data as { items?: unknown[]; length?: number };
         newStats.totalResources = data.items?.length || 0;
       }
       if (results[7].status === 'fulfilled' && results[7].value.data) {
-        const data = results[7].value.data as any;
+        const data = results[7].value.data as { items?: unknown[]; length?: number };
         newStats.totalTeams = data.items?.length || 0;
       }
 
