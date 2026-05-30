@@ -170,8 +170,6 @@ export default function DashboardPage() {
   const RoleIcon = roleInfo.icon;
   const isInvestorRole = user?.role === 'investor' || user?.role === 'mentor' || user?.role === 'partner';
 
-  const pendingApplications = applications.filter((a) => a.status === 'pending');
-  const draftApplications = applications.filter((a) => a.status === 'draft');
   const activeRecruitments = recruitments.filter((r) => r.status === 'active');
 
   return (
