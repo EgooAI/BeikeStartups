@@ -25,13 +25,34 @@ interface RoleRequest {
   application_note?: string;
   role_status: string;
   user_id: number;
-  user?: any;
+  user?: {
+    id: number;
+    username: string;
+    nickname?: string;
+    email?: string;
+  };
+  created_at: string;
+  review_note?: string;
+}
+
+interface Application {
+  id: number;
+  title: string;
+  description?: string;
+  status: string;
+  user_id: number;
+  user?: {
+    id: number;
+    username: string;
+    nickname?: string;
+    email?: string;
+  };
   created_at: string;
   review_note?: string;
 }
 
 export default function AdminVerificationsPage() {
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [roleRequests, setRoleRequests] = useState<RoleRequest[]>([]);
   const [activeTab, setActiveTab] = useState<'applications' | 'roles'>('applications');
   const [loading, setLoading] = useState(true);
@@ -160,11 +181,10 @@ export default function AdminVerificationsPage() {
       <div className="flex space-x-1 bg-gray-100 rounded-xl p-1 mb-6 w-fit">
         <button
           onClick={() => setActiveTab('applications')}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'applications'
+          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'applications'
               ? 'bg-white text-[#0a2a5c] shadow-sm'
               : 'text-gray-500 hover:text-[#0a2a5c]'
-          }`}
+            }`}
         >
           创业团队认证
           {pendingApps.length > 0 && (
@@ -173,11 +193,10 @@ export default function AdminVerificationsPage() {
         </button>
         <button
           onClick={() => setActiveTab('roles')}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'roles'
+          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'roles'
               ? 'bg-white text-[#0a2a5c] shadow-sm'
               : 'text-gray-500 hover:text-[#0a2a5c]'
-          }`}
+            }`}
         >
           身份认证申请
           {pendingRoles.length > 0 && (
@@ -198,14 +217,13 @@ export default function AdminVerificationsPage() {
               <div key={app.id} className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${
-                      app.status === 'approved' ? 'bg-green-500' :
-                      app.status === 'rejected' ? 'bg-red-500' :
-                      app.status === 'pending' ? 'bg-amber-500' : 'bg-gray-400'
-                    }`}>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${app.status === 'approved' ? 'bg-green-500' :
+                        app.status === 'rejected' ? 'bg-red-500' :
+                          app.status === 'pending' ? 'bg-amber-500' : 'bg-gray-400'
+                      }`}>
                       {app.status === 'approved' ? <CheckCircleOutlined /> :
-                       app.status === 'rejected' ? <CloseCircleOutlined /> :
-                       app.status === 'pending' ? <ClockCircleOutlined /> : <FileTextOutlined />}
+                        app.status === 'rejected' ? <CloseCircleOutlined /> :
+                          app.status === 'pending' ? <ClockCircleOutlined /> : <FileTextOutlined />}
                     </div>
                     <div>
                       <h3 className="font-semibold text-[#0a2a5c] text-lg">{app.title}</h3>
@@ -276,14 +294,13 @@ export default function AdminVerificationsPage() {
               <div key={req.id} className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${
-                      req.role_status === 'approved' ? 'bg-green-500' :
-                      req.role_status === 'rejected' ? 'bg-red-500' :
-                      'bg-amber-500'
-                    }`}>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${req.role_status === 'approved' ? 'bg-green-500' :
+                        req.role_status === 'rejected' ? 'bg-red-500' :
+                          'bg-amber-500'
+                      }`}>
                       {req.role_status === 'approved' ? <CheckCircleOutlined /> :
-                       req.role_status === 'rejected' ? <CloseCircleOutlined /> :
-                       <ClockCircleOutlined />}
+                        req.role_status === 'rejected' ? <CloseCircleOutlined /> :
+                          <ClockCircleOutlined />}
                     </div>
                     <div>
                       <h3 className="font-semibold text-[#0a2a5c] text-lg">
@@ -297,11 +314,10 @@ export default function AdminVerificationsPage() {
                       <p className="text-xs text-gray-400">申请时间: {formatDate(req.created_at)}</p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    req.role_status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                    req.role_status === 'approved' ? 'bg-green-50 text-green-600' :
-                    'bg-red-50 text-red-500'
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${req.role_status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                      req.role_status === 'approved' ? 'bg-green-50 text-green-600' :
+                        'bg-red-50 text-red-500'
+                    }`}>
                     {req.role_status === 'pending' ? '待审核' : req.role_status === 'approved' ? '已通过' : '已拒绝'}
                   </span>
                 </div>

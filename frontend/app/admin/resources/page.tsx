@@ -11,11 +11,21 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons';
 
+interface Resource {
+  id: number;
+  title: string;
+  description?: string;
+  resource_type: string;
+  tags?: string;
+  contact: string;
+  created_at: string;
+}
+
 export default function AdminResourcesPage() {
-  const [resources, setResources] = useState<any[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingResource, setEditingResource] = useState<any>(null);
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,8 +42,8 @@ export default function AdminResourcesPage() {
     try {
       const res = await resourceApi.list();
       if (res.data) {
-        const data = res.data as any;
-        setResources(data.items || []);
+        const data = res.data as { items: unknown[] };
+        setResources((data.items as Resource[]) || []);
       }
     } catch (err) {
       console.error('Failed to load resources:', err);
@@ -66,12 +76,15 @@ export default function AdminResourcesPage() {
       }
       resetForm();
       loadResources();
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
+      const errorMsg = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMsg);
     }
   };
 
-  const handleEdit = (res: any) => {
+  const handleEdit = (res: Resource) => {
     setFormData({
       title: res.title,
       description: res.description || '',
@@ -89,8 +102,8 @@ export default function AdminResourcesPage() {
       await resourceApi.delete(id);
       loadResources();
       message.success('资源已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err) {
+      message.error((err as Error).message || '删除失败');
     }
   };
 
@@ -111,7 +124,7 @@ export default function AdminResourcesPage() {
   if (loading) {
     return (
       <div className="p-8 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent" />
       </div>
     );
   }
@@ -120,12 +133,12 @@ export default function AdminResourcesPage() {
     <div className="p-6 lg:p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#0a2a5c]">资源管理</h1>
+          <h1 className="text-2xl font-bold text-primary">资源管理</h1>
           <p className="text-gray-500 mt-1">管理平台上的资源合作信息，共 {resources.length} 条</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="inline-flex items-center px-4 py-2.5 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors text-sm font-medium"
+          className="inline-flex items-center px-4 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors text-sm font-medium"
         >
           <PlusOutlined className="mr-1.5" /> 添加资源
         </button>
@@ -134,7 +147,7 @@ export default function AdminResourcesPage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}>
           <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8">
-            <h2 className="text-xl font-bold text-[#0a2a5c] mb-6">
+            <h2 className="text-xl font-bold text-primary mb-6">
               {editingResource ? '编辑资源' : '添加资源'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -225,13 +238,13 @@ export default function AdminResourcesPage() {
             <p>暂无资源信息</p>
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="text-[#f59e0b] text-sm hover:underline mt-2"
+              className="text-accent text-sm hover:underline mt-2"
             >
               添加第一条资源 →
             </button>
           </div>
         ) : (
-          resources.map((res: any) => (
+          resources.map((res: Resource) => (
             <div key={res.id} className="bg-white rounded-xl shadow-custom border border-gray-100 p-6 hover:shadow-custom-lg transition-all">
               <div className="flex items-start justify-between mb-3">
                 <span className="px-3 py-1 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded-lg text-xs font-medium">
@@ -240,7 +253,7 @@ export default function AdminResourcesPage() {
                 <div className="flex space-x-1">
                   <button
                     onClick={() => handleEdit(res)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#0a2a5c] hover:bg-gray-100 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-primary hover:bg-gray-100 transition-colors"
                   >
                     <EditOutlined />
                   </button>

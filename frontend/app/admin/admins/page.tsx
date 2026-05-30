@@ -32,8 +32,8 @@ export default function AdminAdminsPage() {
         setAdmins(adminsRes.data as User[]);
       }
       if (usersRes.data) {
-        const data = usersRes.data as any;
-        setAllUsers(data.items || data || []);
+        const data = usersRes.data as { items?: User[] } | User[];
+        setAllUsers(Array.isArray(data) ? data : data.items || []);
       }
     } catch (err) {
       console.error('Failed to load data:', err);
@@ -51,8 +51,10 @@ export default function AdminAdminsPage() {
       setSelectedUserId(null);
       await loadData();
       message.success('已设置该用户为管理员');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
+      message.error((err as Error).message || '操作失败');
     } finally {
       setPromoting(false);
     }
@@ -64,8 +66,9 @@ export default function AdminAdminsPage() {
       await superAdminApi.demoteAdmin(userId);
       await loadData();
       message.success('已撤销管理员权限');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '操作失败';
+      message.error(errorMessage);
     }
   };
 
