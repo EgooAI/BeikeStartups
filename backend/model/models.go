@@ -422,3 +422,22 @@ type EventSignup struct {
 	User    *User  `gorm:"foreignKey:UserID" json:"user,omitempty"`
 	Status  string `gorm:"type:varchar(20);not null;default:'pending'" json:"status"`
 }
+
+type BannerStatus string
+
+const (
+	BannerStatusActive   BannerStatus = "active"
+	BannerStatusInactive BannerStatus = "inactive"
+)
+
+type Banner struct {
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+
+	Title    string       `gorm:"size:200;not null" json:"title"`
+	ImageURL string       `gorm:"size:500;not null" json:"image_url"`
+	LinkURL  string       `gorm:"size:500" json:"link_url"`
+	Status   BannerStatus `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
+}

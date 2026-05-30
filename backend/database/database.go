@@ -40,6 +40,7 @@ func InitDatabase(cfg *config.Config) {
 		&model.ProjectPartner{},
 		&model.Event{},
 		&model.EventSignup{},
+		&model.Banner{},
 	)
 	if err != nil {
 		log.Fatal("failed to migrate database:", err)

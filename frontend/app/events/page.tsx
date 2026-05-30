@@ -99,7 +99,32 @@ export default function EventsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {loading ? (
+        {!user && (
+        <div className="bg-gradient-to-r from-[#0a2a5c]/5 to-[#f59e0b]/5 rounded-xl p-6 mb-8 border border-[#0a2a5c]/10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#0a2a5c] mb-1">登录后即可报名活动</h3>
+              <p className="text-sm text-gray-500">注册成为平台会员，参与创业活动、项目路演，与创业者面对面交流。</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <a
+                href="/login"
+                className="inline-flex items-center px-6 py-2.5 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors text-sm"
+              >
+                立即登录
+              </a>
+              <a
+                href="/register"
+                className="inline-flex items-center px-6 py-2.5 bg-white text-[#0a2a5c] font-semibold rounded-xl border border-[#0a2a5c]/20 hover:bg-[#0a2a5c]/5 transition-colors text-sm"
+              >
+                立即注册
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
           </div>
@@ -133,7 +158,7 @@ export default function EventsPage() {
                       {event.location}
                     </div>
                   </div>
-                  {!(user?.role === 'admin' || user?.role === 'super_admin') && (
+                  {user && !(user.role === 'admin' || user.role === 'super_admin') && (
                     isSignedUp ? (
                       <div className="w-full px-4 py-2.5 bg-green-50 text-green-600 rounded-lg text-sm font-medium text-center flex items-center justify-center">
                         <CheckCircleOutlined className="mr-1.5" />

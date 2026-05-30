@@ -144,18 +144,36 @@ func SetupRouter() *gin.Engine {
 	router.GET("/api/projects", handler.ListProjects)
 	router.GET("/api/projects/:id", handler.GetProject)
 
-	events := router.Group("/api/events").Use(middleware.RequireAuth())
+	events := router.Group("/api/events")
 	{
 		events.GET("", handler.ListEvents)
 		events.GET("/:id", handler.GetEvent)
-		events.POST("", middleware.RequireRole(model.RoleSuperAdmin), handler.CreateEvent)
-		events.PUT("/:id", middleware.RequireRole(model.RoleSuperAdmin), handler.UpdateEvent)
-		events.DELETE("/:id", middleware.RequireRole(model.RoleSuperAdmin), handler.DeleteEvent)
-		events.POST("/:id/signup", handler.SignUpEvent)
-		events.GET("/:id/signup", handler.GetEventSignup)
-		events.DELETE("/:id/signup", handler.CancelEventSignup)
-		events.POST("/signups/:id/confirm", middleware.RequireRole(model.RoleSuperAdmin), handler.ConfirmEventSignup)
-		events.GET("/:id/signups", middleware.RequireRole(model.RoleSuperAdmin), handler.ListEventSignups)
+	}
+
+	eventsAuth := router.Group("/api/events").Use(middleware.RequireAuth())
+	{
+		eventsAuth.POST("", middleware.RequireRole(model.RoleSuperAdmin), handler.CreateEvent)
+		eventsAuth.PUT("/:id", middleware.RequireRole(model.RoleSuperAdmin), handler.UpdateEvent)
+		eventsAuth.DELETE("/:id", middleware.RequireRole(model.RoleSuperAdmin), handler.DeleteEvent)
+		eventsAuth.POST("/:id/signup", handler.SignUpEvent)
+		eventsAuth.GET("/:id/signup", handler.GetEventSignup)
+		eventsAuth.DELETE("/:id/signup", handler.CancelEventSignup)
+		eventsAuth.POST("/signups/:id/confirm", middleware.RequireRole(model.RoleSuperAdmin), handler.ConfirmEventSignup)
+		eventsAuth.GET("/:id/signups", middleware.RequireRole(model.RoleSuperAdmin), handler.ListEventSignups)
+	}
+
+	// 公开轮播图接口（无需认证）
+	router.GET("/api/banners", handler.ListBanners)
+
+	// 管理轮播图接口（需要超级管理员权限）
+	bannersAuth := router.Group("/api/banners").Use(middleware.RequireAuth())
+	bannersAuth.Use(middleware.RequireRole(model.RoleSuperAdmin))
+	{
+		bannersAuth.GET("/all", handler.ListAllBanners)
+		bannersAuth.GET("/:id", handler.GetBanner)
+		bannersAuth.POST("", handler.CreateBanner)
+		bannersAuth.PUT("/:id", handler.UpdateBanner)
+		bannersAuth.DELETE("/:id", handler.DeleteBanner)
 	}
 
 	recruitments := router.Group("/api/recruitments").Use(middleware.RequireAuth())

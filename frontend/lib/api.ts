@@ -349,6 +349,26 @@ export const eventApi = {
     api.post(`/api/events/signups/${signupId}/confirm`),
 };
 
+export const bannerApi = {
+  list: () =>
+    api.get('/api/banners'),
+
+  listAll: () =>
+    api.get('/api/banners/all'),
+
+  get: (id: number) =>
+    api.get(`/api/banners/${id}`),
+
+  create: (data: { title: string; image_url: string; link_url?: string; status?: string }) =>
+    api.post('/api/banners', data),
+
+  update: (id: number, data: { title?: string; image_url?: string; link_url?: string; status?: string }) =>
+    api.put(`/api/banners/${id}`, data),
+
+  delete: (id: number) =>
+    api.delete(`/api/banners/${id}`),
+};
+
 export const resourceApi = {
   list: (params?: { status?: string; resource_type?: string; search?: string }) => {
     const query = new URLSearchParams();

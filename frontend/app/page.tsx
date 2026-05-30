@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { projectApi } from '@/lib/api';
 import { Project } from '@/types';
 import { isAuthenticated } from '@/lib/auth';
+import BannerCarousel from '@/components/Common/BannerCarousel';
 import {
   RocketOutlined,
   TeamOutlined,
@@ -80,6 +81,8 @@ export default function HomePage() {
 
   return (
     <div>
+      <BannerCarousel />
+
       {/* Hero Section */}
       <section className="relative min-h-screen bg-primary-gradient text-white overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-30" />
@@ -111,10 +114,10 @@ export default function HomePage() {
                 <RightOutlined className="ml-2" />
               </Link>
               <Link
-                href="/teams/create"
+                href="/register"
                 className="inline-flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl border border-white/20 hover:bg-white/20 transition-all hover:-translate-y-0.5"
               >
-                申请成为创业团队
+                加入我们
                 <ArrowRightOutlined className="ml-2" />
               </Link>
             </div>

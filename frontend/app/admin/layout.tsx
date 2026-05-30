@@ -17,6 +17,7 @@ import {
   MenuOutlined,
   CloseOutlined,
   RightOutlined,
+  PictureOutlined,
 } from '@ant-design/icons';
 
 const adminNavItems = [
@@ -25,6 +26,7 @@ const adminNavItems = [
   { name: '身份审核', href: '/admin/verifications', icon: <SafetyOutlined /> },
   { name: '项目管理', href: '/admin/projects', icon: <ProjectOutlined /> },
   { name: '活动管理', href: '/admin/events', icon: <CalendarOutlined /> },
+  { name: '轮播图管理', href: '/admin/banners', icon: <PictureOutlined /> },
   { name: '资源管理', href: '/admin/resources', icon: <BuildOutlined /> },
 ];
 

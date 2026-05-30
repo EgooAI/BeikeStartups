@@ -127,6 +127,12 @@ export default function ResourcesPage() {
             立即登录
             <ArrowRightOutlined className="ml-2" />
           </a>
+          <p className="mt-6 text-sm text-gray-500">
+            还没有账号？{' '}
+            <a href="/register" className="text-[#f59e0b] hover:underline font-medium">
+              立即注册
+            </a>
+          </p>
         </div>
       </div>
     );

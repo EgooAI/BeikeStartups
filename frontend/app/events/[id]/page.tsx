@@ -212,7 +212,7 @@ export default function EventDetailPage() {
               </div>
             </div>
 
-            {event.status === 'active' && !signedUp && !(user?.role === 'admin' || user?.role === 'super_admin') && (
+            {event.status === 'active' && user && !signedUp && !(user.role === 'admin' || user.role === 'super_admin') && (
               <div className="lg:w-80">
                 <button
                   onClick={handleSignup}
@@ -417,33 +417,7 @@ export default function EventDetailPage() {
               </div>
             )}
 
-            {/* 快捷链接 */}
-            <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-[#0a2a5c] mb-4">快捷链接</h3>
-              <div className="space-y-3">
-                <Link
-                  href="/projects"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-[#0a2a5c]/5 text-[#0a2a5c] hover:bg-[#0a2a5c]/10 transition-colors"
-                >
-                  <RocketOutlined />
-                  <span className="text-sm font-medium">浏览项目</span>
-                </Link>
-                <Link
-                  href="/recruitments"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
-                >
-                  <TeamOutlined />
-                  <span className="text-sm font-medium">加入团队</span>
-                </Link>
-                <Link
-                  href="/resources"
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-                >
-                  <FundOutlined />
-                  <span className="text-sm font-medium">寻找资源</span>
-                </Link>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
