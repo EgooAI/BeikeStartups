@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { projectApi } from '@/lib/api';
 import { Project } from '@/types';
 import { isAuthenticated } from '@/lib/auth';
@@ -11,8 +11,6 @@ import {
   TeamOutlined,
   UserOutlined,
   FundOutlined,
-  RightOutlined,
-  StarOutlined,
   ArrowRightOutlined,
   BulbOutlined,
   TagOutlined,
@@ -25,639 +23,561 @@ import {
   ThunderboltOutlined,
   CheckCircleOutlined,
   SmileOutlined,
+  PlayCircleOutlined,
+  CaretRightOutlined,
 } from '@ant-design/icons';
 
+// ── 预生成数据 ──────────────────────────────────
+
+const heroStars = Array.from({ length: 80 }, () => ({
+  w: Math.random() * 3 + 1, h: Math.random() * 3 + 1,
+  top: Math.random() * 100, left: Math.random() * 100,
+  color: ['#00f0ff', '#ffb800', '#b347ea', '#ffffff'][Math.floor(Math.random() * 4)],
+  opacity: Math.random() * 0.6 + 0.2, duration: Math.random() * 8 + 6, delay: Math.random() * 8,
+}));
+const globalStars = Array.from({ length: 120 }, () => ({
+  w: Math.random() * 2 + 0.5, h: Math.random() * 2 + 0.5,
+  top: Math.random() * 100, left: Math.random() * 100,
+  color: ['#00f0ff', '#ffb800', '#b347ea', '#ffffff', '#00ff88'][Math.floor(Math.random() * 5)],
+  opacity: Math.random() * 0.35 + 0.08, duration: Math.random() * 12 + 8, delay: Math.random() * 12,
+}));
+const floatingParticles = Array.from({ length: 20 }, () => ({
+  w: Math.random() * 2 + 1, h: Math.random() * 2 + 1,
+  top: Math.random() * 100, left: Math.random() * 100,
+  opacity: Math.random() * 0.5 + 0.2, duration: Math.random() * 6 + 4, delay: Math.random() * 4,
+}));
+
 const stats = [
-  { value: '128+', label: '入驻项目', icon: <RocketOutlined />, desc: '个校内创业项目', gradient: 'from-blue-500 to-blue-600', bgGlow: 'bg-blue-500/10' },
-  { value: '36+', label: '认证团队', icon: <TeamOutlined />, desc: '支创业团队', gradient: 'from-amber-500 to-orange-500', bgGlow: 'bg-amber-500/10' },
-  { value: '50+', label: '导师资源', icon: <UserOutlined />, desc: '位校外导师', gradient: 'from-purple-500 to-violet-500', bgGlow: 'bg-purple-500/10' },
-  { value: '20+', label: '投资机构', icon: <FundOutlined />, desc: '家合作投资机构', gradient: 'from-emerald-500 to-teal-500', bgGlow: 'bg-emerald-500/10' },
+  { value: '128+', label: '入驻项目', icon: <RocketOutlined />, neon: 'cyan' },
+  { value: '36+', label: '认证团队', icon: <TeamOutlined />, neon: 'amber' },
+  { value: '50+', label: '导师资源', icon: <UserOutlined />, neon: 'purple' },
+  { value: '20+', label: '投资机构', icon: <FundOutlined />, neon: 'green' },
 ];
+const neonC = (k: string) => ({
+  cyan: { t: 'text-[#00f0ff]', b: 'border-[#00f0ff]/25', g: 'shadow-[0_0_25px_rgba(0,240,255,0.12)]', bg: 'bg-[#00f0ff]/8', f: 'from-[#00f0ff]' },
+  amber: { t: 'text-[#ffb800]', b: 'border-[#ffb800]/25', g: 'shadow-[0_0_25px_rgba(255,184,0,0.12)]', bg: 'bg-[#ffb800]/8', f: 'from-[#ffb800]' },
+  purple: { t: 'text-[#b347ea]', b: 'border-[#b347ea]/25', g: 'shadow-[0_0_25px_rgba(179,71,234,0.12)]', bg: 'bg-[#b347ea]/8', f: 'from-[#b347ea]' },
+  green: { t: 'text-[#00ff88]', b: 'border-[#00ff88]/25', g: 'shadow-[0_0_25px_rgba(0,255,136,0.12)]', bg: 'bg-[#00ff88]/8', f: 'from-[#00ff88]' },
+}[k]!);
 
 const features = [
-  {
-    icon: <BulbOutlined />,
-    title: '发现优质项目',
-    description: '汇聚校园内经过认证的创业项目，发现下一批值得期待的年轻创业团队。',
-    gradient: 'from-blue-500 to-blue-600',
-    bgGlow: 'bg-blue-500/10',
-    accent: 'text-blue-600',
-  },
-  {
-    icon: <TagOutlined />,
-    title: '精准资源匹配',
-    description: '智能匹配投资人、导师与项目，实现高效的投融资对接与辅导。',
-    gradient: 'from-amber-500 to-orange-500',
-    bgGlow: 'bg-amber-500/10',
-    accent: 'text-amber-600',
-  },
-  {
-    icon: <RiseOutlined />,
-    title: '全周期孵化',
-    description: '从种子期到成熟期，陪伴创业项目成长的每一个阶段。',
-    gradient: 'from-purple-500 to-violet-500',
-    bgGlow: 'bg-purple-500/10',
-    accent: 'text-purple-600',
-  },
-  {
-    icon: <TrophyOutlined />,
-    title: '认证保障',
-    description: '严格的项目审核机制，确保平台项目的真实性与质量。',
-    gradient: 'from-emerald-500 to-teal-500',
-    bgGlow: 'bg-emerald-500/10',
-    accent: 'text-emerald-600',
-  },
+  { icon: <BulbOutlined />, title: '发现优质项目', desc: '汇聚校园内经过认证的创业项目，发现下一批值得期待的年轻创业团队。', neon: 'cyan' },
+  { icon: <TagOutlined />, title: '精准资源匹配', desc: '智能匹配投资人、导师与项目，实现高效的投融资对接与辅导。', neon: 'amber' },
+  { icon: <RiseOutlined />, title: '全周期孵化', desc: '从种子期到成熟期，陪伴创业项目成长的每一个阶段。', neon: 'purple' },
+  { icon: <TrophyOutlined />, title: '认证保障', desc: '严格的项目审核机制，确保平台项目的真实性与质量。', neon: 'green' },
+];
+const steps = [
+  { num: '01', icon: <AuditOutlined />, title: '注册认证', desc: '填写项目信息，提交营业执照或学生证明，完成团队认证', neon: 'cyan' },
+  { num: '02', icon: <RocketOutlined />, title: '发布项目', desc: '完善项目BP、团队介绍和发展计划，让更多人了解你的项目', neon: 'amber' },
+  { num: '03', icon: <LinkOutlined />, title: '对接资源', desc: '与投资人、导师和产业资源方建立联系，获得发展支持', neon: 'purple' },
+  { num: '04', icon: <SafetyCertificateOutlined />, title: '加速成长', desc: '通过平台背书和资源支持，推动项目快速发展壮大', neon: 'green' },
 ];
 
-const steps = [
-  {
-    number: '01',
-    icon: <AuditOutlined />,
-    title: '注册认证',
-    description: '填写项目信息，提交营业执照或学生证明，完成团队认证',
-    gradient: 'from-blue-500 to-blue-600',
-  },
-  {
-    number: '02',
-    icon: <RocketOutlined />,
-    title: '发布项目',
-    description: '完善项目BP、团队介绍和发展计划，让更多人了解你的项目',
-    gradient: 'from-amber-500 to-orange-500',
-  },
-  {
-    number: '03',
-    icon: <LinkOutlined />,
-    title: '对接资源',
-    description: '与投资人、导师和产业资源方建立联系，获得发展支持',
-    gradient: 'from-purple-500 to-violet-500',
-  },
-  {
-    number: '04',
-    icon: <SafetyCertificateOutlined />,
-    title: '加速成长',
-    description: '通过平台背书和资源支持，推动项目快速发展壮大',
-    gradient: 'from-emerald-500 to-teal-500',
-  },
-];
+// ── 粒子物理系统 (Canvas) ──────────────────────
+
+interface Particle {
+  x: number; y: number; vx: number; vy: number;
+  ox: number; oy: number; // 初始位置
+  r: number; color: string; alpha: number;
+}
+
+function createParticles(canvas: HTMLCanvasElement, count: number) {
+  const ctx = canvas.getContext('2d')!;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  canvas.width = w;
+  canvas.height = h;
+
+  const particles: Particle[] = [];
+  const colors = ['#00f0ff', '#b347ea', '#ffb800', '#00ff88'];
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    particles.push({
+      x, y, ox: x, oy: y,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 2.5 + 1,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: Math.random() * 0.5 + 0.3,
+    });
+  }
+
+  const mouse = { x: -1000, y: -1000 };
+  const REPEL_RADIUS = 180;
+  const REPEL_FORCE = 2.5;
+  const RETURN_FORCE = 0.015;
+  const CONNECT_DIST = 120;
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      // 鼠标排斥
+      const dx = p.x - mouse.x;
+      const dy = p.y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < REPEL_RADIUS && dist > 1) {
+        const force = (REPEL_RADIUS - dist) / REPEL_RADIUS * REPEL_FORCE;
+        p.vx += (dx / dist) * force;
+        p.vy += (dy / dist) * force;
+      }
+
+      // 回归初始位置
+      p.vx += (p.ox - p.x) * RETURN_FORCE;
+      p.vy += (p.oy - p.y) * RETURN_FORCE;
+
+      // 阻尼
+      p.vx *= 0.96;
+      p.vy *= 0.96;
+
+      // 移动
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // 边界
+      if (p.x < -20) p.x = w + 20;
+      if (p.x > w + 20) p.x = -20;
+      if (p.y < -20) p.y = h + 20;
+      if (p.y > h + 20) p.y = -20;
+    }
+
+    // 绘制连线
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONNECT_DIST) {
+          const alpha = (1 - dist / CONNECT_DIST) * 0.12;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(0,240,255,${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // 绘制粒子
+    for (const p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  return {
+    particles,
+    animate,
+    get mouse() { return mouse; },
+    set mouse(pos: { x: number; y: number }) { mouse.x = pos.x; mouse.y = pos.y; },
+  };
+}
+
+// ── 主组件 ──────────────────────────────────────
 
 export default function HomePage() {
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const trailLen = 24;
+  const [trail, setTrail] = useState<{ x: number; y: number; id: number }[]>(() => Array.from({ length: trailLen }, (_, i) => ({ x: -100, y: -100, id: i })));
+  const [trailSeq, setTrailSeq] = useState(0);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [cursorPixel, setCursorPixel] = useState({ x: -100, y: -100 });
+  const [scrollY, setScrollY] = useState(0);
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
+  const rippleRef = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // 平台核心卡片定时轮播
+  useEffect(() => {
+    const t = setInterval(() => setActiveFeature(p => (p + 1) % 4), 3000);
+    return () => clearInterval(t);
+  }, []);
+
+  // 粒子物理画布
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const system = createParticles(canvas, 100);
+    system.animate();
+    const updateMouse = (e: MouseEvent) => {
+      system.mouse = { x: e.clientX, y: e.clientY };
+    };
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('mousemove', updateMouse);
+    window.addEventListener('resize', resize);
+    return () => {
+      window.removeEventListener('mousemove', updateMouse);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  // 光标与卡片交互 — 3D倾斜
+  const handleCardTilt = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const el = e.currentTarget as HTMLElement;
+    el.style.transform = `perspective(600px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateZ(4px)`;
+    const glow = el.querySelector('.tilt-glow') as HTMLElement;
+    if (glow) glow.style.background = `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(0,240,255,0.08) 0%, transparent 60%)`;
+  };
+  const handleCardLeave = (e: React.MouseEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    el.style.transform = 'perspective(600px) rotateY(0deg) rotateX(0deg) translateZ(0)';
+    const glow = el.querySelector('.tilt-glow') as HTMLElement;
+    if (glow) glow.style.background = 'transparent';
+  };
+
+  // 点击涟漪
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const id = ++rippleRef.current;
+      setRipples(p => [...p.slice(-8), { x: e.clientX, y: e.clientY, id }]);
+    };
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
+  }, []);
 
   useEffect(() => {
-    requestAnimationFrame(() => {
-      setIsLoaded(true);
-    });
-    requestAnimationFrame(() => {
-      setIsLoggedIn(isAuthenticated());
-    });
-    async function fetchProjects() {
-      try {
-        const res = await projectApi.list({ status: 'online', is_public: 'true' });
-        if (res.data) {
-          const data = res.data as { items?: Project[] };
-          setFeaturedProjects(data.items?.slice(0, 4) || []);
-        }
-      } catch (err) {
-        console.error('Failed to fetch projects:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProjects();
+    requestAnimationFrame(() => setIsLoaded(true)); requestAnimationFrame(() => setIsLoggedIn(isAuthenticated()));
+    (async () => { try { const r = await projectApi.list({ status: 'online', is_public: 'true' }); if (r.data) { const d = r.data as { items?: Project[] }; setFeaturedProjects(d.items?.slice(0, 4) || []); } } catch (e) { console.error(e) } finally { setLoading(false); } })();
+  }, []);
+
+  useEffect(() => {
+    let seq = 0;
+    const mm = (e: MouseEvent) => { const pp = { x: e.clientX, y: e.clientY }; const rp = { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }; setMousePos(rp); setCursorPixel(pp); seq += 1; const id = seq; setTrailSeq(id); setTrail(p => { const n = [...p]; n[id % trailLen] = { ...pp, id }; return n; }); };
+    const sm = () => setScrollY(window.scrollY);
+    window.addEventListener('mousemove', mm); window.addEventListener('scroll', sm, { passive: true });
+    return () => { window.removeEventListener('mousemove', mm); window.removeEventListener('scroll', sm); };
   }, []);
 
   return (
-    <div className="overflow-x-hidden">
-      <BannerCarousel />
+    <div className="overflow-x-hidden bg-[#050510] relative">
+      {/* ── 全局星空 ── */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {globalStars.map((p, i) => (<div key={i} className="absolute rounded-full" style={{ width: `${p.w}px`, height: `${p.h}px`, top: `${p.top}%`, left: `${p.left}%`, backgroundColor: p.color, opacity: p.opacity, animation: `star-drift ${p.duration}s linear infinite`, animationDelay: `${p.delay}s` }} />))}
+      </div>
 
-      {/* ═══════════════════════════════════════════════════════
-            Hero Section — 主视觉区域
-          ═══════════════════════════════════════════════════════ */}
-      <section className="relative min-h-[92vh] bg-primary-gradient text-white overflow-hidden flex items-center">
-        {/* ── 底层纹理 ── */}
-        <div className="absolute inset-0 bg-grid opacity-[0.05]" />
-        <div className="absolute inset-0 bg-dot-matrix-light opacity-40" />
-        <div className="absolute inset-0 bg-hex-pattern opacity-[0.04]" />
+      <div className="relative z-[1]">
+        <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[2]" />
+        <BannerCarousel />
 
-        {/* ── 极光渐变 ── */}
-        <div className="absolute inset-0 bg-aurora-dark opacity-70" />
+        {/* ════════════════════════════════════════════
+              HERO
+           ════════════════════════════════════════════ */}
+        <section className="relative min-h-screen flex items-center overflow-hidden bg-[#050510]">
+          {/* 鼠标光晕 */}
+          <div className="absolute pointer-events-none w-[50rem] h-[50rem] rounded-full blur-[180px] transition-[left,top] duration-[2s] ease-out" style={{ left: `${mousePos.x * 100}%`, top: `${mousePos.y * 100}%`, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle,rgba(0,240,255,0.05) 0%,transparent 70%)' }} />
+          <div className="absolute pointer-events-none w-[30rem] h-[30rem] rounded-full blur-[120px] transition-[left,top] duration-[1.5s] ease-out" style={{ left: `${(1 - mousePos.x) * 100}%`, top: `${(1 - mousePos.y) * 100}%`, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle,rgba(179,71,234,0.04) 0%,transparent 70%)' }} />
 
-        {/* ── 动态变形光斑 ── */}
-        <div className="absolute top-[10%] right-[15%] w-[30rem] h-[30rem] bg-amber-400/6 rounded-full blur-[100px] animate-morph-blob" />
-        <div className="absolute bottom-[15%] left-[10%] w-[24rem] h-[24rem] bg-blue-400/5 rounded-full blur-[90px] animate-morph-blob-reverse" />
-        <div className="absolute top-[50%] left-[40%] w-[20rem] h-[20rem] bg-purple-400/4 rounded-full blur-[80px] animate-morph-blob" style={{ animationDelay: '-5s' }} />
+          {/* 视差星空 */}
+          <div className="absolute inset-0" style={{ transform: `translate(${(mousePos.x - 0.5) * -20}px,${(mousePos.y - 0.5) * -20}px)`, transition: 'transform 1.5s ease-out' }}>
+            {heroStars.map((p, i) => (<div key={i} className="absolute rounded-full" style={{ width: `${p.w}px`, height: `${p.h}px`, top: `${p.top}%`, left: `${p.left}%`, backgroundColor: p.color, opacity: p.opacity, animation: `star-drift ${p.duration}s linear infinite`, animationDelay: `${p.delay}s` }} />))}
+          </div>
 
-        {/* ── 脉冲光晕 ── */}
-        <div className="absolute top-1/4 -right-32 w-[36rem] h-[36rem] bg-amber-400/8 rounded-full blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-1/4 -left-32 w-[28rem] h-[28rem] bg-blue-400/6 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2.5s' }} />
+          {/* 大型六边形装饰 */}
+          <div className="absolute -right-40 top-1/2 -translate-y-1/2 pointer-events-none opacity-[0.03]" style={{ transform: `translateX(${(mousePos.x - 0.5) * 20}px)` }}>
+            <svg width="600" height="700" viewBox="0 0 600 700"><defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00f0ff" /><stop offset="100%" stopColor="#b347ea" /></linearGradient></defs>
+              <polygon points="300,20 560,170 560,470 300,620 40,470 40,170" fill="none" stroke="url(#hg)" strokeWidth="1" opacity="0.5" />
+              <polygon points="300,80 500,200 500,440 300,560 100,440 100,200" fill="none" stroke="url(#hg)" strokeWidth="0.5" opacity="0.3" />
+              <polygon points="300,140 440,220 440,420 300,500 160,420 160,220" fill="none" stroke="url(#hg)" strokeWidth="0.5" opacity="0.15" />
+              <circle cx="300" cy="130" r="3" fill="#00f0ff" opacity="0.4" /><circle cx="440" cy="220" r="2" fill="#00f0ff" opacity="0.3" />
+              <circle cx="300" cy="510" r="2" fill="#b347ea" opacity="0.3" /><circle cx="160" cy="220" r="2.5" fill="#ffb800" opacity="0.3" />
+            </svg>
+          </div>
 
-        {/* ── 浮动装饰点 ── */}
-        <div className="floating-dot floating-dot-1 w-1 h-1 bg-amber-300/40 top-[20%] right-[30%]" />
-        <div className="floating-dot floating-dot-1 w-1.5 h-1.5 bg-blue-300/30 top-[60%] right-[45%]" style={{ animationDelay: '-3s' }} />
-        <div className="floating-dot floating-dot-2 w-1 h-1 bg-white/30 top-[35%] left-[25%]" />
-        <div className="floating-dot floating-dot-2 w-2 h-2 bg-amber-300/20 top-[70%] left-[40%]" style={{ animationDelay: '-4s' }} />
-        <div className="floating-dot floating-dot-3 w-1 h-1 bg-emerald-300/30 top-[15%] left-[55%]" />
-        <div className="floating-dot floating-dot-3 w-1.5 h-1.5 bg-white/20 top-[80%] right-[20%]" style={{ animationDelay: '-2s' }} />
+          {/* 网格地面 */}
+          <div className="absolute bottom-0 left-0 right-0 h-[45vh] pointer-events-none transition-transform duration-[2s] ease-out" style={{ background: 'linear-gradient(to top, rgba(0,240,255,0.03) 0%, transparent 100%), repeating-linear-gradient(90deg, rgba(0,240,255,0.04) 0px, transparent 1px, transparent 80px, rgba(0,240,255,0.04) 81px), repeating-linear-gradient(0deg, rgba(0,240,255,0.04) 0px, transparent 1px, transparent 40px, rgba(0,240,255,0.04) 41px)', transform: `perspective(500px) rotateX(${60 + (mousePos.y - 0.5) * 8}deg) rotateZ(${(mousePos.x - 0.5) * -3}deg)`, transformOrigin: 'bottom' }} />
 
-        {/* ── 装饰几何 ── */}
-        <div className="absolute top-0 right-0 w-64 h-64 opacity-[0.04]">
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#f59e0b" />
-                <stop offset="100%" stopColor="#3b82f6" />
-              </linearGradient>
-            </defs>
-            <path d="M0 200L66 133L133 200L200 133L200 200Z" fill="url(#lineGrad)" opacity="0.15" />
-            <circle cx="166" cy="33" r="2" fill="white" opacity="0.3" />
-            <circle cx="33" cy="66" r="1.5" fill="white" opacity="0.2" />
-            <circle cx="100" cy="100" r="1" fill="white" opacity="0.15" />
+          {/* 跟随光标的几何体 */}
+          <div className="absolute pointer-events-none z-0 transition-all duration-[3s] ease-out" style={{ left: `${30 + mousePos.x * 40}%`, top: `${20 + mousePos.y * 40}%`, transform: 'translate(-50%,-50%) rotate(45deg)' }}>
+            <div className="w-32 h-32 border border-[#00f0ff]/8 rounded-2xl animate-[hex-rotate_20s_linear_infinite]" />
+            <div className="absolute inset-4 border border-[#b347ea]/6 rounded-xl animate-[hex-rotate_15s_linear_infinite_reverse]" />
+            <div className="absolute inset-8 border border-[#ffb800]/4 rounded-lg" />
+          </div>
+
+          {/* 漂移光球 */}
+          <div className="absolute w-[600px] h-[600px] bg-[#00f0ff]/3 rounded-full blur-[150px] animate-pulse-slow pointer-events-none transition-[left,top] duration-[3s]" style={{ left: `${40 + mousePos.x * 20}%`, top: `${15 + mousePos.y * 20}%` }} />
+          <div className="absolute w-[400px] h-[400px] bg-[#b347ea]/3 rounded-full blur-[120px] animate-pulse-slow pointer-events-none transition-[left,top] duration-[2.5s]" style={{ left: `${50 - mousePos.x * 20}%`, top: `${60 - mousePos.y * 20}%`, animationDelay: '1.5s' }} />
+
+          {/* 主内容 */}
+          <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-0">
+            <div className="lg:w-[60%]">
+              <div className={`inline-flex items-center gap-2 px-4 py-2 bg-white/[0.03] backdrop-blur-md rounded-full border border-[#00f0ff]/20 text-sm text-[#00f0ff] mb-8 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
+                <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00f0ff] opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-[#00f0ff]" /></span>
+                <span className="tracking-[0.3em] uppercase text-xs font-bold">SYSTEM ONLINE</span>
+              </div>
+              <h1 className={`text-5xl sm:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[0.92] ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`}>
+                <span className="text-white">让校园</span><br />
+                <span className="bg-gradient-to-r from-[#00f0ff] via-[#b347ea] to-[#ffb800] bg-clip-text text-transparent">创业项目</span><br />
+                <span className="text-white">被更多人<span className="text-[#00f0ff] text-neon-cyan">看见</span></span>
+              </h1>
+              <p className={`text-lg sm:text-xl text-gray-400 max-w-lg mb-10 leading-relaxed font-light tracking-wide ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+                面向高校学生创业团队，连接校内创新项目、校外导师、投资人和产业资源，打造真实、高效、开放的校园创投生态平台。
+              </p>
+              <div className={`flex flex-wrap gap-4 ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+                <Link href="/projects" className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,240,255,0.4)]"><span className="relative z-10 flex items-center gap-2"><PlayCircleOutlined />探索项目<CaretRightOutlined className="group-hover:translate-x-1 transition-transform" /></span></Link>
+                <Link href="/register" className="group relative inline-flex items-center px-8 py-4 bg-transparent text-white font-bold rounded-xl border border-[#00f0ff]/30 hover:border-[#00f0ff]/60 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(0,240,255,0.15)]"><span className="relative z-10 flex items-center gap-2">加入我们<ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" /></span></Link>
+              </div>
+              <div className={`flex flex-wrap items-center gap-x-8 gap-y-3 mt-12 text-sm text-gray-500 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+                {['官方认证', '免费入驻', '数据安全'].map(t => (<div key={t} className="flex items-center gap-2"><CheckCircleOutlined className="text-[#00ff88]" /><span>{t}</span></div>))}
+              </div>
+            </div>
+
+            {/* 浮动卡片 — 参差偏移 */}
+            <div className="hidden lg:flex flex-col gap-4 absolute right-0 top-1/2 -translate-y-1/2 w-[18rem] transition-transform duration-[2s] ease-out" style={{ transform: `translate(${(mousePos.x - 0.5) * -30}px,${(mousePos.y - 0.5) * -20}px)` }}>
+              {[{ icon: <FireOutlined />, label: '今日新增项目', value: '+3', n: 'cyan', offset: '-translate-x-4' }, { icon: <ThunderboltOutlined />, label: '已完成对接', value: '26笔', n: 'amber', offset: 'translate-x-2' }, { icon: <SmileOutlined />, label: '活跃导师', value: '50+位', n: 'purple', offset: '-translate-x-2' }].map((c, i) => { const nc = neonC(c.n); return (<div key={i} className={`holo-card p-5 animate-float ${nc.g} ${c.offset} overflow-hidden`} style={{ animationDelay: `${i * 0.5}s`, transition: 'transform 0.1s ease-out', willChange: 'transform' }} onMouseMove={handleCardTilt} onMouseLeave={handleCardLeave}><div className="tilt-glow absolute inset-0 pointer-events-none transition-none" /><div className="relative z-[1] flex items-center gap-4"><div className={`w-10 h-10 rounded-xl ${nc.bg} ${nc.b} border flex items-center justify-center ${nc.t}`}>{c.icon}</div><div><div className="text-xs text-gray-500 uppercase tracking-wider">{c.label}</div><div className={`text-xl font-black ${nc.t}`}>{c.value}</div></div></div><div className="energy-bar mt-3 relative z-[1]"><div className="energy-bar-fill" style={{ width: `${85 - i * 15}%` }} /></div></div>); })}
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#0a0a1a] to-transparent pointer-events-none" />
+        </section>
+
+        {/* ════════════════════════════════════════════
+              STATS — 斜面过渡 + 浮动数据卡
+           ════════════════════════════════════════════ */}
+        <section className="relative -mt-24 pb-28 z-10">
+          {/* 斜面切割 */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-[#0a0a1a]" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 0%)' }} />
+          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((s, i) => {
+                const nc = neonC(s.neon); const yOffsets = ['-translate-y-4', 'translate-y-2', '-translate-y-6', 'translate-y-0']; return (
+                  <div key={i} className={`holo-card p-6 sm:p-8 text-center group ${yOffsets[i]}`}>
+                    <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${nc.bg} ${nc.b} border ${nc.t} mb-5 group-hover:scale-110 transition-all duration-300 ${nc.g}`}>{s.icon}</div>
+                    <div className={`text-3xl sm:text-4xl font-black ${nc.t} mb-1`}>{s.value}</div>
+                    <div className="text-sm text-gray-500 font-semibold">{s.label}</div>
+                    <div className="energy-bar mt-4"><div className="energy-bar-fill" style={{ width: `${70 + i * 8}%` }} /></div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════
+              HOW IT WORKS — 错位任务面板
+           ════════════════════════════════════════════ */}
+        <section className="relative py-24 sm:py-28 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(0,240,255,0.03),transparent_60%)]" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">{globalStars.slice(0, 50).map((p, i) => (<div key={i} className="absolute rounded-full" style={{ width: `${p.w * 0.6}px`, height: `${p.h * 0.6}px`, top: `${p.top}%`, left: `${p.left}%`, backgroundColor: p.color, opacity: p.opacity * 0.5 }} />))}</div>
+
+          {/* 电路装饰 */}
+          <svg className="absolute left-0 top-1/2 -translate-y-1/2 opacity-[0.04] pointer-events-none w-96 h-96" viewBox="0 0 300 300">
+            <defs><linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#00f0ff" /><stop offset="100%" stopColor="#b347ea" /></linearGradient></defs>
+            <path d="M0 50 L120 50 L140 70 L200 70 L220 50 L300 50" stroke="url(#cg)" strokeWidth="1.5" fill="none" />
+            <path d="M0 150 L80 150 L100 130 L180 130 L200 150 L300 150" stroke="url(#cg)" strokeWidth="1" fill="none" />
+            <path d="M0 250 L60 250 L80 230 L160 230 L180 250 L300 250" stroke="url(#cg)" strokeWidth="0.5" fill="none" />
+            <circle cx="120" cy="50" r="4" fill="#00f0ff" opacity="0.6" /><circle cx="200" cy="50" r="3" fill="#00f0ff" opacity="0.4" />
+            <circle cx="80" cy="150" r="3" fill="#b347ea" opacity="0.5" /><circle cx="180" cy="150" r="2" fill="#b347ea" opacity="0.3" />
+            <circle cx="60" cy="250" r="2.5" fill="#ffb800" opacity="0.4" />
           </svg>
-        </div>
 
-        {/* ── 主内容 ── */}
-        <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="lg:w-[55%] xl:w-1/2">
-            {/* 徽章 */}
-            <div className={`inline-flex items-center gap-2.5 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-sm text-amber-300 mb-8 border border-white/15 shadow-[0_0_20px_rgba(245,158,11,0.1)] ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
-              </span>
-              <StarOutlined />
-              <span className="font-medium tracking-wide">新一代贝壳创业俱乐部</span>
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-20">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#00f0ff]/5 border border-[#00f0ff]/15 text-[#00f0ff] text-xs font-bold tracking-[0.3em] uppercase rounded-full mb-4">◆ MISSION PROTOCOL</span>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight">任务<span className="text-[#00f0ff]">流程</span></h2>
+              <p className="text-gray-500 text-lg max-w-xl mx-auto">完成四个任务，正式加入贝壳创业</p>
             </div>
 
-            {/* 主标题 */}
-            <h1 className={`text-[2.5rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] mb-6 tracking-tight ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`}>
-              让校园创业项目，
-              <br />
-              <span className="text-gradient-gold relative inline-block">
-                被更多人看见
-                <span className="absolute -bottom-1.5 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent rounded-full" />
-              </span>
-              。
-            </h1>
-
-            {/* 副标题 */}
-            <p className={`text-lg sm:text-xl text-gray-200/90 leading-relaxed mb-10 max-w-lg ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
-              面向高校学生创业团队，连接校内创新项目、校外导师、投资人和产业资源，
-              打造真实、高效、开放的校园创投生态平台。
-            </p>
-
-            {/* CTA 按钮组 */}
-            <div className={`flex flex-wrap gap-4 ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-              <Link
-                href="/projects"
-                className="group inline-flex items-center px-8 py-4 bg-accent-gradient text-primary font-semibold rounded-xl hover:shadow-lg hover:shadow-amber-500/25 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-              >
-                浏览创业项目
-                <RightOutlined className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-              <Link
-                href="/register"
-                className="group inline-flex items-center px-8 py-4 bg-white/10 backdrop-blur-md text-white font-semibold rounded-xl border border-white/20 hover:bg-white/[0.15] hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-              >
-                加入我们
-                <ArrowRightOutlined className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-            </div>
-
-            {/* 信任标识 */}
-            <div className={`flex flex-wrap items-center gap-x-8 gap-y-3 mt-12 text-sm text-white/50 ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
-              <div className="flex items-center gap-2">
-                <CheckCircleOutlined className="text-emerald-400 text-base" />
-                <span>官方认证</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+              <div className="hidden lg:flex absolute top-14 left-[12.5%] right-[12.5%] items-center">
+                <div className="w-full h-0.5 bg-gradient-to-r from-[#00f0ff] via-[#b347ea] to-[#00ff88]" />
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircleOutlined className="text-emerald-400 text-base" />
-                <span>免费入驻</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircleOutlined className="text-emerald-400 text-base" />
-                <span>数据安全</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 右侧浮动信息卡 */}
-          <div className="hidden lg:flex flex-col gap-5 absolute right-4 xl:right-10 top-1/2 -translate-y-1/2 w-[17rem]">
-            <div className="glass-card-floating animate-float">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0">
-                  <FireOutlined className="text-white text-lg" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs text-white/60 uppercase tracking-wide font-medium truncate">今日新增项目</div>
-                  <div className="text-2xl font-bold mt-0.5">
-                    <span className="text-gradient-gold">+3</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-card-floating animate-float" style={{ animationDelay: '0.6s' }}>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20 flex-shrink-0">
-                  <ThunderboltOutlined className="text-white text-lg" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs text-white/60 uppercase tracking-wide font-medium truncate">已完成对接</div>
-                  <div className="text-2xl font-bold mt-0.5">
-                    <span className="text-gradient-gold">26笔</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-card-floating animate-float" style={{ animationDelay: '1.2s' }}>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
-                  <SmileOutlined className="text-white text-lg" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs text-white/60 uppercase tracking-wide font-medium truncate">活跃导师</div>
-                  <div className="text-2xl font-bold mt-0.5">
-                    <span className="text-gradient-gold">50+位</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 底部波浪过渡 → 暖沙色 */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-auto">
-            <path d="M0 120L48 108C96 96 192 72 288 64C384 56 480 64 576 70C672 76 768 80 864 78C960 76 1056 68 1152 66C1248 64 1344 68 1392 70L1440 72V120H1392C1344 120 1248 120 1152 120C1056 120 960 120 864 120C768 120 672 120 576 120C480 120 384 120 288 120C192 120 96 120 48 120H0Z" fill="#f7f3ec" />
-          </svg>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-            Stats Section — 数据统计
-          ═══════════════════════════════════════════════════════ */}
-      <section className="relative z-10 -mt-2 pb-24 sm:pb-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="absolute inset-0 bg-aurora opacity-50 pointer-events-none" />
-
-        <div className="relative bg-[#fefcf8]/90 backdrop-blur-xl rounded-[2rem] shadow-[0_8px_40px_rgba(10,42,92,0.06)] px-6 py-10 sm:px-10 sm:py-12 border border-[#e8dfd0]/80 overflow-hidden">
-          <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-[#f7f3ec]/50 via-[#fefcf8] to-[#f7f3ec]/30 pointer-events-none" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-[#d9cebb] to-transparent" />
-
-          <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 sm:gap-x-10">
-            {stats.map((stat, index) => (
-              <div key={index} className="group text-center">
-                <div className="relative mx-auto mb-5">
-                  <div className={`absolute inset-0 rounded-2xl ${stat.bgGlow} blur-xl group-hover:blur-2xl transition-all duration-500 scale-75 group-hover:scale-100`} />
-                  <div className={`relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.gradient} text-white shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
-                    <span className="text-xl">{stat.icon}</span>
-                  </div>
-                </div>
-                <div className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent tracking-tight">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-500 mt-2 leading-relaxed">
-                  <span className="font-semibold text-gray-700">{stat.label}</span>
-                  <span className="mx-1.5 text-gray-300">·</span>
-                  {stat.desc}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-            How It Works — 使用流程
-          ═══════════════════════════════════════════════════════ */}
-      <section className="relative py-24 sm:py-28 overflow-hidden">
-        {/* ── 暖沙色背景层 ── */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f7f3ec] via-[#faf7f2] to-[#f7f3ec]" />
-        <div className="absolute inset-0 bg-dot-matrix opacity-60" />
-        {/* 光斑 */}
-        <div className="absolute top-1/3 -left-24 w-[28rem] h-[28rem] bg-blue-100/40 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 -right-24 w-[24rem] h-[24rem] bg-amber-100/30 rounded-full blur-[100px] pointer-events-none" />
-        {/* 浮动点 */}
-        <div className="floating-dot floating-dot-1 w-1.5 h-1.5 bg-blue-300/40 top-[25%] left-[10%]" />
-        <div className="floating-dot floating-dot-2 w-1 h-1 bg-amber-300/30 top-[60%] right-[15%]" />
-        <div className="floating-dot floating-dot-3 w-2 h-2 bg-purple-300/20 top-[40%] right-[8%]" style={{ animationDelay: '-3s' }} />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 sm:mb-20">
-            <span className="inline-block px-4 py-1.5 bg-primary/5 text-primary/70 text-sm font-medium rounded-full mb-4 tracking-wide">
-              快速开始
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-primary mb-4 tracking-tight">
-              简单四步，开启创业之旅
-            </h2>
-            <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-              快速入驻贝壳青创汇，让您的项目获得更多曝光与资源支持
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-6 relative">
-            {/* 桌面端连接线 */}
-            <div className="hidden lg:flex absolute top-14 left-[12.5%] right-[12.5%] items-center">
-              <div className="w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 relative">
-                <div className="absolute -top-[3px] left-1/4 -translate-x-1/2 w-2.5 h-2.5 bg-amber-400 rounded-full shadow-[0_0_6px_rgba(245,158,11,0.5)]" />
-                <div className="absolute -top-[3px] left-2/4 -translate-x-1/2 w-2.5 h-2.5 bg-purple-400 rounded-full shadow-[0_0_6px_rgba(168,85,247,0.5)]" />
-                <div className="absolute -top-[3px] left-3/4 -translate-x-1/2 w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_6px_rgba(52,211,153,0.5)]" />
-              </div>
-            </div>
-
-            {steps.map((step, index) => (
-              <div key={index} className="relative group">
-                <div className="relative bg-[#fefcf8] rounded-2xl px-6 pt-14 pb-7 shadow-[0_2px_12px_rgba(10,42,92,0.03)] hover:shadow-[0_12px_32px_rgba(10,42,92,0.08)] transition-all duration-500 hover:-translate-y-1.5 border border-[#e8dfd0] h-full">
-                  <div className="absolute -top-7 left-1/2 -translate-x-1/2">
-                    <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center text-white text-2xl shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
-                      {step.icon}
+              {steps.map((s, i) => {
+                const nc = neonC(s.neon); const offsets = ['lg:-translate-y-3', 'lg:translate-y-4', 'lg:-translate-y-5', 'lg:translate-y-2']; return (
+                  <div key={i} className={`relative group pt-8 ${offsets[i]}`}>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                      <div className={`w-14 h-14 rounded-2xl ${nc.bg} ${nc.b} border-2 flex items-center justify-center ${nc.t} text-xl ${nc.g} group-hover:scale-110 transition-all duration-300`}>{s.icon}</div>
+                    </div>
+                    <div className="holo-card pt-14 pb-6 px-5 h-full text-center">
+                      <div className="text-xs font-bold tracking-[0.3em] text-gray-600 uppercase mb-3">Phase {s.num}</div>
+                      <h3 className="text-lg font-bold text-white mb-2">{s.title}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
+                      <div className={`mt-4 w-8 h-0.5 mx-auto rounded-full ${nc.bg} opacity-0 group-hover:opacity-100 group-hover:w-12 transition-all duration-500`} style={{ backgroundColor: s.neon === 'cyan' ? '#00f0ff' : s.neon === 'amber' ? '#ffb800' : s.neon === 'purple' ? '#b347ea' : '#00ff88' }} />
                     </div>
                   </div>
-                  <div className="text-center mb-3">
-                    <span className="text-xs font-bold tracking-[0.2em] text-gray-300 uppercase">Step {step.number}</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-primary text-center mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed text-center max-w-[15rem] mx-auto">
-                    {step.description}
-                  </p>
-                  <div className={`mt-5 w-12 h-1 mx-auto rounded-full bg-gradient-to-r ${step.gradient} opacity-0 group-hover:opacity-100 group-hover:w-16 transition-all duration-500`} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-            Features Section — 平台特色
-          ═══════════════════════════════════════════════════════ */}
-      <section className="relative py-24 sm:py-28 overflow-hidden">
-        {/* ── 暖色调背景层 ── */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#faf7f2] via-[#f5f0e8]/50 to-[#faf7f2]" />
-        <div className="absolute inset-0 bg-hex-pattern opacity-40" />
-        {/* 动态光斑 */}
-        <div className="absolute top-0 right-0 w-[42rem] h-[42rem] bg-blue-100/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none animate-morph-blob" />
-        <div className="absolute bottom-0 left-0 w-[36rem] h-[36rem] bg-amber-100/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none animate-morph-blob-reverse" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20rem] h-[20rem] bg-purple-100/15 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
-        {/* 浮动点 */}
-        <div className="floating-dot floating-dot-1 w-1.5 h-1.5 bg-blue-400/30 top-[15%] right-[25%]" />
-        <div className="floating-dot floating-dot-2 w-1 h-1 bg-amber-400/25 bottom-[20%] left-[20%]" />
-        <div className="floating-dot floating-dot-3 w-2 h-2 bg-emerald-400/20 top-[50%] right-[12%]" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 sm:mb-20">
-            <span className="inline-block px-4 py-1.5 bg-accent/10 text-accent text-sm font-medium rounded-full mb-4 tracking-wide">
-              核心优势
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-primary mb-4 tracking-tight">
-              为什么选择贝壳青创汇
-            </h2>
-            <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-              专为校园创业者打造的一站式创业服务平台，连接资源，助力成长
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="group relative bg-[#fefcf8]/90 backdrop-blur-sm rounded-2xl p-6 sm:p-7 shadow-[0_2px_12px_rgba(10,42,92,0.03)] hover:shadow-[0_16px_40px_rgba(10,42,92,0.08)] transition-all duration-500 hover:-translate-y-2 border border-[#e8dfd0] overflow-hidden"
-              >
-                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${feature.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} />
-                <div className={`absolute -top-8 -right-8 w-24 h-24 ${feature.bgGlow} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-                <div className="relative">
-                  <div className={`w-[52px] h-[52px] rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white text-xl mb-5 shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300`}>
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-lg font-bold text-primary mb-3 group-hover:text-primary-light transition-colors duration-300">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {feature.description}
-                  </p>
-
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-            Featured Projects — 精选项目展示
-          ═══════════════════════════════════════════════════════ */}
-      <section className="relative py-24 sm:py-28 overflow-hidden">
-        {/* ── 暖沙色背景层 ── */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f7f3ec]/80 via-[#faf7f2] to-[#f7f3ec]/80" />
-        <div className="absolute inset-0 bg-grid-diagonal opacity-50" />
-        <div className="absolute inset-0 bg-aurora-animated opacity-40" />
-        {/* 光斑 */}
-        <div className="absolute top-0 left-0 w-[30rem] h-[30rem] bg-blue-100/40 rounded-full blur-[120px] pointer-events-none -translate-x-1/4 -translate-y-1/4" />
-        <div className="absolute bottom-0 right-0 w-[24rem] h-[24rem] bg-amber-100/30 rounded-full blur-[100px] pointer-events-none translate-x-1/4 translate-y-1/4" />
-        {/* 浮动点 */}
-        <div className="floating-dot floating-dot-1 w-1 h-1 bg-blue-400/25 top-[10%] right-[30%]" />
-        <div className="floating-dot floating-dot-2 w-1.5 h-1.5 bg-amber-400/20 bottom-[15%] left-[25%]" style={{ animationDelay: '-2s' }} />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-5">
-            <div>
-              <span className="inline-block px-4 py-1.5 bg-blue-100/80 text-blue-600 text-sm font-medium rounded-full mb-4 tracking-wide">
-                项目展示
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-primary tracking-tight mb-2">
-                精选校园创业项目
-              </h2>
-              <p className="text-gray-500 text-base sm:text-lg">发现来自校园的创新力量</p>
+                );
+              })}
             </div>
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 text-primary font-semibold hover:text-accent transition-colors group self-start sm:self-end flex-shrink-0"
-            >
-              查看全部项目
-              <span className="w-8 h-8 rounded-full bg-primary/5 group-hover:bg-accent/10 flex items-center justify-center transition-all duration-300">
-                <ArrowRightOutlined className="text-sm group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </Link>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════
+              FEATURES — 突破边框布局
+           ════════════════════════════════════════════ */}
+        <section className="relative py-24 sm:py-28 overflow-visible">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(179,71,234,0.04),transparent_60%)]" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">{globalStars.slice(50, 100).map((p, i) => (<div key={i} className="absolute rounded-full" style={{ width: `${p.w * 0.6}px`, height: `${p.h * 0.6}px`, top: `${p.top}%`, left: `${p.left}%`, backgroundColor: p.color, opacity: p.opacity * 0.5 }} />))}</div>
+
+          {/* 大型六边形装饰 */}
+          <div className="absolute right-0 top-0 pointer-events-none opacity-[0.03]" style={{ transform: `translateY(${scrollY * 0.05}px)` }}>
+            <svg width="400" height="400" viewBox="0 0 400 400"><polygon points="200,10 370,110 370,290 200,390 30,290 30,110" fill="none" stroke="#b347ea" strokeWidth="1.5" /><polygon points="200,60 320,130 320,270 200,340 80,270 80,130" fill="none" stroke="#b347ea" strokeWidth="0.8" opacity="0.5" /></svg>
           </div>
 
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border-[3px] border-primary/10 border-t-primary animate-spin" />
-                <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-r-accent/30 animate-spin" style={{ animationDuration: '1.5s' }} />
-              </div>
-              <p className="text-gray-400 text-sm animate-pulse mt-2">正在加载精选项目...</p>
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-20">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#b347ea]/5 border border-[#b347ea]/15 text-[#b347ea] text-xs font-bold tracking-[0.3em] uppercase rounded-full mb-4">◆ CORE TECHNOLOGY</span>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight">平台<span className="text-[#b347ea]">核心</span></h2>
+              <p className="text-gray-500 text-lg max-w-xl mx-auto">四大核心科技，为校园创业提供全方位支持</p>
             </div>
-          ) : featuredProjects.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-              {featuredProjects.map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.id}`}
-                  className="group bg-[#fefcf8]/90 backdrop-blur-sm rounded-2xl shadow-[0_2px_12px_rgba(10,42,92,0.03)] hover:shadow-[0_16px_40px_rgba(10,42,92,0.08)] transition-all duration-500 overflow-hidden border border-[#e8dfd0] hover:-translate-y-2 flex flex-col"
-                >
-                  <div className="relative h-40 bg-gradient-to-br from-[#f5f0e8] to-[#efe8dc] flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {project.cover_image ? (
-                      <>
-                        <img
-                          src={project.cover_image}
-                          alt={project.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-16 h-16 rounded-2xl bg-[#f7f3ec] flex items-center justify-center group-hover:bg-primary/10 transition-colors duration-300">
-                          <RocketOutlined className="text-3xl text-primary/20 group-hover:text-primary/35 group-hover:scale-110 transition-all duration-300" />
-                        </div>
-                      </div>
+
+            {/* 非对称布局 + 定时聚光灯轮播 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {features.map((f, i) => {
+                const nc = neonC(f.neon);
+                const isActive = activeFeature === i;
+                return (
+                  <div
+                    key={i}
+                    className={`holo-card p-6 group transition-all duration-700 overflow-hidden ${isActive ? 'scale-[1.04] z-10 shadow-[0_0_30px_rgba(0,240,255,0.15)]' : 'scale-100 opacity-70 hover:opacity-100'} ${i % 2 === 1 ? 'lg:translate-y-3' : 'lg:-translate-y-2'}`}
+                    style={{ ...(isActive ? { borderColor: f.neon === 'cyan' ? 'rgba(0,240,255,0.5)' : f.neon === 'amber' ? 'rgba(255,184,0,0.4)' : f.neon === 'purple' ? 'rgba(179,71,234,0.4)' : 'rgba(0,255,136,0.4)' } : {}), transition: 'transform 0.1s ease-out, opacity 0.7s, box-shadow 0.7s, border-color 0.7s', willChange: 'transform' }}
+                    onMouseMove={handleCardTilt}
+                    onMouseLeave={handleCardLeave}
+                  >
+                    <div className="tilt-glow absolute inset-0 pointer-events-none" />
+                    {/* 活跃指示条 */}
+                    {isActive && (
+                      <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-transparent via-current to-transparent"
+                        style={{ color: f.neon === 'cyan' ? '#00f0ff' : f.neon === 'amber' ? '#ffb800' : f.neon === 'purple' ? '#b347ea' : '#00ff88' }} />
                     )}
-                    <div className="absolute top-3 right-3">
-                      <span className="px-3 py-1.5 bg-accent-gradient text-white text-xs font-semibold rounded-full shadow-[0_2px_8px_rgba(245,158,11,0.3)]">
-                        种子计划
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-bold text-primary group-hover:text-primary-light transition-colors duration-300 mb-2 line-clamp-1">
-                      {project.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-4 flex-1">
-                      {project.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tags?.split(',').slice(0, 2).map((tag, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-[#f5f0e8] text-gray-500 rounded-lg text-xs font-medium group-hover:bg-[#efe8dc] transition-colors duration-300">
-                          {tag.trim()}
-                        </span>
-                      ))}
-                      {project.team && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-medium">
-                          <CheckCircleOutlined className="text-[10px]" />
-                          已认证
-                        </span>
-                      )}
+                    <div className={`w-12 h-12 rounded-2xl ${nc.bg} ${nc.b} border flex items-center justify-center ${nc.t} text-xl mb-4 flex-shrink-0 transition-all duration-500 ${isActive ? `scale-110 ${nc.g}` : 'group-hover:scale-110'}`}>
+                      {f.icon}
                     </div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-base font-bold text-white">{f.title}</h3>
+                      {isActive && <span className={`text-[10px] font-mono tracking-wider animate-pulse ${nc.t}`}>◆ ACTIVE</span>}
+                    </div>
+                    <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
                   </div>
-                </Link>
+                );
+              })}
+            </div>
+
+            {/* 轮播指示器 */}
+            <div className="flex justify-center gap-2 mt-8">
+              {features.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveFeature(i)}
+                  className={`transition-all duration-500 rounded-full ${activeFeature === i
+                    ? 'w-8 h-2 bg-gradient-to-r from-[#00f0ff] to-[#b347ea] shadow-[0_0_10px_rgba(0,240,255,0.5)]'
+                    : 'w-2 h-2 bg-white/10 hover:bg-white/25'
+                    }`}
+                />
               ))}
             </div>
-          ) : (
-            <div className="text-center py-20 sm:py-24 bg-[#fefcf8]/90 backdrop-blur-sm rounded-3xl border border-dashed border-[#d9cebb]">
-              <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#f5f0e8] flex items-center justify-center">
-                <RocketOutlined className="text-3xl text-[#d9cebb]" />
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════
+              PROJECTS
+           ════════════════════════════════════════════ */}
+        <section className="relative py-24 sm:py-28 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,184,0,0.03),transparent_60%)]" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">{globalStars.slice(70, 120).map((p, i) => (<div key={i} className="absolute rounded-full" style={{ width: `${p.w * 0.6}px`, height: `${p.h * 0.6}px`, top: `${p.top}%`, left: `${p.left}%`, backgroundColor: p.color, opacity: p.opacity * 0.5 }} />))}</div>
+
+          {/* 装饰斜线 */}
+          <svg className="absolute right-10 bottom-10 opacity-[0.04] pointer-events-none w-64 h-64" viewBox="0 0 200 200">
+            <line x1="0" y1="200" x2="100" y2="100" stroke="#ffb800" strokeWidth="1" /><line x1="100" y1="100" x2="200" y2="200" stroke="#ffb800" strokeWidth="1" />
+            <line x1="20" y1="200" x2="100" y2="120" stroke="#ffb800" strokeWidth="0.5" opacity="0.5" /><line x1="100" y1="120" x2="180" y2="200" stroke="#ffb800" strokeWidth="0.5" opacity="0.5" />
+            <circle cx="100" cy="100" r="4" fill="#ffb800" opacity="0.4" />
+          </svg>
+
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-14 gap-4">
+              <div>
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#ffb800]/5 border border-[#ffb800]/15 text-[#ffb800] text-xs font-bold tracking-[0.3em] uppercase rounded-full mb-4">◆ FEATURED MISSIONS</span>
+                <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight">精选<span className="text-[#ffb800]">项目</span></h2>
               </div>
-              <p className="text-gray-400 text-lg font-medium">暂无精选项目</p>
-              <p className="text-gray-300 text-sm mt-1.5">精彩项目即将上线，敬请期待</p>
+              <Link href="/projects" className="inline-flex items-center gap-2 text-[#ffb800] font-bold hover:text-[#ffd000] transition-colors group">查看更多项目<ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" /></Link>
             </div>
-          )}
-        </div>
-      </section>
 
-      {/* ═══════════════════════════════════════════════════════
-            CTA Section — 行动号召
-          ═══════════════════════════════════════════════════════ */}
-      <section className="relative py-28 sm:py-32 bg-primary-gradient overflow-hidden">
-        {/* ── 底层纹理 ── */}
-        <div className="absolute inset-0 bg-grid opacity-[0.05]" />
-        <div className="absolute inset-0 bg-dot-matrix-light opacity-30" />
-        <div className="absolute inset-0 bg-hex-pattern opacity-[0.03]" />
-
-        {/* ── 极光 ── */}
-        <div className="absolute inset-0 bg-aurora-dark opacity-60" />
-
-        {/* ── 动态变形光斑 ── */}
-        <div className="absolute top-0 right-1/4 w-[36rem] h-[36rem] bg-amber-400/6 rounded-full blur-[150px] animate-morph-blob" />
-        <div className="absolute bottom-0 left-1/4 w-[28rem] h-[28rem] bg-blue-400/5 rounded-full blur-[120px] animate-morph-blob-reverse" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[24rem] h-[24rem] bg-purple-400/3 rounded-full blur-[100px] animate-pulse-slow" />
-
-        {/* ── 浮动装饰点 ── */}
-        <div className="floating-dot floating-dot-1 w-1 h-1 bg-amber-300/30 top-[15%] right-[20%]" />
-        <div className="floating-dot floating-dot-2 w-1.5 h-1.5 bg-white/20 top-[70%] left-[15%]" />
-        <div className="floating-dot floating-dot-3 w-1 h-1 bg-blue-300/25 top-[40%] right-[35%]" style={{ animationDelay: '-3s' }} />
-        <div className="floating-dot floating-dot-2 w-2 h-2 bg-white/15 top-[25%] left-[35%]" style={{ animationDelay: '-1s' }} />
-        <div className="floating-dot floating-dot-1 w-1 h-1 bg-emerald-300/25 bottom-[20%] right-[25%]" style={{ animationDelay: '-5s' }} />
-
-        {/* ── 装饰几何 ── */}
-        <div className="absolute top-10 left-10 opacity-[0.03]">
-          <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="0" width="40" height="40" rx="8" fill="white" />
-            <rect x="45" y="0" width="40" height="40" rx="8" fill="white" />
-            <rect x="0" y="45" width="40" height="40" rx="8" fill="white" />
-          </svg>
-        </div>
-        <div className="absolute bottom-10 right-10 opacity-[0.03]">
-          <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="20" cy="20" r="16" fill="white" />
-            <circle cx="60" cy="20" r="16" fill="white" />
-            <circle cx="40" cy="60" r="16" fill="white" />
-          </svg>
-        </div>
-
-        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 tracking-tight leading-[1.15]">
-            从一个想法，
-            <br className="sm:hidden" />
-            <span className="text-gradient-gold">到一个真正的创业项目</span>
-          </h2>
-
-          <p className="text-gray-200/80 text-base sm:text-lg mb-12 leading-relaxed max-w-xl mx-auto">
-            在这里，同学可以发现项目，团队可以发布项目，导师可以辅导项目，
-            投资人可以发现项目，资源方可以支持项目。
-            <br className="hidden sm:block" />
-            贝壳创业俱乐部，陪伴校园创业团队从种子阶段走向更大的舞台。
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-16">
-            <Link
-              href={isLoggedIn ? '/dashboard' : '/register'}
-              className="group inline-flex items-center px-10 py-4 bg-accent-gradient text-primary font-bold rounded-xl hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {isLoggedIn ? '马上行动' : '立即加入'}
-              <ArrowRightOutlined className="ml-2.5 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-            <Link
-              href="/about"
-              className="group inline-flex items-center px-10 py-4 bg-white/10 backdrop-blur-md text-white font-semibold rounded-xl border border-white/20 hover:bg-white/[0.15] hover:border-white/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              了解更多
-              <ArrowRightOutlined className="ml-2.5 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
+            {loading ? (
+              <div className="flex justify-center py-20"><div className="relative w-14 h-14"><div className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/20 border-t-[#00f0ff] animate-spin" /><div className="absolute inset-[6px] rounded-full border-2 border-[#b347ea]/20 border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }} /></div></div>
+            ) : featuredProjects.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {featuredProjects.map((p, i) => (<Link key={p.id} href={`/projects/${p.id}`} className={`holo-card overflow-hidden group flex flex-col card-enter ${i === 0 ? 'lg:row-span-1 lg:col-span-1' : ''}`}><div className="relative h-40 bg-gradient-to-br from-[#0a0a1a] to-[#101025] flex items-center justify-center overflow-hidden">{p.cover_image ? <img src={p.cover_image} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /> : <div className={`w-16 h-16 rounded-2xl ${neonC('cyan').bg} ${neonC('cyan').b} border flex items-center justify-center`}><RocketOutlined className="text-2xl text-[#00f0ff]/50" /></div>}<div className="absolute top-3 right-3"><span className="px-3 py-1 bg-gradient-to-r from-[#ffb800] to-[#ff8c00] text-[#050510] text-xs font-black rounded-full">招募中</span></div><div className="absolute inset-0 bg-scanlines opacity-30 pointer-events-none" /></div><div className="p-5 flex flex-col flex-1"><h3 className="font-bold text-white group-hover:text-[#00f0ff] transition-colors mb-2 line-clamp-1">{p.title}</h3><p className="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-4 flex-1">{p.description}</p><div className="flex flex-wrap gap-2">{p.tags?.split(',').slice(0, 2).map((t: string, j: number) => <span key={j} className="px-2 py-1 bg-white/[0.04] border border-white/[0.06] text-gray-500 rounded text-xs">{t.trim()}</span>)}{p.team && <span className="px-2 py-1 bg-[#00ff88]/10 border border-[#00ff88]/20 text-[#00ff88] rounded text-xs font-medium">✓ 已认证</span>}</div></div></Link>))}
+              </div>
+            ) : (<div className="text-center py-20 holo-card"><div className={`w-16 h-16 mx-auto mb-4 rounded-2xl ${neonC('cyan').bg} ${neonC('cyan').b} border flex items-center justify-center`}><RocketOutlined className="text-2xl text-[#00f0ff]/40" /></div><p className="text-gray-500">暂无精选项目</p></div>)}
           </div>
+        </section>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-white/40 text-sm">
-            <div className="flex items-center gap-2">
-              <SafetyCertificateOutlined className="text-emerald-400/60" />
-              <span>官方认证平台</span>
-            </div>
-            <div className="w-1 h-1 bg-white/20 rounded-full hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <TeamOutlined className="text-blue-400/60" />
-              <span>100+ 活跃团队</span>
-            </div>
-            <div className="w-1 h-1 bg-white/20 rounded-full hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <FundOutlined className="text-amber-400/60" />
-              <span>20+ 合作机构</span>
-            </div>
+        {/* ════════════════════════════════════════════
+              CTA
+           ════════════════════════════════════════════ */}
+        <section className="relative py-28 sm:py-32 overflow-hidden bg-[#0a0a1a]">
+          {/* 能量环 */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="w-[600px] h-[600px] rounded-full border border-[#00f0ff]/5 animate-pulse-slow" />
+            <div className="absolute inset-[50px] rounded-full border border-[#b347ea]/8 animate-pulse-slow" style={{ animationDelay: '1s' }} />
+            <div className="absolute inset-[120px] rounded-full border border-[#ffb800]/10 animate-pulse-slow" style={{ animationDelay: '2s' }} />
           </div>
-        </div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30rem] h-[30rem] bg-[#00f0ff]/4 rounded-full blur-[150px]" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[40rem] h-[20rem] bg-[#b347ea]/3 rounded-full blur-[120px]" />
+          <div className="absolute inset-0">{floatingParticles.map((p, i) => (<div key={i} className="absolute rounded-full" style={{ width: `${p.w}px`, height: `${p.h}px`, top: `${p.top}%`, left: `${p.left}%`, backgroundColor: '#00f0ff', opacity: p.opacity, animation: `float ${p.duration}s ease-in-out infinite`, animationDelay: `${p.delay}s` }} />))}</div>
 
-        {/* 顶部波浪过渡（从暖沙到深蓝） */}
-        <div className="absolute top-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-auto">
-            <path d="M0 80L48 68C96 56 192 32 288 26C384 20 480 32 576 38C672 44 768 44 864 40C960 36 1056 28 1152 24C1248 20 1344 20 1392 20L1440 20V80H1392C1344 80 1248 80 1152 80C1056 80 960 80 864 80C768 80 672 80 576 80C480 80 384 80 288 80C192 80 96 80 48 80H0Z" fill="#f7f3ec" opacity="0.5" />
-          </svg>
-        </div>
-      </section>
+          {/* 倾斜装饰条 */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" style={{ transform: 'skewY(-1deg)' }} />
+
+          <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-sm text-[#00f0ff] mb-8"><FireOutlined /> READY TO LAUNCH</div>
+            <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white mb-6 tracking-tight leading-[1.05]">准备好<span className="bg-gradient-to-r from-[#00f0ff] to-[#b347ea] bg-clip-text text-transparent">启航</span>了吗</h2>
+            <p className="text-gray-400 text-lg mb-12 max-w-lg mx-auto leading-relaxed">加入贝壳创业舰队，让你的项目从校园走向星辰大海</p>
+            <div className="flex flex-wrap justify-center gap-4 mb-16">
+              <Link href={isLoggedIn ? '/dashboard' : '/register'} className="group relative inline-flex items-center px-10 py-4 bg-gradient-to-r from-[#00f0ff] to-[#b347ea] text-white font-bold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(0,240,255,0.35)]"><span className="relative z-10 flex items-center gap-2">{isLoggedIn ? '进入控制台' : '立即加入舰队'}<RocketOutlined className="group-hover:translate-x-1 transition-transform" /></span></Link>
+              <Link href="/about" className="group relative inline-flex items-center px-10 py-4 bg-transparent text-white font-bold rounded-xl border border-white/10 hover:border-[#00f0ff]/40 transition-all duration-300 hover:scale-105">了解更多<ArrowRightOutlined className="ml-2 group-hover:translate-x-1 transition-transform" /></Link>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600"><span className="flex items-center gap-2"><SafetyCertificateOutlined className="text-[#00ff88]" />官方认证平台</span><span className="w-1 h-1 bg-gray-800 rounded-full" /><span className="flex items-center gap-2"><TeamOutlined className="text-[#00f0ff]" />100+ 活跃团队</span><span className="w-1 h-1 bg-gray-800 rounded-full" /><span className="flex items-center gap-2"><FundOutlined className="text-[#ffb800]" />20+ 合作机构</span></div>
+          </div>
+        </section>
+      </div>
+
+      {/* ── 点击涟漪 ── */}
+      {ripples.map(r => (
+        <div key={r.id} className="fixed pointer-events-none z-[9997] rounded-full"
+          style={{
+            left: r.x, top: r.y,
+            border: '1.5px solid rgba(0,240,255,0.5)',
+            boxShadow: '0 0 15px rgba(0,240,255,0.4)',
+            transform: 'translate(-50%,-50%)',
+            animation: 'ripple-expand 0.8s ease-out forwards',
+          }}
+        />
+      ))}
+
+      {/* ── 拖尾 + 光标 ── */}
+      {trail.map((p) => { const age = (trailSeq - p.id) / trailLen; if (age > 1 || age < 0 || p.x < 0) return null; const t = age; const r = Math.round(0 + t * 179); const g = Math.round(240 - t * 210); const b = Math.round(255 - t * 120 + (t > 0.5 ? (t - 0.5) * 2 * 135 : 0)); const color = `rgb(${r},${g},${b})`; const size = (1 - t) * 5 + 1.5; const alpha = (1 - t) * 0.85 + 0.15; return (<div key={p.id} className="fixed rounded-full pointer-events-none z-[9998]" style={{ width: `${size}px`, height: `${size}px`, left: `${p.x}px`, top: `${p.y}px`, background: `radial-gradient(circle, ${color} 0%, transparent 60%)`, boxShadow: `0 0 ${size * 4}px ${color}, 0 0 ${size * 2}px #fff`, opacity: alpha, transform: 'translate(-50%,-50%)' }} />); })}
+      <div className="fixed pointer-events-none z-[9999]" style={{ left: `${cursorPixel.x}px`, top: `${cursorPixel.y}px`, transform: 'translate(-50%,-50%)' }}>
+        <div className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00f0ff]/10 blur-xl animate-pulse-slow" />
+        <div className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#00f0ff]/30 animate-spin" style={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%)', animationDuration: '3s' }} />
+        <div className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#b347ea]/20 animate-spin" style={{ clipPath: 'polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%)', animationDuration: '3s', animationDirection: 'reverse' }} />
+        <div className="absolute w-8 h-[1px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-transparent via-[#00f0ff]/40 to-transparent" />
+        <div className="absolute h-8 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-b from-transparent via-[#00f0ff]/40 to-transparent" />
+        <div className="absolute w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full shadow-[0_0_20px_rgba(0,240,255,0.9),0_0_40px_rgba(0,240,255,0.5)]" />
+      </div>
     </div>
   );
 }

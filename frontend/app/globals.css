@@ -345,6 +345,170 @@ body {
     background-size: 200% 200%;
     animation: aurora-drift 20s ease-in-out infinite;
   }
+
+  /* ═══════════════════════════════════════════════
+        Gaming/Cyberpunk 游戏风格工具类
+       ═══════════════════════════════════════════════ */
+
+  /* 霓虹文字发光 */
+  .text-neon-cyan {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5), 0 0 30px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.15);
+  }
+
+  .text-neon-amber {
+    text-shadow: 0 0 10px rgba(255, 184, 0, 0.5), 0 0 30px rgba(255, 184, 0, 0.3);
+  }
+
+  .text-neon-purple {
+    text-shadow: 0 0 10px rgba(179, 71, 234, 0.5), 0 0 30px rgba(179, 71, 234, 0.3);
+  }
+
+  /* 霓虹边框 */
+  .border-neon-cyan {
+    border-color: rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.1), inset 0 0 10px rgba(0, 240, 255, 0.05);
+  }
+
+  .border-neon-amber {
+    border-color: rgba(255, 184, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 184, 0, 0.1), inset 0 0 10px rgba(255, 184, 0, 0.05);
+  }
+
+  /* 扫描线效果 */
+  .bg-scanlines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 240, 255, 0.015) 2px,
+      rgba(0, 240, 255, 0.015) 4px
+    );
+  }
+
+  /* 全息卡片 */
+  .holo-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 240, 255, 0.12);
+    border-radius: 1.25rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .holo-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(0, 240, 255, 0.35);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.4);
+    transform: translateY(-4px);
+  }
+
+  /* 能量条 */
+  .energy-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+  }
+
+  .energy-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #00f0ff, #b347ea);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    animation: energy-pulse 2s ease-in-out infinite;
+  }
+
+  /* 六边形装饰 */
+  .hex-decoration {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  /* 故障效果 */
+  .glitch-text {
+    position: relative;
+  }
+
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch-text::before {
+    animation: glitch-1 2s infinite linear alternate-reverse;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    color: #ff00ff;
+    opacity: 0.5;
+  }
+
+  .glitch-text::after {
+    animation: glitch-2 3s infinite linear alternate-reverse;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    color: #00f0ff;
+    opacity: 0.5;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+      Gaming 关键帧动画
+     ═══════════════════════════════════════════════ */
+
+@keyframes energy-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes glitch-1 {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitch-2 {
+  0% { transform: translate(0); }
+  25% { transform: translate(2px, -1px); }
+  50% { transform: translate(-1px, 2px); }
+  75% { transform: translate(-2px, -1px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.6; }
+}
+
+@keyframes star-drift {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+}
+
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+}
+
+@keyframes hex-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(0, 240, 255, 0.15); box-shadow: 0 0 15px rgba(0, 240, 255, 0.05); }
+  50% { border-color: rgba(0, 240, 255, 0.35); box-shadow: 0 0 25px rgba(0, 240, 255, 0.12); }
+}
+
+@keyframes ripple-expand {
+  0% { width: 0px; height: 0px; opacity: 1; border-width: 2px; }
+  100% { width: 200px; height: 200px; opacity: 0; border-width: 0.5px; }
 }
 
 @keyframes shimmer {

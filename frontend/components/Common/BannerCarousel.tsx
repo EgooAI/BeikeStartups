@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { bannerApi } from '@/lib/api';
 import { LeftOutlined, RightOutlined, PictureOutlined } from '@ant-design/icons';
 import Link from 'next/link';
@@ -19,6 +19,11 @@ export default function BannerCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  const [progress, setProgress] = useState(0);
+  const progressRef = useRef<number>(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const AUTO_PLAY_MS = 5000;
+  const PROGRESS_STEP = 100 / (AUTO_PLAY_MS / 50);
 
   const fetchBanners = async () => {
     try {
@@ -41,93 +46,167 @@ export default function BannerCarousel() {
     setFailedImages((prev) => new Set(prev).add(bannerId));
   };
 
+  const goTo = useCallback((index: number) => {
+    setCurrentIndex(index);
+    setProgress(0);
+    progressRef.current = 0;
+  }, []);
+
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % banners.length);
+    setProgress(0);
+    progressRef.current = 0;
   }, [banners.length]);
 
   const goToPrev = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
+    setProgress(0);
+    progressRef.current = 0;
   }, [banners.length]);
 
+  // 自动轮播 + 进度条
   useEffect(() => {
     if (banners.length <= 1) return;
-    const interval = setInterval(goToNext, 5000);
-    return () => clearInterval(interval);
-  }, [banners.length, goToNext]);
 
-  if (loading) {
-    return null;
-  }
+    const progressTimer = setInterval(() => {
+      progressRef.current += PROGRESS_STEP;
+      setProgress(Math.min(progressRef.current, 100));
+    }, 50);
 
-  if (banners.length === 0) {
-    return null;
-  }
+    intervalRef.current = setInterval(() => {
+      goToNext();
+    }, AUTO_PLAY_MS);
+
+    return () => {
+      clearInterval(progressTimer);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [banners.length, goToNext, PROGRESS_STEP]);
+
+  if (loading) return null;
+  if (banners.length === 0) return null;
 
   const currentBanner = banners[currentIndex];
-  const showFallback = currentBanner && failedImages.has(currentBanner.id);
 
   return (
-    <div className="relative w-full h-[400px] md:h-[450px] lg:h-[500px] overflow-hidden">
-      {banners.map((banner, index) => (
-        <Link
-          key={banner.id}
-          href={banner.link_url || '/'}
-          className={`absolute inset-0 transition-opacity duration-700 ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+    <div className="relative w-full h-[420px] sm:h-[480px] lg:h-[560px] overflow-hidden bg-[#050510]">
+      {/* 轮播图 */}
+      {banners.map((banner, index) => {
+        const isActive = index === currentIndex;
+        const showFallback = failedImages.has(banner.id);
+
+        return (
+          <Link
+            key={banner.id}
+            href={banner.link_url || '/'}
+            className={`absolute inset-0 transition-all duration-700 ease-out ${
+              isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0 pointer-events-none'
             }`}
-        >
-          {failedImages.has(banner.id) ? (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a7c] flex flex-col items-center justify-center">
-              <PictureOutlined className="text-6xl text-white/50 mb-4" />
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 drop-shadow-lg px-8 text-center">
-                {banner.title}
-              </h2>
-            </div>
-          ) : (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${banner.image_url})` }}
-              onError={() => handleImageError(banner.id)}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-            </div>
-          )}
-          <div className="relative h-full flex items-center">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-              <div className="max-w-xl">
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 drop-shadow-lg">
+          >
+            {/* 图片 / 占位 */}
+            {showFallback ? (
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a1a] via-[#101025] to-[#050510] flex flex-col items-center justify-center">
+                <div className="w-20 h-20 rounded-2xl bg-white/[0.03] border border-[#00f0ff]/10 flex items-center justify-center mb-4">
+                  <PictureOutlined className="text-4xl text-[#00f0ff]/30" />
+                </div>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2 text-center px-8">
                   {banner.title}
                 </h2>
+                <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-[#00f0ff]/30 to-transparent" />
+              </div>
+            ) : (
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] ease-out"
+                style={{
+                  backgroundImage: `url(${banner.image_url})`,
+                  transform: isActive ? 'scale(1)' : 'scale(1.1)',
+                }}
+                onError={() => handleImageError(banner.id)}
+              >
+                {/* 多层渐变遮罩 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#050510]/95 via-[#050510]/60 to-[#050510]/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-[#050510]/30" />
+                {/* 扫描线 */}
+                <div className="absolute inset-0 bg-scanlines opacity-40" />
+                {/* 底部发光边 */}
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/40 to-transparent" />
+              </div>
+            )}
+
+            {/* 文字内容 */}
+            <div className="relative h-full flex items-center">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div className={`max-w-xl transition-all duration-700 delay-200 ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+                  {/* 角标 */}
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[#00f0ff] text-xs font-bold tracking-wider uppercase rounded-full mb-4">
+                    ◆ Featured
+                  </span>
+                  <h2 className="text-2xl md:text-3xl lg:text-5xl font-black text-white mb-3 leading-tight drop-shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                    {banner.title}
+                  </h2>
+                  {/* 装饰线 */}
+                  <div className="w-20 h-0.5 bg-gradient-to-r from-[#00f0ff] to-transparent mb-4" />
+                </div>
               </div>
             </div>
-          </div>
-        </Link>
-      ))}
+          </Link>
+        );
+      })}
 
+      {/* 底部信息栏 */}
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+          <div className="flex items-end justify-between">
+            {/* 进度条 + 计数器 */}
+            <div className="flex items-center gap-4">
+              {/* 页码 */}
+              <span className="text-white/60 text-sm font-mono tracking-wider">
+                <span className="text-[#00f0ff] font-bold">{String(currentIndex + 1).padStart(2, '0')}</span>
+                <span className="text-white/20"> / {String(banners.length).padStart(2, '0')}</span>
+              </span>
+
+              {/* 进度条 */}
+              <div className="w-32 sm:w-48 h-0.5 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#00f0ff] to-[#b347ea] rounded-full transition-all duration-50 ease-linear"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+
+            {/* 导航圆点 */}
+            <div className="flex items-center gap-2">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goTo(index)}
+                  className={`transition-all duration-300 rounded-full ${
+                    index === currentIndex
+                      ? 'w-8 h-2 bg-[#00f0ff] shadow-[0_0_10px_rgba(0,240,255,0.5)]'
+                      : 'w-2 h-2 bg-white/20 hover:bg-white/40'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 左右箭头 */}
       {banners.length > 1 && (
         <>
           <button
             onClick={goToPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center justify-center text-white"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-[#00f0ff]/40 hover:bg-white/[0.06] transition-all duration-300 flex items-center justify-center text-white/60 hover:text-[#00f0ff] group"
           >
-            <LeftOutlined />
+            <LeftOutlined className="group-hover:-translate-x-0.5 transition-transform" />
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center justify-center text-white"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-[#00f0ff]/40 hover:bg-white/[0.06] transition-all duration-300 flex items-center justify-center text-white/60 hover:text-[#00f0ff] group"
           >
-            <RightOutlined />
+            <RightOutlined className="group-hover:translate-x-0.5 transition-transform" />
           </button>
-
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/70'
-                  }`}
-              />
-            ))}
-          </div>
         </>
       )}
     </div>

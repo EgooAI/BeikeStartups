@@ -4,20 +4,20 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { 
-  HomeOutlined, 
-  ProjectOutlined, 
-  TeamOutlined, 
-  FundOutlined, 
-  CalendarOutlined, 
+import {
+  HomeOutlined,
+  ProjectOutlined,
+  TeamOutlined,
+  FundOutlined,
+  CalendarOutlined,
   InfoCircleOutlined,
   UserOutlined,
   LogoutOutlined,
   MenuOutlined,
   CloseOutlined,
-  GoldOutlined,
   DownOutlined,
-  RocketOutlined
+  RocketOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 
 const navItems = [
@@ -47,29 +47,34 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-gray-100/80">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a1a]/85 backdrop-blur-xl border-b border-[#00f0ff]/10">
+      {/* 底部发光边 */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/30 to-transparent" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="flex items-center space-x-2 group"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <div className="w-10 h-10 rounded-xl bg-accent-gradient flex items-center justify-center shadow-button group-hover:scale-105 transition-transform">
-                <GoldOutlined className="text-xl text-white" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00f0ff] to-[#b347ea] flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.3)] group-hover:scale-105 transition-transform">
+                <ThunderboltOutlined className="text-lg text-white" />
               </div>
-              <span className="text-xl font-bold text-primary">贝壳青创汇</span>
+              <span className="text-xl font-black text-white tracking-tight">
+                贝壳<span className="text-[#00f0ff]">青创汇</span>
+              </span>
             </Link>
             <nav className="hidden lg:flex ml-10 space-x-1">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive(item.href)
-                      ? 'bg-primary/8 text-primary'
-                      : 'text-gray-600 hover:text-primary hover:bg-gray-50'
+                      ? 'bg-[#00f0ff]/10 text-[#00f0ff] shadow-[0_0_10px_rgba(0,240,255,0.1)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
                   }`}
                 >
                   <span className="text-sm">{item.icon}</span>
@@ -85,35 +90,35 @@ export default function Header() {
                 {(user.role === 'team_owner' || user.role === 'team_member') && (
                   <Link
                     href="/my-projects"
-                    className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                       isActive('/my-projects')
-                        ? 'bg-primary/8 text-primary'
-                        : 'text-gray-600 hover:text-primary hover:bg-gray-50'
+                        ? 'bg-[#b347ea]/10 text-[#b347ea]'
+                        : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
                     }`}
                   >
                     <RocketOutlined className="text-sm" />
                     <span>团队项目</span>
                   </Link>
                 )}
-                
+
                 <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:text-primary hover:bg-gray-50 transition-all"
+                    className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/[0.04] transition-all"
                   >
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <UserOutlined className="text-primary" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00f0ff]/20 to-[#b347ea]/20 border border-[#00f0ff]/20 flex items-center justify-center">
+                      <UserOutlined className="text-[#00f0ff] text-xs" />
                     </div>
                     <span>{user.nickname || user.username}</span>
-                    <DownOutlined className={`text-xs transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                    <DownOutlined className={`text-xs transition-transform text-gray-500 ${userMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
-                  
+
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-custom-lg border border-gray-100 py-2 animate-scale-in">
+                    <div className="absolute right-0 mt-2 w-56 bg-[#0f0f1f]/95 backdrop-blur-xl rounded-xl border border-[#00f0ff]/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] py-2 animate-scale-in">
                       <Link
                         href="/dashboard"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                        className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-400 hover:text-white hover:bg-white/[0.04] transition-colors"
                       >
                         <UserOutlined />
                         <span>个人中心</span>
@@ -121,7 +126,7 @@ export default function Header() {
                       <Link
                         href="/profile"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                        className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-400 hover:text-white hover:bg-white/[0.04] transition-colors"
                       >
                         <UserOutlined />
                         <span>修改个人信息</span>
@@ -130,16 +135,16 @@ export default function Header() {
                         <Link
                           href="/admin"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center space-x-3 px-4 py-3 text-sm text-amber-600 hover:bg-amber-50 transition-colors"
+                          className="flex items-center space-x-3 px-4 py-3 text-sm text-[#ffb800] hover:bg-[#ffb800]/5 transition-colors"
                         >
                           <UserOutlined />
                           <span>管理后台</span>
                         </Link>
                       ) : null}
-                      <hr className="my-2 border-gray-100" />
+                      <hr className="my-2 border-white/5" />
                       <button
                         onClick={() => { handleLogout(); setUserMenuOpen(false); }}
-                        className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                        className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 transition-colors"
                       >
                         <LogoutOutlined />
                         <span>退出登录</span>
@@ -152,13 +157,13 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-primary transition-colors rounded-xl hover:bg-gray-50"
+                  className="px-4 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-white/[0.04]"
                 >
                   登录
                 </Link>
                 <Link
                   href="/register"
-                  className="px-5 py-2.5 text-sm font-medium text-white bg-accent-gradient rounded-xl hover:opacity-90 transition-all shadow-button"
+                  className="px-5 py-2.5 text-sm font-bold text-[#050510] bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] rounded-xl hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all hover:scale-105"
                 >
                   注册
                 </Link>
@@ -167,7 +172,7 @@ export default function Header() {
           </div>
 
           <button
-            className="lg:hidden flex items-center p-2 text-gray-600 hover:text-primary rounded-lg hover:bg-gray-50 transition-colors"
+            className="lg:hidden flex items-center p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/[0.04] transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <CloseOutlined className="text-xl" /> : <MenuOutlined className="text-xl" />}
@@ -176,7 +181,7 @@ export default function Header() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg animate-slide-up">
+        <div className="lg:hidden bg-[#0a0a1a]/98 backdrop-blur-xl border-t border-[#00f0ff]/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-slide-up">
           <div className="px-4 py-4 space-y-1">
             {navItems.map((item) => (
               <Link
@@ -185,21 +190,21 @@ export default function Header() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isActive(item.href)
-                    ? 'bg-primary/8 text-primary'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-[#00f0ff]/10 text-[#00f0ff]'
+                    : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
                 }`}
               >
                 <span className="text-base">{item.icon}</span>
                 <span>{item.name}</span>
               </Link>
             ))}
-            <hr className="my-3 border-gray-100" />
+            <hr className="my-3 border-white/5" />
             {user ? (
               <>
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/[0.04]"
                 >
                   <UserOutlined />
                   <span>个人中心</span>
@@ -207,7 +212,7 @@ export default function Header() {
                 <Link
                   href="/profile"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/[0.04]"
                 >
                   <UserOutlined />
                   <span>修改个人信息</span>
@@ -216,7 +221,7 @@ export default function Header() {
                   <Link
                     href="/admin"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-amber-600 hover:bg-amber-50"
+                    className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-[#ffb800] hover:bg-[#ffb800]/5"
                   >
                     <UserOutlined />
                     <span>管理后台</span>
@@ -224,7 +229,7 @@ export default function Header() {
                 ) : null}
                 <button
                   onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 w-full"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/5 w-full"
                 >
                   <LogoutOutlined />
                   <span>退出登录</span>
@@ -235,14 +240,14 @@ export default function Header() {
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 text-center px-4 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50"
+                  className="flex-1 text-center px-4 py-2.5 text-sm font-medium text-gray-400 border border-white/10 rounded-xl hover:bg-white/[0.04]"
                 >
                   登录
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 text-center px-4 py-2.5 text-sm font-medium text-white bg-accent-gradient rounded-xl"
+                  className="flex-1 text-center px-4 py-2.5 text-sm font-bold text-[#050510] bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] rounded-xl"
                 >
                   注册
                 </Link>
