@@ -176,12 +176,10 @@ func DeleteRecruitment(c *gin.Context) {
 }
 
 func ListRecruitments(c *gin.Context) {
-	user := c.MustGet("user").(*model.User)
-
-	// 检查权限：学生或项目负责人
-	if user.Role != model.RoleStudent && user.Role != model.RoleTeamOwner {
-		response.Forbidden(c, "只有学生和项目负责人可以访问招募广场")
-		return
+	// 获取当前用户（可选，未登录时为空）
+	var user *model.User
+	if userValue, exists := c.Get("user"); exists && userValue != nil {
+		user = userValue.(*model.User)
 	}
 
 	// 自动截止超过时间的招募
@@ -211,7 +209,7 @@ func ListRecruitments(c *gin.Context) {
 	}
 
 	// 如果是项目负责人查看自己发布的招募
-	if c.Query("my") == "true" && user.Role == model.RoleTeamOwner {
+	if c.Query("my") == "true" && user != nil && user.Role == model.RoleTeamOwner {
 		team, err := repository.GetTeamByOwnerID(user.ID)
 		if err != nil {
 			response.InternalError(c, "获取团队信息失败")

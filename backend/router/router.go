@@ -176,10 +176,13 @@ func SetupRouter() *gin.Engine {
 		bannersAuth.DELETE("/:id", handler.DeleteBanner)
 	}
 
+	// 公开访问 — 任何人可查看招募列表和详情
+	router.GET("/api/recruitments", handler.ListRecruitments)
+	router.GET("/api/recruitments/:id", handler.GetRecruitment)
+
+	// 需要登录的操作
 	recruitments := router.Group("/api/recruitments").Use(middleware.RequireAuth())
 	{
-		recruitments.GET("", handler.ListRecruitments)
-		recruitments.GET("/:id", handler.GetRecruitment)
 		recruitments.POST("", handler.CreateRecruitment)
 		recruitments.PUT("/:id", handler.UpdateRecruitment)
 		recruitments.DELETE("/:id", handler.DeleteRecruitment)

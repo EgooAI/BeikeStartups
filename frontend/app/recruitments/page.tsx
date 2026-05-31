@@ -7,12 +7,8 @@ import { recruitmentApi } from '@/lib/api';
 import { Recruitment } from '@/types';
 import {
   TeamOutlined,
-  SearchOutlined,
-  ClockCircleOutlined,
-  EnvironmentOutlined,
-  UserOutlined,
-  LoginOutlined,
   PlusCircleOutlined,
+  LoginOutlined,
 } from '@ant-design/icons';
 
 export default function RecruitmentsPage() {
@@ -21,22 +17,18 @@ export default function RecruitmentsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
+    if (!authLoading) {
       fetchRecruitments();
     }
-  }, [user]);
+  }, [authLoading, user]);
 
   async function fetchRecruitments() {
     try {
-      let res;
-      // 学生查看所有招募，项目负责人查看自己发布的招募，管理员查看所有招募
-      if (user?.role === 'student' || user?.role === 'admin' || user?.role === 'super_admin') {
-        res = await recruitmentApi.list('active');
-      } else if (user?.role === 'team_owner') {
-        res = await recruitmentApi.list('active', true);
-      }
-      if (res && res.data) {
-        const data = res.data as any;
+      // 团队负责人只看自己发布的招募，其他人看全部
+      const isOwner = user?.role === 'team_owner';
+      const res = await recruitmentApi.list('active', isOwner);
+      if (res.data) {
+        const data = res.data as { items?: Recruitment[] };
         setRecruitments(data.items || []);
       }
     } catch (err) {
@@ -54,52 +46,6 @@ export default function RecruitmentsPage() {
           <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-r-accent/30 animate-spin" style={{ animationDuration: '1.5s' }} />
         </div>
         <p className="text-gray-400 text-sm animate-pulse">正在加载中...</p>
-      </div>
-    );
-  }
-
-  const isAllowedRole = user?.role === 'student' || user?.role === 'team_owner' || user?.role === 'admin' || user?.role === 'super_admin';
-
-  if (!user || !isAllowedRole) {
-    return (
-      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
-        <div className="dashboard-panel p-12 max-w-md text-center">
-          <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <UserOutlined className="text-4xl text-primary/40" />
-          </div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-primary mb-3">
-            {!user ? '登录后查看招募广场' : '权限不足'}
-          </h2>
-          <p className="text-gray-500 mb-8">
-            {!user
-              ? '登录后即可浏览创业团队的招募信息，找到适合你的创业机会。'
-              : '只有学生、项目负责人和管理员可以访问招募广场'}
-          </p>
-          {!user ? (
-            <>
-              <Link
-                href="/login"
-                className="inline-flex items-center px-8 py-3 bg-primary text-white font-semibold rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <LoginOutlined className="mr-2" />
-                立即登录
-              </Link>
-              <p className="text-sm text-gray-400 mt-4">
-                还没有账号？{' '}
-                <Link href="/register" className="text-accent hover:underline">
-                  立即注册
-                </Link>
-              </p>
-            </>
-          ) : (
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center px-8 py-3 bg-primary text-white font-semibold rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
-            >
-              返回首页
-            </Link>
-          )}
-        </div>
       </div>
     );
   }
@@ -127,6 +73,22 @@ export default function RecruitmentsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 未登录提示条 */}
+        {!user && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <p className="text-amber-700 text-sm">
+              您当前为游客身份，可以浏览所有招募信息。登录后即可提交申请，加入心仪的创业团队。
+            </p>
+            <Link
+              href="/login"
+              className="inline-flex items-center px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors flex-shrink-0 ml-4"
+            >
+              <LoginOutlined className="mr-1.5" />
+              立即登录
+            </Link>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="relative">

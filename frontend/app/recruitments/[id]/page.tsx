@@ -2,13 +2,14 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { recruitmentApi } from '@/lib/api';
 import { Recruitment, Response } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 import { message } from 'antd';
-import { ArrowLeftOutlined, TeamOutlined, FileTextOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, TeamOutlined, FileTextOutlined, LoginOutlined } from '@ant-design/icons';
 
 export default function RecruitmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -56,17 +57,14 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
   };
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-
-    if (user) {
-      requestAnimationFrame(() => {
-        loadRecruitment();
+    if (authLoading) return;
+    // 所有人可见，登录后检查是否已申请
+    requestAnimationFrame(() => {
+      loadRecruitment();
+      if (user) {
         checkApplication();
-      });
-    }
+      }
+    });
   }, [user, authLoading]);
 
   const handleApply = async () => {
@@ -201,8 +199,7 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
   }
 
   const isOwner = recruitment.team?.owner_id === user?.id;
-  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
-  const canManage = isOwner || isAdmin;
+  const canManage = isOwner;
 
   return (
     <div className="min-h-screen bg-[#f7f3ec]/50 py-8">
@@ -320,6 +317,35 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                   {myApplicationStatus === 'pending' ? '申请已提交，等待审核' :
                     myApplicationStatus === 'accepted' ? '申请已通过，你已加入该团队！' :
                       myApplicationStatus === 'rejected' ? '申请已被拒绝' : '申请状态未知'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* 未登录提示 — 游客可查看但不能申请 */}
+          {!user && recruitment.status === 'active' && (
+            <div className="mt-8 pt-8 border-t border-[#e8dfd0]/60">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-center">
+                <p className="text-amber-700 text-sm mb-3">
+                  登录后即可申请加入该团队，找到适合你的创业机会。
+                </p>
+                <Link
+                  href={`/login?redirect=/recruitments/${recruitmentId}`}
+                  className="inline-flex items-center px-5 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors"
+                >
+                  <LoginOutlined className="mr-1.5" />
+                  登录后申请
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* 非学生已登录用户提示 */}
+          {user && user.role !== 'student' && !isOwner && recruitment.status === 'active' && (
+            <div className="mt-8 pt-8 border-t border-[#e8dfd0]/60">
+              <div className="bg-[#faf7f2] border border-[#e8dfd0] rounded-xl p-5 text-center">
+                <p className="text-[#8b7e6a] text-sm">
+                  仅学生身份可以提交申请。如需申请，请使用学生账号登录。
                 </p>
               </div>
             </div>
