@@ -153,19 +153,25 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-4 border-[#e8dfd0] opacity-40"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#f59e0b] animate-spin"></div>
+          <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-[#0a2a5c] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }}></div>
+        </div>
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
         <div className="text-center">
-          <ExclamationCircleOutlined className="text-6xl text-gray-300 mb-4" />
-          <h2 className="text-xl font-semibold text-gray-600">活动不存在</h2>
-          <Link href="/events" className="text-[#f59e0b] hover:underline mt-4 inline-block">
+          <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <ExclamationCircleOutlined className="text-4xl text-[#0a2a5c]/20" />
+          </div>
+          <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c]">活动不存在</h2>
+          <Link href="/events" className="text-[#f59e0b] hover:text-[#d97706] font-medium mt-4 inline-block transition-colors">
             返回活动列表
           </Link>
         </div>
@@ -176,13 +182,15 @@ export default function EventDetailPage() {
   const statusInfo = getStatusInfo(event.status);
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-[#f7f3ec]/50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-gradient-to-br from-[#fefcf8] via-[#faf7f2] to-[#f5f0e8] border-b border-[#e8dfd0]"
+        style={{ backgroundImage: 'radial-gradient(circle, #e8dfd0 1px, transparent 1px), linear-gradient(to bottom right, #fefcf8, #faf7f2, #f5f0e8)', backgroundSize: '20px 20px, auto', backgroundPosition: '0 0, 0 0' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Link
             href="/events"
-            className="inline-flex items-center text-gray-500 hover:text-[#0a2a5c] transition-colors mb-6"
+            className="inline-flex items-center text-[#0a2a5c]/50 hover:text-[#0a2a5c] transition-colors mb-6 font-medium"
           >
             <ArrowLeftOutlined className="mr-2" />
             返回活动列表
@@ -191,15 +199,15 @@ export default function EventDetailPage() {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
-                <span className="px-4 py-1.5 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded-lg text-sm font-medium">
+                <span className="px-4 py-1.5 bg-[#f5f0e8] text-[#0a2a5c] rounded-lg text-sm font-medium">
                   {getEventTypeLabel(event.event_type)}
                 </span>
                 <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${statusInfo.color}`}>
                   {statusInfo.label}
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-[#0a2a5c] mb-4">{event.title}</h1>
-              <div className="flex flex-wrap items-center gap-6 text-gray-500">
+              <h1 className="text-3xl font-extrabold tracking-tight text-[#0a2a5c] mb-4">{event.title}</h1>
+              <div className="flex flex-wrap items-center gap-6 text-[#0a2a5c]/50">
                 <div className="flex items-center">
                   <CalendarOutlined className="mr-2 text-[#f59e0b]" />
                   <span>
@@ -224,7 +232,7 @@ export default function EventDetailPage() {
                 <button
                   onClick={handleSignup}
                   disabled={signingUp}
-                  className="w-full px-6 py-4 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 transition-colors text-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-4 bg-gradient-to-r from-[#f59e0b] to-[#f97316] text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-lg font-extrabold tracking-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {signingUp ? '报名中...' : '立即报名'}
                 </button>
@@ -233,7 +241,7 @@ export default function EventDetailPage() {
 
             {signedUp && (
               <div className="lg:w-80">
-                <div className="px-6 py-4 bg-green-50 text-green-600 rounded-xl text-center">
+                <div className="px-6 py-4 bg-green-50 text-green-600 rounded-xl text-center border border-green-100">
                   <CheckCircleOutlined className="mr-2" />
                   <span className="font-medium">已报名</span>
                   {mySignup && (
@@ -261,25 +269,25 @@ export default function EventDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* 活动介绍 */}
-            <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-[#0a2a5c] mb-4 flex items-center">
+            <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+              <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-4 flex items-center">
                 <RocketOutlined className="mr-2 text-[#f59e0b]" />
                 活动介绍
               </h2>
               <div className="prose prose-gray max-w-none">
-                <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">
+                <p className="text-[#0a2a5c]/60 whitespace-pre-wrap leading-relaxed">
                   {event.description || '暂无活动介绍'}
                 </p>
               </div>
             </div>
 
             {/* 活动须知 */}
-            <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-[#0a2a5c] mb-4 flex items-center">
+            <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+              <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-4 flex items-center">
                 <ExclamationCircleOutlined className="mr-2 text-[#f59e0b]" />
                 活动须知
               </h2>
-              <ul className="space-y-3 text-gray-600">
+              <ul className="space-y-3 text-[#0a2a5c]/60">
                 <li className="flex items-start">
                   <CheckCircleOutlined className="mr-2 mt-1 text-green-500" />
                   <span>请提前15分钟到达活动现场签到</span>
@@ -301,33 +309,38 @@ export default function EventDetailPage() {
 
             {/* 报名人员列表 - 仅管理员可见 */}
             {(user?.role === 'admin' || user?.role === 'super_admin') && (
-              <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-                <h2 className="text-xl font-bold text-[#0a2a5c] mb-4 flex items-center">
+              <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+                <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-4 flex items-center">
                   <TeamOutlined className="mr-2 text-[#f59e0b]" />
                   报名人员 ({signups.length})
                 </h2>
                 {loadingSignups ? (
                   <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#0a2a5c] border-t-transparent" />
+                    <div className="relative h-8 w-8">
+                      <div className="absolute inset-0 rounded-full border-3 border-[#e8dfd0] opacity-40"></div>
+                      <div className="absolute inset-0 rounded-full border-3 border-transparent border-t-[#f59e0b] animate-spin"></div>
+                    </div>
                   </div>
                 ) : signups.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
-                    <UserOutlined className="text-4xl mb-3 block" />
-                    <p className="text-sm">暂无报名人员</p>
+                  <div className="text-center py-8">
+                    <div className="w-14 h-14 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                      <UserOutlined className="text-2xl text-[#0a2a5c]/20" />
+                    </div>
+                    <p className="text-sm text-[#0a2a5c]/30">暂无报名人员</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {signups.map((signup) => (
-                      <div key={signup.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div key={signup.id} className="flex items-center justify-between p-3 rounded-xl bg-[#faf7f2] hover:bg-[#f5f0e8] transition-colors border border-[#e8dfd0]/50">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-full bg-[#0a2a5c]/10 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-[#f5f0e8] flex items-center justify-center">
                             <UserOutlined className="text-[#0a2a5c]" />
                           </div>
                           <div>
                             <p className="font-medium text-[#0a2a5c]">
                               {signup.user?.nickname || signup.user?.username || '未知用户'}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-[#0a2a5c]/30">
                               {signup.user?.email || signup.user?.phone || ''}
                             </p>
                           </div>
@@ -350,36 +363,36 @@ export default function EventDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* 活动信息 */}
-            <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-[#0a2a5c] mb-4">活动信息</h3>
+            <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+              <h3 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-4">活动信息</h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-500">活动类型</span>
+                <div className="flex items-center justify-between py-3 border-b border-[#e8dfd0]/50">
+                  <span className="text-[#0a2a5c]/50">活动类型</span>
                   <span className="font-medium text-[#0a2a5c]">{getEventTypeLabel(event.event_type)}</span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-500">活动状态</span>
+                <div className="flex items-center justify-between py-3 border-b border-[#e8dfd0]/50">
+                  <span className="text-[#0a2a5c]/50">活动状态</span>
                   <span className={`font-medium ${statusInfo.color.split(' ')[1]}`}>{statusInfo.label}</span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-500">活动地点</span>
+                <div className="flex items-center justify-between py-3 border-b border-[#e8dfd0]/50">
+                  <span className="text-[#0a2a5c]/50">活动地点</span>
                   <span className="font-medium text-[#0a2a5c] text-right max-w-[180px]">{event.location}</span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-500">开始时间</span>
+                <div className="flex items-center justify-between py-3 border-b border-[#e8dfd0]/50">
+                  <span className="text-[#0a2a5c]/50">开始时间</span>
                   <span className="font-medium text-[#0a2a5c]">
                     {new Date(event.start_at).toLocaleDateString('zh-CN')}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-500">结束时间</span>
+                <div className="flex items-center justify-between py-3 border-b border-[#e8dfd0]/50">
+                  <span className="text-[#0a2a5c]/50">结束时间</span>
                   <span className="font-medium text-[#0a2a5c]">
                     {new Date(event.end_at).toLocaleDateString('zh-CN')}
                   </span>
                 </div>
                 {event.owner && (
                   <div className="flex items-center justify-between py-3">
-                    <span className="text-gray-500">主办方</span>
+                    <span className="text-[#0a2a5c]/50">主办方</span>
                     <span className="font-medium text-[#0a2a5c]">
                       {event.owner.nickname || event.owner.username || '未知'}
                     </span>
@@ -390,14 +403,14 @@ export default function EventDetailPage() {
 
             {/* 资源对接入口 - 根据角色显示不同入口 */}
             {user && (user.role === 'investor' || user.role === 'mentor' || user.role === 'partner') && (
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl shadow-custom border border-purple-100 p-6">
-                <h3 className="text-lg font-semibold text-purple-800 mb-3">资源对接</h3>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl shadow-sm border border-purple-100 p-6">
+                <h3 className="text-lg font-extrabold tracking-tight text-purple-800 mb-3">资源对接</h3>
                 <p className="text-sm text-purple-600 mb-4">
                   作为{user.role === 'investor' ? '投资人' : user.role === 'mentor' ? '导师' : '资源方'}，您可以与优质创业项目进行资源对接。
                 </p>
                 <Link
                   href="/projects"
-                  className="inline-flex items-center px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  className="inline-flex items-center px-4 py-2.5 bg-purple-600 text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm font-medium"
                 >
                   <FundOutlined className="mr-2" />
                   浏览项目库
@@ -407,14 +420,14 @@ export default function EventDetailPage() {
 
             {/* 学生/团队入口 */}
             {user && (user.role === 'student' || user.role === 'team_owner') && (
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl shadow-custom border border-amber-100 p-6">
-                <h3 className="text-lg font-semibold text-amber-800 mb-3">创业机会</h3>
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl shadow-sm border border-amber-100 p-6">
+                <h3 className="text-lg font-extrabold tracking-tight text-amber-800 mb-3">创业机会</h3>
                 <p className="text-sm text-amber-600 mb-4">
                   发现优质创业项目，寻找志同道合的团队成员，共同实现创业梦想。
                 </p>
                 <Link
                   href="/projects"
-                  className="inline-flex items-center px-4 py-2.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium"
+                  className="inline-flex items-center px-4 py-2.5 bg-amber-600 text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm font-medium"
                 >
                   <RocketOutlined className="mr-2" />
                   浏览项目库

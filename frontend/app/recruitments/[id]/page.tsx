@@ -8,6 +8,7 @@ import { recruitmentApi } from '@/lib/api';
 import { Recruitment, Response } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 import { message } from 'antd';
+import { ArrowLeftOutlined, TeamOutlined, FileTextOutlined } from '@ant-design/icons';
 
 export default function RecruitmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -176,45 +177,55 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#f7f3ec] to-[#faf7f2]">
+        <div className="relative">
+          <div className="w-14 h-14 rounded-full border-[3px] border-primary/10 border-t-primary animate-spin" />
+          <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-r-accent/30 animate-spin" style={{ animationDuration: '1.5s' }} />
+        </div>
+        <p className="text-gray-400 text-sm animate-pulse">正在加载中...</p>
       </div>
     );
   }
 
   if (!recruitment) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">招募不存在</p>
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="dashboard-panel p-12 text-center">
+          <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <FileTextOutlined className="text-4xl text-primary/40" />
+          </div>
+          <p className="text-gray-500">招募不存在</p>
+        </div>
       </div>
     );
   }
 
   const isOwner = recruitment.team?.owner_id === user?.id;
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const canManage = isOwner || isAdmin;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#f7f3ec]/50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="text-indigo-600 hover:text-indigo-700 mb-4"
+            className="inline-flex items-center text-primary/60 hover:text-primary transition-colors mb-4"
           >
-            ← 返回列表
+            <ArrowLeftOutlined className="mr-2" />
+            返回列表
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="dashboard-panel p-8">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{recruitment.title}</h1>
-              <p className="text-indigo-600 text-xl font-medium mb-2">{recruitment.position}</p>
+              <h1 className="text-3xl font-extrabold tracking-tight text-primary mb-2">{recruitment.title}</h1>
+              <p className="text-accent text-xl font-bold mb-2">{recruitment.position}</p>
               {recruitment.salary && (
-                <p className="text-green-600 mb-2">{recruitment.salary}</p>
+                <p className="text-green-600 font-medium mb-2">{recruitment.salary}</p>
               )}
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-400 text-sm">
                 发布于 {formatDate(recruitment.created_at)}
               </p>
             </div>
@@ -224,7 +235,7 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
           </div>
 
           {recruitment.team && (
-            <div className="mb-6 pb-6 border-b border-gray-200">
+            <div className="mb-6 pb-6 border-b border-[#e8dfd0]/60">
               <p className="text-gray-600">
                 <strong>招聘团队：</strong>{recruitment.team.name}
               </p>
@@ -233,20 +244,20 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
 
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">职位描述</h2>
-              <p className="text-gray-700 whitespace-pre-wrap">{recruitment.description}</p>
+              <h2 className="text-lg font-extrabold tracking-tight text-primary mb-2">职位描述</h2>
+              <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">{recruitment.description}</p>
             </div>
 
             {recruitment.requirements && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">任职要求</h2>
-                <p className="text-gray-700 whitespace-pre-wrap">{recruitment.requirements}</p>
+                <h2 className="text-lg font-extrabold tracking-tight text-primary mb-2">任职要求</h2>
+                <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">{recruitment.requirements}</p>
               </div>
             )}
 
             {recruitment.deadline && (
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-yellow-800">
+              <div className="bg-accent-light p-4 rounded-xl border border-accent/20">
+                <p className="text-accent-hover font-medium">
                   <strong>截止日期：</strong>{formatDate(recruitment.deadline)}
                 </p>
               </div>
@@ -254,16 +265,16 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
           </div>
 
           {user?.role === 'student' && recruitment.status === 'active' && !hasApplied && (
-            <div className="mt-8 pt-8 border-t border-gray-200">
+            <div className="mt-8 pt-8 border-t border-[#e8dfd0]/60">
               {showApplyForm ? (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">申请该职位</h3>
+                  <h3 className="text-lg font-extrabold tracking-tight text-primary mb-4">申请该职位</h3>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">自我介绍</label>
                     <textarea
                       value={coverLetter}
                       onChange={(e) => setCoverLetter(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                       rows={4}
                       placeholder="请介绍一下你自己，包括相关经验、技能等..."
                     />
@@ -271,13 +282,13 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                   <div className="flex gap-4">
                     <button
                       onClick={handleApply}
-                      className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                      className="px-6 py-2.5 bg-primary text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                     >
                       提交申请
                     </button>
                     <button
                       onClick={() => setShowApplyForm(false)}
-                      className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                      className="px-6 py-2.5 border border-[#e8dfd0] rounded-xl text-gray-600 hover:bg-[#faf7f2] hover:-translate-y-0.5 transition-all duration-300 font-medium"
                     >
                       取消
                     </button>
@@ -286,7 +297,7 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
               ) : (
                 <button
                   onClick={() => setShowApplyForm(true)}
-                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-semibold"
+                  className="w-full bg-primary text-white px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-semibold"
                 >
                   申请该职位
                 </button>
@@ -295,15 +306,17 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
           )}
 
           {user?.role === 'student' && hasApplied && (
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <div className={`p-4 rounded-lg ${myApplicationStatus === 'pending' ? 'bg-yellow-50' :
-                myApplicationStatus === 'accepted' ? 'bg-green-50' :
-                  myApplicationStatus === 'rejected' ? 'bg-red-50' : 'bg-gray-50'
+            <div className="mt-8 pt-8 border-t border-[#e8dfd0]/60">
+              <div className={`p-4 rounded-xl ${
+                myApplicationStatus === 'pending' ? 'bg-accent-light border border-accent/20' :
+                myApplicationStatus === 'accepted' ? 'bg-green-50 border border-green-200' :
+                  myApplicationStatus === 'rejected' ? 'bg-red-50 border border-red-200' : 'bg-[#faf7f2] border border-[#e8dfd0]'
+              }`}>
+                <p className={`font-semibold ${
+                  myApplicationStatus === 'pending' ? 'text-accent-hover' :
+                  myApplicationStatus === 'accepted' ? 'text-green-700' :
+                    myApplicationStatus === 'rejected' ? 'text-red-700' : 'text-gray-600'
                 }`}>
-                <p className={`font-semibold ${myApplicationStatus === 'pending' ? 'text-yellow-800' :
-                  myApplicationStatus === 'accepted' ? 'text-green-800' :
-                    myApplicationStatus === 'rejected' ? 'text-red-800' : 'text-gray-800'
-                  }`}>
                   {myApplicationStatus === 'pending' ? '申请已提交，等待审核' :
                     myApplicationStatus === 'accepted' ? '申请已通过，你已加入该团队！' :
                       myApplicationStatus === 'rejected' ? '申请已被拒绝' : '申请状态未知'}
@@ -313,8 +326,8 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
           )}
 
           {canManage && (
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">管理操作</h3>
+            <div className="mt-8 pt-8 border-t border-[#e8dfd0]/60">
+              <h3 className="text-lg font-extrabold tracking-tight text-primary mb-4">管理操作</h3>
 
               {!showResponses ? (
                 <div className="flex flex-wrap gap-4">
@@ -322,21 +335,21 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                     <>
                       <button
                         onClick={loadResponses}
-                        className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                        className="px-6 py-2.5 bg-purple-500 text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-600 transition-all duration-300 font-medium"
                       >
                         查看申请列表
                       </button>
 
                       <button
                         onClick={handleSolve}
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-6 py-2.5 bg-info text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                       >
                         标记为已解决
                       </button>
 
                       <button
                         onClick={handleInvalidate}
-                        className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                        className="px-6 py-2.5 bg-gray-500 text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-gray-600 transition-all duration-300 font-medium"
                       >
                         作废招募
                       </button>
@@ -346,7 +359,7 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                   {isOwner && (
                     <button
                       onClick={handleDelete}
-                      className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                      className="px-6 py-2.5 bg-red-500 text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-red-600 transition-all duration-300 font-medium"
                     >
                       删除招募
                     </button>
@@ -356,30 +369,32 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                 <div>
                   <button
                     onClick={() => setShowResponses(false)}
-                    className="mb-4 text-indigo-600 hover:text-indigo-700"
+                    className="mb-4 inline-flex items-center text-primary hover:text-primary-light transition-colors"
                   >
-                    ← 返回管理
+                    <ArrowLeftOutlined className="mr-2" />
+                    返回管理
                   </button>
 
-                  <h4 className="text-md font-semibold text-gray-700 mb-4">申请列表 ({responses.length})</h4>
+                  <h4 className="text-md font-extrabold tracking-tight text-gray-700 mb-4">申请列表 ({responses.length})</h4>
 
                   {responses.length > 0 ? (
                     <div className="space-y-4">
                       {responses.map((response) => (
-                        <div key={response.id} className="bg-gray-50 p-4 rounded-lg">
+                        <div key={response.id} className="bg-[#faf7f2] p-4 rounded-xl border border-[#e8dfd0]/60">
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <p className="font-medium text-gray-900">
                                 {response.user?.nickname || response.user?.username}
                               </p>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-400">
                                 {response.user?.email}
                               </p>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${response.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              response.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                                response.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
-                              }`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              response.status === 'pending' ? 'bg-accent-light text-accent-hover' :
+                              response.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                response.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-[#f5f0e8] text-gray-500'
+                            }`}>
                               {response.status === 'pending' ? '待审核' :
                                 response.status === 'accepted' ? '已通过' :
                                   response.status === 'rejected' ? '已拒绝' : response.status}
@@ -391,13 +406,13 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                               <>
                                 <button
                                   onClick={() => handleAcceptResponse(response.id)}
-                                  className="bg-green-600 text-white px-4 py-1.5 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                  className="bg-success text-white px-4 py-1.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm font-medium"
                                 >
                                   通过
                                 </button>
                                 <button
                                   onClick={() => handleRejectResponse(response.id)}
-                                  className="bg-red-600 text-white px-4 py-1.5 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                                  className="bg-red-500 text-white px-4 py-1.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm font-medium"
                                 >
                                   拒绝
                                 </button>
@@ -408,7 +423,12 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-center py-8">暂无申请</p>
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <TeamOutlined className="text-2xl text-primary/40" />
+                      </div>
+                      <p className="text-gray-400">暂无申请</p>
+                    </div>
                   )}
                 </div>
               )}

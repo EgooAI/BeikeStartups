@@ -73,9 +73,9 @@ export default function RoleRequestPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">请先登录</p>
+          <p className="text-[#8b7e6a] mb-4">请先登录</p>
           <Link href="/login" className="text-[#0a2a5c] hover:underline">去登录</Link>
         </div>
       </div>
@@ -83,10 +83,10 @@ export default function RoleRequestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-[#f7f3ec]/50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold text-[#0a2a5c] mb-2">身份认证申请</h1>
-        <p className="text-gray-500 mb-8">选择你想要申请的身份，填写相关信息提交审核。</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">身份认证申请</h1>
+        <p className="text-[#8b7e6a] mb-8">选择你想要申请的身份，填写相关信息提交审核。</p>
 
         {/* Role Selection */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -94,89 +94,89 @@ export default function RoleRequestPage() {
             <button
               key={role.value}
               onClick={() => setSelectedRole(role.value)}
-              className={`p-6 rounded-xl border-2 text-left transition-all ${selectedRole === role.value
-                  ? 'border-[#0a2a5c] bg-white shadow-custom'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+              className={`p-6 rounded-xl border-2 text-left transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${selectedRole === role.value
+                  ? 'border-[#0a2a5c] bg-[#fefcf8]'
+                  : 'border-[#e8dfd0] bg-[#fefcf8] hover:border-[#d4c8b0]'
                 }`}
             >
-              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${role.color} text-white mb-3`}>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${role.color} text-white mb-3 shadow-sm`}>
                 {role.icon}
               </div>
-              <h3 className="font-semibold text-[#0a2a5c] mb-1">{role.label}</h3>
-              <p className="text-sm text-gray-500">{role.desc}</p>
+              <h3 className="font-extrabold tracking-tight text-[#0a2a5c] mb-1">{role.label}</h3>
+              <p className="text-sm text-[#8b7e6a]">{role.desc}</p>
             </button>
           ))}
         </div>
 
         {selectedRole && (
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-custom p-8 space-y-6">
-            <h2 className="text-xl font-semibold text-[#0a2a5c]">
+          <form onSubmit={handleSubmit} className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm p-8 space-y-6">
+            <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c]">
               申请成为 {roleOptions.find(r => r.value === selectedRole)?.label}
             </h2>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">所属机构/单位</label>
+              <label className="block text-sm font-medium text-[#5c4f3c] mb-2">所属机构/单位</label>
               <input
                 type="text"
                 value={form.organization}
                 onChange={(e) => setForm({ ...form, organization: e.target.value })}
                 placeholder="请填写您的所属机构"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] placeholder:text-[#c4b99a]"
               />
             </div>
 
             {selectedRole === 'mentor' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">专业领域/擅长方向</label>
+                <label className="block text-sm font-medium text-[#5c4f3c] mb-2">专业领域/擅长方向</label>
                 <textarea
                   value={form.expertise}
                   onChange={(e) => setForm({ ...form, expertise: e.target.value })}
                   placeholder="请描述您的专业领域和擅长方向"
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] placeholder:text-[#c4b99a] resize-none"
                 />
               </div>
             )}
 
             {selectedRole === 'investor' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">投资方向</label>
+                <label className="block text-sm font-medium text-[#5c4f3c] mb-2">投资方向</label>
                 <textarea
                   value={form.investment_focus}
                   onChange={(e) => setForm({ ...form, investment_focus: e.target.value })}
                   placeholder="请描述您的投资方向和关注的领域"
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] placeholder:text-[#c4b99a] resize-none"
                 />
               </div>
             )}
 
             {selectedRole === 'partner' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">服务领域/资源类型</label>
+                <label className="block text-sm font-medium text-[#5c4f3c] mb-2">服务领域/资源类型</label>
                 <textarea
                   value={form.service_area}
                   onChange={(e) => setForm({ ...form, service_area: e.target.value })}
                   placeholder="请描述您能提供的资源类型和服务领域"
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] placeholder:text-[#c4b99a] resize-none"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">申请说明</label>
+              <label className="block text-sm font-medium text-[#5c4f3c] mb-2">申请说明</label>
               <textarea
                 value={form.application_note}
                 onChange={(e) => setForm({ ...form, application_note: e.target.value })}
                 placeholder="请补充说明您的申请理由"
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] placeholder:text-[#c4b99a] resize-none"
               />
             </div>
 
             {message && (
-              <div className={`p-4 rounded-xl text-sm ${message.includes('成功') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              <div className={`p-4 rounded-xl text-sm ${message.includes('成功') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
                 }`}>
                 {message}
               </div>
@@ -185,7 +185,7 @@ export default function RoleRequestPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50"
+              className="w-full px-6 py-3 bg-[#0a2a5c] text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium disabled:opacity-50"
             >
               {submitting ? '提交中...' : '提交申请'}
             </button>

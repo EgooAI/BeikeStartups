@@ -31,22 +31,19 @@ export default function AdminLoginPage() {
 
     try {
       await login(username, password);
-      
-      // 注意：login 后会触发 AuthContext 的 loadUser，但这里需要立即检查角色
-      // 所以从 token 中解析角色信息
+
       const token = localStorage.getItem('token');
       let role = null;
-      
+
       if (token) {
         try {
-          // JWT token 的 payload 在第二部分
           const payload = JSON.parse(atob(token.split('.')[1]));
           role = payload?.role;
         } catch (err) {
           console.error('解析 token 失败:', err);
         }
       }
-      
+
       if (role === 'admin' || role === 'super_admin') {
         router.push('/admin');
       } else {
@@ -100,12 +97,12 @@ export default function AdminLoginPage() {
       </div>
 
       {/* Right login panel */}
-      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 bg-[#fefcf8] flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           {/* Back link - mobile */}
           <Link
             href="/"
-            className="inline-flex items-center text-gray-400 hover:text-[#0a2a5c] mb-8 transition-colors text-sm lg:hidden"
+            className="inline-flex items-center text-[#a89a80] hover:text-[#0a2a5c] mb-8 transition-colors text-sm lg:hidden"
           >
             <ArrowLeftOutlined className="mr-2" />
             返回首页
@@ -116,8 +113,8 @@ export default function AdminLoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] rounded-2xl mb-4 shadow-lg">
               <SafetyOutlined className="text-2xl text-[#f59e0b]" />
             </div>
-            <h2 className="text-2xl font-bold text-[#0a2a5c]">管理员登录</h2>
-            <p className="text-gray-400 mt-1">请输入管理员账号信息登录后台</p>
+            <h2 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">管理员登录</h2>
+            <p className="text-[#a89a80] mt-1">请输入管理员账号信息登录后台</p>
           </div>
 
           {/* Security notice */}
@@ -130,9 +127,9 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">管理员账号</label>
+              <label className="block text-sm font-medium text-[#6b5e4a] mb-2">管理员账号</label>
               <div className="relative">
-                <UserOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <UserOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#a89a80]" />
                 <input
                   type="text"
                   value={username}
@@ -140,27 +137,27 @@ export default function AdminLoginPage() {
                   placeholder="请输入管理员用户名"
                   required
                   autoFocus
-                  className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] transition-all"
+                  className="w-full pl-11 pr-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">密码</label>
+              <label className="block text-sm font-medium text-[#6b5e4a] mb-2">密码</label>
               <div className="relative">
-                <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#a89a80]" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="请输入管理员密码"
                   required
-                  className="w-full pl-11 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] transition-all"
+                  className="w-full pl-11 pr-12 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a89a80] hover:text-[#6b5e4a] transition-colors"
                 >
                   {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                 </button>
@@ -177,11 +174,14 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-3.5 bg-gradient-to-r from-[#0a2a5c] to-[#1a4a8a] text-white rounded-xl hover:from-[#0a2a5c]/90 hover:to-[#1a4a8a]/90 transition-all font-medium disabled:opacity-50 shadow-lg shadow-[#0a2a5c]/20 flex items-center justify-center"
+              className="w-full px-6 py-3.5 bg-gradient-to-r from-[#0a2a5c] to-[#1a4a8a] text-white rounded-xl hover:from-[#0a2a5c]/90 hover:to-[#1a4a8a]/90 transition-all duration-300 font-medium disabled:opacity-50 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center justify-center"
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2" />
+                  <div className="relative flex justify-center items-center mr-2">
+                    <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <div className="absolute w-3 h-3 rounded-full border-2 border-white/20 border-b-white animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.5s' }} />
+                  </div>
                   验证中...
                 </>
               ) : (
@@ -193,7 +193,7 @@ export default function AdminLoginPage() {
             </button>
 
             <div className="text-center space-y-2">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[#a89a80]">
                 使用普通账号登录？{' '}
                 <Link href="/login" className="text-[#0a2a5c] hover:underline font-medium">
                   用户登录
@@ -201,7 +201,7 @@ export default function AdminLoginPage() {
               </p>
               <Link
                 href="/"
-                className="hidden lg:inline-flex items-center text-xs text-gray-400 hover:text-[#0a2a5c] transition-colors"
+                className="hidden lg:inline-flex items-center text-xs text-[#a89a80] hover:text-[#0a2a5c] transition-colors"
               >
                 <GlobalOutlined className="mr-1" />
                 返回贝壳青创汇前台
@@ -210,7 +210,7 @@ export default function AdminLoginPage() {
           </form>
 
           {/* Footer */}
-          <p className="text-center text-xs text-gray-300 mt-8">
+          <p className="text-center text-xs text-[#c4b69c] mt-8">
             贝壳青创汇 &copy; {new Date().getFullYear()} All Rights Reserved.
           </p>
         </div>

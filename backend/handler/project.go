@@ -242,7 +242,7 @@ func DeleteProject(c *gin.Context) {
 func ListProjects(c *gin.Context) {
 	// pagination
 	page := 1
-	limit := 20
+	limit := 18
 	if p := c.Query("page"); p != "" {
 		fmt.Sscan(p, &page)
 	}

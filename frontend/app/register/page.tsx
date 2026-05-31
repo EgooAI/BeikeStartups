@@ -132,25 +132,32 @@ export default function RegisterPage() {
   };
 
   const inputClass = (field: keyof FieldError) => {
-    const base = 'w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-sm';
+    const base = 'w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-sm placeholder:text-[#c4b99a]';
     if (errors[field] && submitted) {
       return `${base} border-red-300 focus:ring-red-200 focus:border-red-400 bg-red-50/30`;
     }
     if (form[field] && submitted && !errors[field]) {
       return `${base} border-green-300 focus:ring-green-200 focus:border-green-400 bg-green-50/30`;
     }
-    return `${base} border-gray-200 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]`;
+    return `${base} bg-[#faf7f2] border-[#e8dfd0] focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a2a5c]/5 via-white to-[#f59e0b]/5 flex items-center justify-center py-12 px-4">
-      <div className="bg-white rounded-2xl shadow-custom-lg p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-b from-[#f7f3ec] to-[#faf7f2] flex items-center justify-center py-12 px-4 relative overflow-hidden">
+      {/* Decorative gradient blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#fef3c7]/30 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-morph-blob" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-[#0a2a5c]/[0.03] rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-morph-blob-reverse" />
+        <div className="absolute top-1/3 left-1/2 w-64 h-64 bg-[#d4a853]/[0.06] rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-float" />
+      </div>
+
+      <div className="dashboard-panel bg-[#fefcf8] rounded-2xl p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] rounded-2xl mb-4 shadow-button">
             <GoldOutlined className="text-3xl text-[#f59e0b]" />
           </div>
-          <h1 className="text-2xl font-bold text-[#0a2a5c]">创建账号</h1>
-          <p className="text-gray-500 mt-1">加入贝壳青创汇，开启创业之旅</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">创建账号</h1>
+          <p className="text-[#8b7e6a] mt-1">加入贝壳青创汇，开启创业之旅</p>
         </div>
 
         {serverError && (
@@ -161,11 +168,11 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
               用户名 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <UserOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <UserOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
               <input
                 type="text"
                 value={form.username}
@@ -180,11 +187,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
               邮箱 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <MailOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <MailOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
               <input
                 type="email"
                 value={form.email}
@@ -200,11 +207,11 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
                 昵称
               </label>
               <div className="relative">
-                <SmileOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                <SmileOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
                 <input
                   type="text"
                   value={form.nickname}
@@ -218,11 +225,11 @@ export default function RegisterPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
                 手机号
               </label>
               <div className="relative">
-                <PhoneOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                <PhoneOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
                 <input
                   type="tel"
                   value={form.phone}
@@ -238,11 +245,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
               密码 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
               <input
                 type="password"
                 value={form.password}
@@ -255,17 +262,17 @@ export default function RegisterPage() {
               <p className="mt-1.5 text-xs text-red-500">{errors.password}</p>
             ) : (
               form.password && !submitted && (
-                <p className="mt-1.5 text-xs text-gray-400">{form.password.length} 个字符</p>
+                <p className="mt-1.5 text-xs text-[#8b7e6a]">{form.password.length} 个字符</p>
               )
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
               确认密码 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
               <input
                 type="password"
                 value={form.confirmPassword}
@@ -282,12 +289,12 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-6 py-3 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] text-white rounded-xl hover:from-[#0a2a5c]/90 hover:to-[#1a4a8a]/90 shadow-button hover:-translate-y-0.5 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {loading ? '注册中...' : '创建账号'}
           </button>
 
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-[#8b7e6a]">
             已有账号？{' '}
             <Link href="/login" className="text-[#f59e0b] hover:underline font-medium">
               立即登录

@@ -98,32 +98,34 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      <div className="bg-white border-b border-gray-100">
+    <div className="min-h-screen bg-[#f7f3ec]/50">
+      <div className="bg-gradient-to-br from-[#fefcf8] via-[#faf7f2] to-[#f5f0e8] border-b border-[#e8dfd0]"
+        style={{ backgroundImage: 'radial-gradient(circle, #e8dfd0 1px, transparent 1px), linear-gradient(to bottom right, #fefcf8, #faf7f2, #f5f0e8)', backgroundSize: '20px 20px, auto', backgroundPosition: '0 0, 0 0' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold text-[#0a2a5c] mb-2">活动路演</h1>
-          <p className="text-gray-500">创业活动、项目路演、训练营，发现更多创业机会。</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">活动路演</h1>
+          <p className="text-[#0a2a5c]/50">创业活动、项目路演、训练营，发现更多创业机会。</p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!user && (
-          <div className="bg-gradient-to-r from-[#0a2a5c]/5 to-[#f59e0b]/5 rounded-xl p-6 mb-8 border border-[#0a2a5c]/10">
+          <div className="bg-gradient-to-r from-[#fefcf8] to-[#faf7f2] rounded-xl p-6 mb-8 border border-[#e8dfd0] shadow-sm">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-[#0a2a5c] mb-1">登录后即可报名活动</h3>
-                <p className="text-sm text-gray-500">注册成为平台会员，参与创业活动、项目路演，与创业者面对面交流。</p>
+                <h3 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-1">登录后即可报名活动</h3>
+                <p className="text-sm text-[#0a2a5c]/50">注册成为平台会员，参与创业活动、项目路演，与创业者面对面交流。</p>
               </div>
               <div className="flex items-center gap-3">
                 <a
                   href="/login"
-                  className="inline-flex items-center px-6 py-2.5 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors text-sm"
+                  className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-[#0a2a5c] to-[#1a4a8a] text-white font-semibold rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm"
                 >
                   立即登录
                 </a>
                 <a
                   href="/register"
-                  className="inline-flex items-center px-6 py-2.5 bg-white text-[#0a2a5c] font-semibold rounded-xl border border-[#0a2a5c]/20 hover:bg-[#0a2a5c]/5 transition-colors text-sm"
+                  className="inline-flex items-center px-6 py-2.5 bg-[#fefcf8] text-[#0a2a5c] font-semibold rounded-xl border border-[#e8dfd0] hover:bg-[#faf7f2] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm"
                 >
                   立即注册
                 </a>
@@ -134,18 +136,22 @@ export default function EventsPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+            <div className="relative h-12 w-12">
+              <div className="absolute inset-0 rounded-full border-4 border-[#e8dfd0] opacity-40"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#f59e0b] animate-spin"></div>
+              <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-[#0a2a5c] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }}></div>
+            </div>
           </div>
         ) : events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event: Event) => {
               const isSignedUp = signedUpEventIds.has(event.id);
               return (
-                <Link href={`/events/${event.id}`} key={event.id} className="block bg-white rounded-xl shadow-custom overflow-hidden border border-gray-100 hover:shadow-custom-lg transition-all">
+                <Link href={`/events/${event.id}`} key={event.id} className="block bg-[#fefcf8] rounded-xl shadow-sm overflow-hidden border border-[#e8dfd0] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                   <div className="h-3 bg-gradient-to-r from-[#0a2a5c] to-[#f59e0b]" />
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <span className="px-3 py-1 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded-lg text-xs font-medium">
+                      <span className="px-3 py-1 bg-[#f5f0e8] text-[#0a2a5c] rounded-lg text-xs font-medium">
                         {getEventTypeLabel(event.event_type)}
                       </span>
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${event.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'
@@ -153,9 +159,9 @@ export default function EventsPage() {
                         {event.status === 'active' ? '进行中' : event.status === 'closed' ? '已结束' : '已取消'}
                       </span>
                     </div>
-                    <h3 className="text-lg font-semibold text-[#0a2a5c] mb-3 line-clamp-2">{event.title}</h3>
-                    <p className="text-sm text-gray-500 line-clamp-2 mb-4">{event.description}</p>
-                    <div className="space-y-2 text-sm text-gray-400 mb-5">
+                    <h3 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-3 line-clamp-2">{event.title}</h3>
+                    <p className="text-sm text-[#0a2a5c]/50 line-clamp-2 mb-4">{event.description}</p>
+                    <div className="space-y-2 text-sm text-[#0a2a5c]/40 mb-5">
                       <div className="flex items-center">
                         <CalendarOutlined className="mr-2" />
                         {new Date(event.start_at).toLocaleDateString('zh-CN')} - {new Date(event.end_at).toLocaleDateString('zh-CN')}
@@ -167,7 +173,7 @@ export default function EventsPage() {
                     </div>
                     {user && !(user.role === 'admin' || user.role === 'super_admin') && (
                       isSignedUp ? (
-                        <div className="w-full px-4 py-2.5 bg-green-50 text-green-600 rounded-lg text-sm font-medium text-center flex items-center justify-center">
+                        <div className="w-full px-4 py-2.5 bg-green-50 text-green-600 rounded-xl text-sm font-medium text-center flex items-center justify-center shadow-sm">
                           <CheckCircleOutlined className="mr-1.5" />
                           已报名
                         </div>
@@ -178,7 +184,7 @@ export default function EventsPage() {
                             handleSignup(event.id);
                           }}
                           disabled={signingUpId === event.id}
-                          className="w-full px-4 py-2.5 bg-[#f59e0b] text-white rounded-lg hover:bg-[#f59e0b]/90 transition-colors text-sm font-medium disabled:opacity-50"
+                          className="w-full px-4 py-2.5 bg-gradient-to-r from-[#f59e0b] to-[#f97316] text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm font-medium disabled:opacity-50"
                         >
                           {signingUpId === event.id ? '报名中...' : '立即报名'}
                         </button>
@@ -191,10 +197,12 @@ export default function EventsPage() {
 
           </div>
         ) : (
-          <div className="text-center py-20 text-gray-400">
-            <CalendarOutlined className="text-6xl mb-4 block" />
-            <p className="text-lg">暂无活动</p>
-            <p className="text-sm mt-2">还没有活动发布，敬请期待</p>
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <CalendarOutlined className="text-4xl text-[#0a2a5c]/20" />
+            </div>
+            <p className="text-lg text-[#0a2a5c]/40 font-medium">暂无活动</p>
+            <p className="text-sm mt-2 text-[#0a2a5c]/30">还没有活动发布，敬请期待</p>
           </div>
         )}
       </div>

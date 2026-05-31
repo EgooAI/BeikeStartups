@@ -108,9 +108,9 @@ export default function ConnectPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">请先登录</p>
+          <p className="text-[#8b7e6a] mb-4">请先登录</p>
           <a href="/login" className="text-[#0a2a5c] hover:underline">立即登录</a>
         </div>
       </div>
@@ -119,31 +119,34 @@ export default function ConnectPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-[3px] border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+          <div className="absolute inset-[4px] rounded-full border-[3px] border-[#e8dfd0] border-b-[#0a2a5c] animate-[spin_0.8s_linear_reverse_infinite]" />
+        </div>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
-        <div className="bg-white rounded-2xl shadow-custom p-8 text-center max-w-md mx-4">
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm p-8 text-center max-w-md mx-4">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <SendOutlined className="text-green-600 text-2xl" />
           </div>
-          <h2 className="text-xl font-bold text-[#0a2a5c] mb-2">申请提交成功</h2>
-          <p className="text-gray-500 mb-6">项目团队将在3个工作日内审核您的申请</p>
+          <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">申请提交成功</h2>
+          <p className="text-[#8b7e6a] mb-6">项目团队将在3个工作日内审核您的申请</p>
           <div className="flex gap-3">
             <button
               onClick={() => router.back()}
-              className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-3 border border-[#e8dfd0] text-[#5c4f3c] rounded-xl hover:bg-[#faf7f2] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
             >
               返回项目详情
             </button>
             <button
               onClick={() => router.push('/projects')}
-              className="flex-1 px-4 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors"
+              className="flex-1 px-4 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
             >
               浏览更多项目
             </button>
@@ -156,49 +159,49 @@ export default function ConnectPage() {
   const roleOptions = getRoleBasedOptions();
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-[#f7f3ec]/50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center text-gray-500 hover:text-[#0a2a5c] transition-colors mb-6"
+          className="flex items-center text-[#8b7e6a] hover:text-[#0a2a5c] transition-colors mb-6"
         >
           <ArrowLeftOutlined className="mr-2" /> 返回项目详情
         </button>
 
-        <div className="bg-white rounded-2xl shadow-custom overflow-hidden">
+        <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm overflow-hidden">
           <div className="h-48 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] flex items-center justify-center relative">
             <div className="text-white text-center">
-              <div className={`w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-3`}>
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-3">
                 {getRequestTypeIcon(requestType)}
               </div>
-              <h1 className="text-2xl font-bold">{getRequestTypeLabel(requestType)}</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{getRequestTypeLabel(requestType)}</h1>
             </div>
           </div>
 
           <div className="p-8">
-            <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-              <p className="text-sm text-gray-500 mb-2">对接项目</p>
+            <div className="mb-6 p-4 bg-[#faf7f2] rounded-xl border border-[#e8dfd0]">
+              <p className="text-sm text-[#a89880] mb-2">对接项目</p>
               <p className="font-semibold text-[#0a2a5c]">{project.title}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {roleOptions.length > 1 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">对接类型</label>
+                  <label className="block text-sm font-medium text-[#5c4f3c] mb-2">对接类型</label>
                   <div className="grid grid-cols-3 gap-3">
                     {roleOptions.map((option) => (
                       <button
                         key={option.value}
                         type="button"
                         onClick={() => setRequestType(option.value as ConnectionRequestType)}
-                        className={`p-4 rounded-xl border-2 transition-all text-left ${
+                        className={`p-4 rounded-xl border-2 transition-all text-left shadow-sm hover:shadow-md hover:-translate-y-0.5 duration-300 ${
                           requestType === option.value
-                            ? 'border-[#0a2a5c] bg-[#0a2a5c]/5'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-[#0a2a5c] bg-[#faf7f2]'
+                            : 'border-[#e8dfd0] hover:border-[#d4c8b0]'
                         }`}
                       >
                         <span className="text-lg mb-1 block">{option.value === 'bp_access' ? '📄' : option.value === 'become_mentor' ? '👨‍🏫' : '📦'}</span>
-                        <span className="text-sm font-medium text-gray-700">{option.label}</span>
+                        <span className="text-sm font-medium text-[#5c4f3c]">{option.label}</span>
                       </button>
                     ))}
                   </div>
@@ -206,29 +209,29 @@ export default function ConnectPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">补充说明（选填）</label>
+                <label className="block text-sm font-medium text-[#5c4f3c] mb-2">补充说明（选填）</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="请简要说明您的背景、优势或合作意向..."
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] resize-none"
+                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] resize-none placeholder:text-[#c4b99a]"
                 />
-                <p className="mt-2 text-xs text-gray-400">请简要介绍您的背景和合作意向，帮助项目团队更好地了解您</p>
+                <p className="mt-2 text-xs text-[#a89880]">请简要介绍您的背景和合作意向，帮助项目团队更好地了解您</p>
               </div>
 
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  className="flex-1 px-6 py-3 border border-[#e8dfd0] text-[#5c4f3c] rounded-xl hover:bg-[#faf7f2] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium disabled:opacity-50"
+                  className="flex-1 px-6 py-3 bg-[#0a2a5c] text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium disabled:opacity-50"
                 >
                   {submitting ? '提交中...' : '提交申请'}
                 </button>

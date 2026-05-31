@@ -8,6 +8,7 @@ import { responseApi } from '@/lib/api';
 import { Response as RecruitmentResponse } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 import { message } from 'antd';
+import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export default function ResponseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -101,16 +102,24 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-[3px] border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+          <div className="absolute inset-[4px] rounded-full border-[3px] border-[#e8dfd0] border-b-[#0a2a5c] animate-[spin_0.8s_linear_reverse_infinite]" />
+        </div>
       </div>
     );
   }
 
   if (!response) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">记录不存在</p>
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <ExclamationCircleOutlined className="text-3xl text-[#8b7e6a]" />
+          </div>
+          <p className="text-[#8b7e6a]">记录不存在</p>
+        </div>
       </div>
     );
   }
@@ -121,30 +130,32 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
   const canReview = isTeamOwner || isAdmin;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#f7f3ec]/50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="text-indigo-600 hover:text-indigo-700 mb-4"
+            className="flex items-center text-[#8b7e6a] hover:text-[#0a2a5c] transition-colors"
           >
-            ← 返回
+            <ArrowLeftOutlined className="mr-2" /> 返回
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm p-8">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">
                 {response.recruitment?.title}
               </h1>
-              <p className="text-indigo-600 font-medium mb-2">
+              <p className="text-[#0a2a5c] font-medium mb-2 flex items-center gap-1.5">
+                <FileTextOutlined className="text-sm" />
                 {response.recruitment?.position}
               </p>
-              <p className="text-gray-500 text-sm">
+              <p className="text-[#8b7e6a] text-sm flex items-center gap-1.5">
+                <UserOutlined className="text-xs" />
                 申请人：{response.user?.nickname || response.user?.username}
               </p>
-              <p className="text-gray-500 text-sm">
+              <p className="text-[#a89880] text-sm">
                 申请时间：{formatDate(response.created_at)}
               </p>
             </div>
@@ -155,18 +166,18 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
 
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">求职信</h2>
-              <p className="text-gray-700 whitespace-pre-wrap">{response.cover_letter}</p>
+              <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-2">求职信</h2>
+              <p className="text-[#5c4f3c] whitespace-pre-wrap">{response.cover_letter}</p>
             </div>
 
             {response.resume && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">简历</h2>
+                <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-2">简历</h2>
                 <a
                   href={response.resume}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-600 hover:text-indigo-700"
+                  className="text-[#0a2a5c] hover:text-[#0a2a5c]/80 font-medium"
                 >
                   查看简历 →
                 </a>
@@ -174,33 +185,33 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
             )}
 
             {response.review_note && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">回复意见</h2>
-                <p className="text-gray-700">{response.review_note}</p>
+              <div className="bg-[#faf7f2] p-4 rounded-xl border border-[#e8dfd0]">
+                <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-2">回复意见</h2>
+                <p className="text-[#5c4f3c]">{response.review_note}</p>
               </div>
             )}
           </div>
 
           {canReview && response.status === 'pending' && (
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">审核操作</h3>
+            <div className="mt-8 pt-8 border-t border-[#e8dfd0]">
+              <h3 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-4">审核操作</h3>
               <textarea
                 value={reviewNote}
                 onChange={(e) => setReviewNote(e.target.value)}
                 placeholder="输入回复意见..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-4"
+                className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] focus:outline-none placeholder:text-[#c4b99a] mb-4 resize-none"
                 rows={3}
               />
               <div className="flex space-x-4">
                 <button
                   onClick={handleAccept}
-                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  className="bg-green-600 text-white px-6 py-2.5 rounded-xl hover:bg-green-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                 >
                   录取
                 </button>
                 <button
                   onClick={handleReject}
-                  className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                  className="bg-red-600 text-white px-6 py-2.5 rounded-xl hover:bg-red-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                 >
                   拒绝
                 </button>
@@ -209,10 +220,10 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
           )}
 
           {isApplicant && response.status === 'pending' && (
-            <div className="mt-8 pt-8 border-t border-gray-200">
+            <div className="mt-8 pt-8 border-t border-[#e8dfd0]">
               <button
                 onClick={handleInvalidate}
-                className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                className="bg-[#8b7e6a] text-white px-6 py-2.5 rounded-xl hover:bg-[#6c5f4a] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
               >
                 撤回申请
               </button>

@@ -52,8 +52,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+      <div className="min-h-screen flex items-center justify-center bg-[#f7f3ec]/50">
+        <div className="relative flex justify-center items-center">
+          <div className="w-12 h-12 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+        </div>
       </div>
     );
   }
@@ -71,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#f7f3ec]/50 flex">
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0a2a5c] transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -161,11 +164,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-gray-100 h-16 flex items-center px-6 sticky top-0 z-30">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-[#0a2a5c] mr-4">
+        <header className="bg-gradient-to-br from-[#fefcf8] via-[#faf7f2] to-[#f5f0e8] border-b border-[#e8dfd0] h-16 flex items-center px-6 sticky top-0 z-30">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-[#8b7e6a] hover:text-[#0a2a5c] mr-4">
             <MenuOutlined className="text-xl" />
           </button>
-          <div className="flex items-center space-x-2 text-sm text-gray-400">
+          <div className="flex items-center space-x-2 text-sm text-[#a89a80]">
             <Link href="/" className="hover:text-[#0a2a5c] transition-colors">前台</Link>
             <span>/</span>
             <span className="text-[#0a2a5c]">管理后台</span>

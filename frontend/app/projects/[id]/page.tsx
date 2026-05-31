@@ -21,6 +21,7 @@ import {
   BookOutlined,
   PauseOutlined,
   EditOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 
 const STAGE_OPTIONS: { value: ProjectStage; label: string }[] = [
@@ -103,49 +104,58 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-[3px] border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+          <div className="absolute inset-[4px] rounded-full border-[3px] border-[#e8dfd0] border-b-[#0a2a5c] animate-[spin_0.8s_linear_reverse_infinite]" />
+        </div>
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
         <div className="text-center">
-          <RocketOutlined className="text-6xl text-gray-300 mb-4 block" />
-          <p className="text-gray-500">项目不存在</p>
-          <Link href="/projects" className="text-[#0a2a5c] hover:underline mt-4 inline-block">返回项目库</Link>
+          <div className="w-24 h-24 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <ExclamationCircleOutlined className="text-4xl text-[#8b7e6a]" />
+          </div>
+          <p className="text-[#8b7e6a] text-lg mb-4">项目不存在</p>
+          <Link href="/projects" className="text-[#0a2a5c] hover:underline font-medium">返回项目库</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-[#f7f3ec]/50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center text-gray-500 hover:text-[#0a2a5c] transition-colors mb-6"
+          className="flex items-center text-[#8b7e6a] hover:text-[#0a2a5c] transition-colors mb-6"
         >
           <ArrowLeftOutlined className="mr-2" /> 返回
         </button>
 
-        <div className="bg-white rounded-2xl shadow-custom overflow-hidden">
+        <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm overflow-hidden">
           {/* Cover */}
           <div className="h-64 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] relative flex items-center justify-center">
             {project.cover_image ? (
               <img src={project.cover_image} alt={project.title} className="w-full h-full object-cover" />
             ) : (
-              <RocketOutlined className="text-8xl text-white/20" />
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                  <RocketOutlined className="text-5xl text-white/40" />
+                </div>
+              </div>
             )}
             <div className="absolute top-4 left-4 flex items-center gap-2">
               {editingStage ? (
-                <div className="flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full">
+                <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
                   <select
                     value={newStage}
                     onChange={(e) => setNewStage(e.target.value as ProjectStage)}
-                    className="text-sm bg-transparent border-none focus:outline-none"
+                    className="text-sm bg-transparent border-none focus:outline-none text-[#0a2a5c]"
                   >
                     {STAGE_OPTIONS.map(option => (
                       <option key={option.value} value={option.value}>
@@ -155,19 +165,19 @@ export default function ProjectDetailPage() {
                   </select>
                   <button
                     onClick={handleSaveStage}
-                    className="text-[#0a2a5c] hover:text-[#0a2a5c]/80"
+                    className="text-green-600 hover:text-green-700 font-bold"
                   >
                     ✓
                   </button>
                   <button
                     onClick={handleCancelEditStage}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-red-400 hover:text-red-500 font-bold"
                   >
                     ✕
                   </button>
                 </div>
               ) : (
-                <span className={`px-4 py-1.5 ${STAGE_COLORS[project.stage] || 'bg-[#f59e0b]'} text-white text-sm rounded-full font-medium`}>
+                <span className={`px-4 py-1.5 ${STAGE_COLORS[project.stage] || 'bg-[#f59e0b]'} text-white text-sm rounded-full font-medium shadow-sm`}>
                   {STAGE_OPTIONS.find(s => s.value === project.stage)?.label || '未知阶段'}
                 </span>
               )}
@@ -177,42 +187,46 @@ export default function ProjectDetailPage() {
           <div className="p-8">
             <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-[#0a2a5c] mb-2">{project.title}</h1>
-                <p className="text-gray-500 text-lg">{project.description}</p>
+                <h1 className="text-3xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">{project.title}</h1>
+                <p className="text-[#8b7e6a] text-lg">{project.description}</p>
               </div>
               <div className="flex gap-2">
-                <button className="px-4 py-2 border border-gray-200 rounded-xl text-gray-500 hover:border-red-200 hover:text-red-500 transition-colors">
+                <button className="px-4 py-2 border border-[#e8dfd0] rounded-xl text-[#8b7e6a] hover:bg-[#faf7f2] hover:border-red-200 hover:text-red-500 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                   <HeartOutlined />
                 </button>
-                <button className="px-4 py-2 border border-gray-200 rounded-xl text-gray-500 hover:border-[#0a2a5c]/20 hover:text-[#0a2a5c] transition-colors">
+                <button className="px-4 py-2 border border-[#e8dfd0] rounded-xl text-[#8b7e6a] hover:bg-[#faf7f2] hover:border-[#0a2a5c]/20 hover:text-[#0a2a5c] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                   <ShareAltOutlined />
                 </button>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 mb-6">
-              {project.tags?.split(',').map((tag, i) => (
-                <span key={i} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm">
-                  {tag.trim()}
-                </span>
-              ))}
-            </div>
-
-            {project.content && (
-              <div className="prose max-w-none mb-8">
-                <h2 className="text-xl font-semibold text-[#0a2a5c] mb-4">项目介绍</h2>
-                <div className="text-gray-600 leading-relaxed whitespace-pre-wrap">{project.content}</div>
+            {/* Tags */}
+            {project.tags && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {project.tags.split(',').map((tag, i) => (
+                  <span key={i} className="px-3 py-1.5 bg-[#f5f0e8] text-[#8b7e6a] rounded-xl text-sm font-medium">
+                    {tag.trim()}
+                  </span>
+                ))}
               </div>
             )}
 
-            {/* 项目阶段 - 独立区块，可编辑 */}
-            <div className="p-6 bg-gray-50 rounded-xl mb-8">
+            {/* Project Content */}
+            {project.content && (
+              <div className="prose max-w-none mb-8">
+                <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-4">项目介绍</h2>
+                <div className="text-[#5c4f3c] leading-relaxed whitespace-pre-wrap">{project.content}</div>
+              </div>
+            )}
+
+            {/* Project Stage */}
+            <div className="p-6 bg-[#faf7f2] rounded-xl border border-[#e8dfd0] mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-[#0a2a5c]">项目阶段</h2>
+                <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c]">项目阶段</h2>
                 {canEditStage && !editingStage && (
                   <button
                     onClick={handleStartEditStage}
-                    className="px-3 py-1.5 bg-[#0a2a5c] text-white text-sm rounded-lg hover:bg-[#0a2a5c]/90 transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 bg-[#0a2a5c] text-white text-sm rounded-xl hover:bg-[#0a2a5c]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-1"
                   >
                     <EditOutlined className="text-xs" /> 修改阶段
                   </button>
@@ -220,11 +234,11 @@ export default function ProjectDetailPage() {
               </div>
 
               {editingStage ? (
-                <div className="flex items-center gap-3 bg-white p-4 rounded-lg border border-[#0a2a5c]/20">
+                <div className="flex items-center gap-3 bg-[#fefcf8] p-4 rounded-xl border border-[#0a2a5c]/20">
                   <select
                     value={newStage}
                     onChange={(e) => setNewStage(e.target.value as ProjectStage)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0a2a5c] focus:border-transparent text-sm"
+                    className="flex-1 px-3 py-2 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] focus:outline-none text-sm"
                   >
                     {STAGE_OPTIONS.map(option => (
                       <option key={option.value} value={option.value}>
@@ -234,26 +248,26 @@ export default function ProjectDetailPage() {
                   </select>
                   <button
                     onClick={handleSaveStage}
-                    className="px-4 py-2 bg-[#0a2a5c] text-white text-sm rounded-lg hover:bg-[#0a2a5c]/90 transition-colors"
+                    className="px-4 py-2 bg-[#0a2a5c] text-white text-sm rounded-xl hover:bg-[#0a2a5c]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
                     保存
                   </button>
                   <button
                     onClick={handleCancelEditStage}
-                    className="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 border border-[#e8dfd0] text-[#5c4f3c] text-sm rounded-xl hover:bg-[#faf7f2] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
                     取消
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   {STAGE_OPTIONS.map(option => (
                     <div
                       key={option.value}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 shadow-sm ${
                         project.stage === option.value
                           ? `${STAGE_COLORS[option.value]} text-white shadow-md scale-105`
-                          : 'bg-white text-gray-500 border border-gray-200'
+                          : 'bg-[#fefcf8] text-[#8b7e6a] border border-[#e8dfd0]'
                       }`}
                     >
                       <span className="text-sm font-medium">{option.label}</span>
@@ -267,32 +281,31 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Project Info Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50 rounded-xl mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-[#faf7f2] rounded-xl border border-[#e8dfd0] mb-8">
               <div className="flex items-center space-x-3">
-                <TeamOutlined className="text-xl text-[#0a2a5c]" />
+                <div className="w-10 h-10 bg-[#f5f0e8] rounded-xl flex items-center justify-center">
+                  <TeamOutlined className="text-lg text-[#0a2a5c]" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-500">所属团队</p>
+                  <p className="text-sm text-[#a89880]">所属团队</p>
                   <p className="font-medium text-[#0a2a5c]">{project.team?.name || '待定'}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <TeamOutlined className="text-xl text-[#0a2a5c]" />
-                <div>
-                  <p className="text-sm text-gray-500">所属团队</p>
-                  <p className="font-medium text-[#0a2a5c]">{project.team?.name || '待定'}</p>
+                <div className="w-10 h-10 bg-[#f5f0e8] rounded-xl flex items-center justify-center">
+                  <EyeOutlined className="text-lg text-[#0a2a5c]" />
                 </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <EyeOutlined className="text-xl text-[#0a2a5c]" />
                 <div>
-                  <p className="text-sm text-gray-500">浏览次数</p>
+                  <p className="text-sm text-[#a89880]">浏览次数</p>
                   <p className="font-medium text-[#0a2a5c]">{project.view_count}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <CalendarOutlined className="text-xl text-[#0a2a5c]" />
+                <div className="w-10 h-10 bg-[#f5f0e8] rounded-xl flex items-center justify-center">
+                  <CalendarOutlined className="text-lg text-[#0a2a5c]" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-500">发布时间</p>
+                  <p className="text-sm text-[#a89880]">发布时间</p>
                   <p className="font-medium text-[#0a2a5c]">
                     {new Date(project.created_at).toLocaleDateString('zh-CN')}
                   </p>
@@ -303,22 +316,22 @@ export default function ProjectDetailPage() {
             {/* Recruitment Section */}
             {recruitments.length > 0 && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-[#0a2a5c] mb-4">招募需求</h2>
+                <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-4">招募需求</h2>
                 <div className="space-y-4">
                   {recruitments.map((rec) => (
-                    <div key={rec.id} className="p-5 border border-gray-200 rounded-xl hover:border-[#f59e0b]/30 transition-colors">
+                    <div key={rec.id} className="p-5 border border-[#e8dfd0] rounded-xl hover:border-[#d4c8b0] hover:bg-[#faf7f2] transition-all duration-300">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-semibold text-[#0a2a5c]">{rec.position}</h3>
-                          <p className="text-sm text-gray-500 mt-1">{rec.description}</p>
+                          <h3 className="font-extrabold tracking-tight text-[#0a2a5c]">{rec.position}</h3>
+                          <p className="text-sm text-[#8b7e6a] mt-1">{rec.description}</p>
                           {rec.requirements && (
-                            <p className="text-sm text-gray-400 mt-2">要求: {rec.requirements}</p>
+                            <p className="text-sm text-[#a89880] mt-2">要求: {rec.requirements}</p>
                           )}
                         </div>
                         {user?.role === 'student' && (
                           <Link
                             href={`/responses/create?recruitment_id=${rec.id}`}
-                            className="px-5 py-2 bg-[#f59e0b] text-white text-sm rounded-lg hover:bg-[#f59e0b]/90 transition-colors whitespace-nowrap"
+                            className="px-5 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap"
                           >
                             申请加入
                           </Link>
@@ -330,14 +343,14 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
-            {/* Action Buttons based on user role */}
-            <div className="flex flex-wrap gap-3 border-t border-gray-100 pt-6">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3 border-t border-[#e8dfd0] pt-6">
               {user ? (
                 <>
                   {user.role === 'student' && (
                     <Link
                       href={user ? `/responses/create?recruitment_id=${recruitments[0]?.id || ''}` : '/login'}
-                      className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 transition-colors font-medium"
+                      className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                     >
                       <UserOutlined className="mr-2" />申请加入团队
                     </Link>
@@ -348,13 +361,13 @@ export default function ProjectDetailPage() {
                 <>
                   <Link
                     href="/login"
-                    className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 transition-colors font-medium"
+                    className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                   >
                     登录后申请加入
                   </Link>
                   <Link
                     href="/register"
-                    className="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:border-[#0a2a5c]/20 transition-colors font-medium"
+                    className="px-6 py-3 border border-[#e8dfd0] text-[#5c4f3c] rounded-xl hover:bg-[#faf7f2] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                   >
                     注册账号
                   </Link>
@@ -362,18 +375,18 @@ export default function ProjectDetailPage() {
               )}
             </div>
 
-            {/* Role-specific actions - hidden for students and team members */}
+            {/* Resource Connection for non-student roles */}
             {user?.role !== 'student' && user?.role !== 'team_owner' && (
-              <div className="mt-6 p-5 bg-amber-50 rounded-xl border border-amber-100">
-                <h3 className="font-semibold text-amber-800 mb-3">资源对接</h3>
-                <p className="text-sm text-amber-600 mb-4">
+              <div className="mt-6 p-5 bg-[#faf7f2] rounded-xl border border-[#e8dfd0]">
+                <h3 className="font-extrabold tracking-tight text-[#0a2a5c] mb-3">资源对接</h3>
+                <p className="text-sm text-[#8b7e6a] mb-4">
                   投资人可申请查看BP，导师可申请成为项目导师，资源方可提供资源合作。
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {user?.role === 'investor' && (
                     <Link
                       href={`/projects/${project.id}/connect`}
-                      className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
+                      className="px-4 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                     >
                       <FileTextOutlined className="mr-2" />申请对接
                     </Link>
@@ -381,7 +394,7 @@ export default function ProjectDetailPage() {
                   {user?.role === 'mentor' && (
                     <Link
                       href={`/projects/${project.id}/connect`}
-                      className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
+                      className="px-4 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                     >
                       <BookOutlined className="mr-2" />申请对接
                     </Link>
@@ -389,17 +402,16 @@ export default function ProjectDetailPage() {
                   {user?.role === 'partner' && (
                     <Link
                       href={`/projects/${project.id}/connect`}
-                      className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors flex items-center"
+                      className="px-4 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                     >
                       <PauseOutlined className="mr-2" />申请对接
                     </Link>
                   )}
-                 
                 </div>
               </div>
             )}
 
-            {/* Connection Requests Management - visible only to team members */}
+            {/* Connection Requests Management */}
             <ProjectConnectionRequests projectId={project.id} />
           </div>
         </div>

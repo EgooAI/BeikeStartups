@@ -8,6 +8,7 @@ import { responseApi } from '@/lib/api';
 import { Response as RecruitmentResponse } from '@/types';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 import Link from 'next/link';
+import { InboxOutlined, FileSearchOutlined } from '@ant-design/icons';
 
 export default function ResponsesPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -25,29 +26,35 @@ export default function ResponsesPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-[3px] border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+          <div className="absolute inset-[4px] rounded-full border-[3px] border-[#e8dfd0] border-b-[#0a2a5c] animate-[spin_0.8s_linear_reverse_infinite]" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#f7f3ec]/50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">我的应聘记录</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-[#0a2a5c] mb-8">我的应聘记录</h1>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">
             {error}
           </div>
         )}
 
         {responses.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <p className="text-gray-600">暂无应聘记录</p>
+          <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm p-12 text-center">
+            <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <InboxOutlined className="text-3xl text-[#8b7e6a]" />
+            </div>
+            <p className="text-[#8b7e6a] mb-4">暂无应聘记录</p>
             <Link
               href="/recruitments"
-              className="text-indigo-600 hover:text-indigo-700 font-medium mt-4 inline-block"
+              className="text-[#0a2a5c] hover:text-[#0a2a5c]/80 font-medium inline-block"
             >
               浏览招聘信息 →
             </Link>
@@ -55,16 +62,16 @@ export default function ResponsesPage() {
         ) : (
           <div className="space-y-4">
             {responses.map((response) => (
-              <div key={response.id} className="bg-white rounded-lg shadow-md p-6">
+              <div key={response.id} className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h3 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">
                       {response.recruitment?.title || '招募'}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-2">
+                    <p className="text-[#8b7e6a] text-sm mb-2">
                       职位：{response.recruitment?.position}
                     </p>
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-[#a89880] text-xs">
                       申请时间：{formatDate(response.created_at)}
                     </p>
                   </div>
@@ -74,12 +81,12 @@ export default function ResponsesPage() {
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-gray-700 text-sm">{response.cover_letter}</p>
+                  <p className="text-[#5c4f3c] text-sm">{response.cover_letter}</p>
                 </div>
 
                 {response.review_note && (
-                  <div className="bg-gray-50 p-3 rounded mb-4">
-                    <p className="text-sm text-gray-700">
+                  <div className="bg-[#faf7f2] p-3 rounded-xl border border-[#e8dfd0] mb-4">
+                    <p className="text-sm text-[#5c4f3c]">
                       <strong>回复意见：</strong>{response.review_note}
                     </p>
                   </div>
@@ -87,8 +94,9 @@ export default function ResponsesPage() {
 
                 <Link
                   href={`/responses/${response.id}`}
-                  className="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
+                  className="text-[#0a2a5c] hover:text-[#0a2a5c]/80 font-medium text-sm flex items-center gap-1"
                 >
+                  <FileSearchOutlined className="text-xs" />
                   查看详情
                 </Link>
               </div>

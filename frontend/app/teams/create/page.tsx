@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { teamApi } from '@/lib/api';
+import { TeamOutlined } from '@ant-design/icons';
 
 export default function CreateTeamPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -41,23 +42,34 @@ export default function CreateTeamPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#f7f3ec] to-[#faf7f2]">
+        <div className="relative">
+          <div className="w-14 h-14 rounded-full border-[3px] border-primary/10 border-t-primary animate-spin" />
+          <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-r-accent/30 animate-spin" style={{ animationDuration: '1.5s' }} />
+        </div>
+        <p className="text-gray-400 text-sm animate-pulse">正在加载中...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#f7f3ec]/50 py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">创建团队</h1>
-          <p className="mt-2 text-gray-600">组建您的创业团队</p>
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-sm">
+              <TeamOutlined className="text-xl text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-primary">创建团队</h1>
+              <p className="mt-1 text-gray-500">组建您的创业团队</p>
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="dashboard-panel p-8 space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
               {error}
             </div>
           )}
@@ -74,7 +86,7 @@ export default function CreateTeamPage() {
               maxLength={100}
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               placeholder="输入团队名称"
             />
           </div>
@@ -89,7 +101,7 @@ export default function CreateTeamPage() {
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
               placeholder="描述您的团队"
             />
           </div>
@@ -104,23 +116,28 @@ export default function CreateTeamPage() {
               name="logo"
               value={formData.logo}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               placeholder="输入Logo图片URL（可选）"
             />
           </div>
 
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 pt-2">
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              className="flex-1 bg-primary text-white py-3 px-6 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 font-medium"
             >
-              {isLoading ? '创建中...' : '创建团队'}
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  创建中...
+                </span>
+              ) : '创建团队'}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 py-3 border border-[#e8dfd0] rounded-xl text-gray-600 hover:bg-[#faf7f2] hover:-translate-y-0.5 transition-all duration-300 font-medium"
             >
               取消
             </button>

@@ -168,32 +168,35 @@ export default function AdminEventsPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      draft: 'bg-gray-100 text-gray-500',
+      draft: 'bg-[#f5f0e8] text-[#8b7e6a]',
       active: 'bg-green-50 text-green-600',
       closed: 'bg-blue-50 text-blue-600',
       cancelled: 'bg-red-50 text-red-500',
     };
-    return colors[status] || 'bg-gray-100 text-gray-500';
+    return colors[status] || 'bg-[#f5f0e8] text-[#8b7e6a]';
   };
 
   if (loading) {
     return (
-      <div className="p-8 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#f7f3ec]/50">
+        <div className="relative flex justify-center items-center">
+          <div className="w-12 h-12 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 min-h-screen">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#0a2a5c]">活动管理</h1>
-          <p className="text-gray-500 mt-1">发布和管理创业活动、路演、训练营等。</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">活动管理</h1>
+          <p className="text-[#8b7e6a] mt-1">发布和管理创业活动、路演、训练营等。</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="inline-flex items-center px-4 py-2.5 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors text-sm font-medium"
+          className="inline-flex items-center px-4 py-2.5 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
         >
           <PlusOutlined className="mr-1.5" /> 发布活动
         </button>
@@ -201,28 +204,28 @@ export default function AdminEventsPage() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-[#0a2a5c] mb-6">
+          <div className="bg-[#fefcf8] rounded-2xl shadow-xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto border border-[#e8dfd0]">
+            <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-6">
               {editingEvent ? '编辑活动' : '发布新活动'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">活动标题</label>
+                <label className="block text-sm font-medium text-[#6b5e4a] mb-1.5">活动标题</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  className="w-full px-4 py-2.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                   placeholder="输入活动标题"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">活动类型</label>
+                <label className="block text-sm font-medium text-[#6b5e4a] mb-1.5">活动类型</label>
                 <select
                   value={formData.event_type}
                   onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  className="w-full px-4 py-2.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                 >
                   <option value="roadshow">路演</option>
                   <option value="salon">沙龙</option>
@@ -232,60 +235,60 @@ export default function AdminEventsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">活动描述</label>
+                <label className="block text-sm font-medium text-[#6b5e4a] mb-1.5">活动描述</label>
                 <textarea
                   required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  className="w-full px-4 py-2.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                   rows={3}
                   placeholder="输入活动描述"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">活动地点</label>
+                <label className="block text-sm font-medium text-[#6b5e4a] mb-1.5">活动地点</label>
                 <input
                   type="text"
                   required
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                  className="w-full px-4 py-2.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                   placeholder="输入活动地点"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">开始时间</label>
+                  <label className="block text-sm font-medium text-[#6b5e4a] mb-1.5">开始时间</label>
                   <input
                     type="datetime-local"
                     required
                     value={formData.start_at}
                     onChange={(e) => setFormData({ ...formData, start_at: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                    className="w-full px-4 py-2.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">结束时间</label>
+                  <label className="block text-sm font-medium text-[#6b5e4a] mb-1.5">结束时间</label>
                   <input
                     type="datetime-local"
                     required
                     value={formData.end_at}
                     onChange={(e) => setFormData({ ...formData, end_at: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+                    className="w-full px-4 py-2.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
                   />
                 </div>
               </div>
               <div className="flex space-x-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2.5 bg-[#0a2a5c] text-white rounded-lg hover:bg-[#0a2a5c]/90 transition-colors text-sm font-medium"
+                  className="flex-1 px-4 py-2.5 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   {editingEvent ? '保存修改' : '发布活动'}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                  className="px-4 py-2.5 border border-[#e8dfd0] text-[#6b5e4a] rounded-xl hover:bg-[#faf7f2] transition-all duration-300 text-sm font-medium hover:-translate-y-0.5"
                 >
                   取消
                 </button>
@@ -297,37 +300,42 @@ export default function AdminEventsPage() {
 
       {showSignups && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowSignups(false); }}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-[#0a2a5c] mb-2">
+          <div className="bg-[#fefcf8] rounded-2xl shadow-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto border border-[#e8dfd0]">
+            <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">
               {selectedEvent?.title} - 报名管理
             </h2>
-            <p className="text-gray-500 text-sm mb-6">共 {signups.length} 人报名</p>
+            <p className="text-[#8b7e6a] text-sm mb-6">共 {signups.length} 人报名</p>
 
             {loadingSignups ? (
               <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#0a2a5c] border-t-transparent" />
+                <div className="relative flex justify-center items-center">
+                  <div className="w-10 h-10 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+                  <div className="absolute w-6 h-6 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+                </div>
               </div>
             ) : signups.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                <UserOutlined className="text-5xl mb-3 block" />
-                <p>暂无报名人员</p>
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f0e8] rounded-2xl mb-4">
+                  <UserOutlined className="text-4xl text-[#a89a80]" />
+                </div>
+                <p className="text-[#a89a80]">暂无报名人员</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {signups.map((signup) => (
-                  <div key={signup.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div key={signup.id} className="flex items-center justify-between p-4 rounded-xl bg-[#faf7f2] hover:bg-[#f5f0e8] transition-colors">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-full bg-[#0a2a5c]/10 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-xl bg-[#0a2a5c]/10 flex items-center justify-center">
                         <UserOutlined className="text-[#0a2a5c] text-lg" />
                       </div>
                       <div>
                         <p className="font-medium text-[#0a2a5c]">
                           {signup.user?.nickname || signup.user?.username || '未知用户'}
                         </p>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-[#a89a80]">
                           {signup.user?.email || signup.user?.phone || '未提供联系方式'}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-[#a89a80] mt-1">
                           报名时间：{new Date(signup.created_at).toLocaleDateString('zh-CN')} {new Date(signup.created_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
@@ -343,7 +351,7 @@ export default function AdminEventsPage() {
                       {signup.status !== 'confirmed' && signup.status !== 'cancelled' && (
                         <button
                           onClick={() => handleConfirmSignup(signup.id)}
-                          className="px-4 py-2 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center"
+                          className="px-4 py-2 text-xs bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-300 flex items-center shadow-sm hover:shadow-md hover:-translate-y-0.5"
                         >
                           <CheckCircleOutlined className="mr-1" /> 确认
                         </button>
@@ -357,7 +365,7 @@ export default function AdminEventsPage() {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setShowSignups(false)}
-                className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                className="px-6 py-2.5 border border-[#e8dfd0] text-[#6b5e4a] rounded-xl hover:bg-[#faf7f2] transition-all duration-300 text-sm font-medium hover:-translate-y-0.5"
               >
                 关闭
               </button>
@@ -366,42 +374,44 @@ export default function AdminEventsPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-custom border border-gray-100 overflow-hidden">
+      <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] overflow-hidden">
         {events.length === 0 ? (
-          <div className="p-12 text-center text-gray-400">
-            <CalendarOutlined className="text-5xl mb-3 block" />
-            <p>暂无活动</p>
+          <div className="p-12 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f0e8] rounded-2xl mb-4">
+              <CalendarOutlined className="text-4xl text-[#a89a80]" />
+            </div>
+            <p className="text-[#a89a80]">暂无活动</p>
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
               className="text-[#f59e0b] text-sm hover:underline mt-2"
             >
-              发布第一个活动 →
+              发布第一个活动 &rarr;
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">活动名称</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">类型</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">地点</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">时间</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">状态</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500">操作</th>
+                <tr className="bg-[#faf7f2]">
+                  <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">活动名称</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">类型</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">地点</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">时间</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">状态</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#e8dfd0]">
                 {events.map((event: Event) => (
-                  <tr key={event.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={event.id} className="hover:bg-[#faf7f2]/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-[#0a2a5c]">{event.title}</td>
                     <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded-lg text-xs">
+                      <span className="px-2.5 py-1 bg-[#f5f0e8] text-[#0a2a5c] rounded-xl text-xs font-medium">
                         {getEventTypeLabel(event.event_type)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{event.location}</td>
-                    <td className="px-6 py-4 text-sm text-gray-400">
+                    <td className="px-6 py-4 text-sm text-[#6b5e4a]">{event.location}</td>
+                    <td className="px-6 py-4 text-sm text-[#a89a80]">
                       {new Date(event.start_at).toLocaleDateString('zh-CN')}
                     </td>
                     <td className="px-6 py-4">
@@ -413,19 +423,19 @@ export default function AdminEventsPage() {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleViewSignups(event)}
-                          className="px-3 py-1.5 text-xs bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                          className="px-3 py-1.5 text-xs bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:-translate-y-0.5"
                         >
                           <TeamOutlined className="mr-1" /> 报名管理
                         </button>
                         <button
                           onClick={() => handleEdit(event)}
-                          className="px-3 py-1.5 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                          className="px-3 py-1.5 text-xs bg-[#f5f0e8] text-[#6b5e4a] rounded-xl hover:bg-[#e8dfd0] transition-all duration-300 hover:-translate-y-0.5"
                         >
                           <EditOutlined className="mr-1" /> 编辑
                         </button>
                         <button
                           onClick={() => handleDelete(event.id)}
-                          className="px-3 py-1.5 text-xs bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                          className="px-3 py-1.5 text-xs bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-all duration-300 hover:-translate-y-0.5"
                         >
                           <DeleteOutlined className="mr-1" /> 结束活动
                         </button>

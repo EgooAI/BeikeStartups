@@ -33,64 +33,6 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const results = await Promise.allSettled([
-          adminApi.listUsers(),
-          projectApi.list(),
-          applicationApi.list(),
-          roleApi.listRequests(),
-          eventApi.list(),
-          recruitmentApi.list(),
-          resourceApi.list(),
-          teamApi.list(),
-        ]);
-
-        const newStats = { ...stats };
-
-        if (results[0].status === 'fulfilled' && results[0].value.data) {
-          const data = results[0].value.data as { items?: unknown[]; length?: number };
-          newStats.totalUsers = data.items?.length || data.length || 0;
-        }
-        if (results[1].status === 'fulfilled' && results[1].value.data) {
-          const data = results[1].value.data as { items?: unknown[]; length?: number };
-          newStats.totalProjects = data.items?.length || data.length || 0;
-        }
-        if (results[2].status === 'fulfilled' && results[2].value.data) {
-          const data = results[2].value.data as { items?: unknown[]; length?: number };
-          const apps = Array.isArray(data) ? data : data.items || [];
-          newStats.pendingApplications = apps.filter((a: { status: string }) => a.status === 'pending').length;
-        }
-        if (results[3].status === 'fulfilled' && results[3].value.data) {
-          const data = results[3].value.data as { items?: unknown[]; length?: number };
-          const requests = Array.isArray(data) ? data : data.items || [];
-          newStats.pendingVerifications = requests.filter((r: { status: string }) => r.status === 'pending').length;
-        }
-        if (results[4].status === 'fulfilled' && results[4].value.data) {
-          const data = results[4].value.data as { items?: unknown[]; length?: number };
-          newStats.totalEvents = data.items?.length || 0;
-        }
-        if (results[5].status === 'fulfilled' && results[5].value.data) {
-          const data = results[5].value.data as { items?: unknown[]; length?: number };
-          newStats.totalRecruitments = data.items?.length || 0;
-        }
-        if (results[6].status === 'fulfilled' && results[6].value.data) {
-          const data = results[6].value.data as { items?: unknown[]; length?: number };
-          newStats.totalResources = data.items?.length || 0;
-        }
-        if (results[7].status === 'fulfilled' && results[7].value.data) {
-          const data = results[7].value.data as { items?: unknown[]; length?: number };
-          newStats.totalTeams = data.items?.length || 0;
-        }
-
-        setStats(newStats);
-      } catch (err) {
-        console.error('Failed to load admin stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadStats();
   }, []);
 
@@ -115,7 +57,7 @@ export default function AdminDashboardPage() {
       }
       if (results[1].status === 'fulfilled' && results[1].value.data) {
         const data = results[1].value.data as { items?: unknown[]; length?: number };
-        newStats.totalProjects = data.items?.length || 0;
+        newStats.totalProjects = data.items?.length || data.length || 0;
       }
       if (results[2].status === 'fulfilled' && results[2].value.data) {
         const data = results[2].value.data as { items?: unknown[]; length?: number };
@@ -165,17 +107,20 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#f7f3ec]/50">
+        <div className="relative flex justify-center items-center">
+          <div className="w-12 h-12 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0a2a5c]">管理仪表板</h1>
-        <p className="text-gray-500 mt-1">欢迎回来，{user?.nickname || user?.username}。以下是平台运营概览。</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">管理仪表板</h1>
+        <p className="text-[#8b7e6a] mt-1">欢迎回来，{user?.nickname || user?.username}。以下是平台运营概览。</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -183,18 +128,18 @@ export default function AdminDashboardPage() {
           <Link
             key={idx}
             href={card.href}
-            className="bg-white rounded-xl shadow-custom border border-gray-100 p-5 hover:shadow-custom-lg transition-all group"
+            className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1">{card.label}</p>
-                <p className="text-3xl font-bold text-[#0a2a5c]">{card.value}</p>
+                <p className="text-sm text-[#8b7e6a] mb-1">{card.label}</p>
+                <p className="text-3xl font-extrabold tracking-tight text-[#0a2a5c]">{card.value}</p>
               </div>
               <div className={`w-12 h-12 rounded-xl ${card.color} flex items-center justify-center text-white shadow-sm`}>
                 {card.icon}
               </div>
             </div>
-            <div className="mt-3 text-xs text-gray-400 group-hover:text-[#0a2a5c] transition-colors flex items-center">
+            <div className="mt-3 text-xs text-[#a89a80] group-hover:text-[#0a2a5c] transition-colors flex items-center">
               查看详情 <RightOutlined className="ml-1 text-xs" />
             </div>
           </Link>
@@ -202,12 +147,12 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-[#0a2a5c] mb-4">快捷操作</h2>
+        <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+          <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-4">快捷操作</h2>
           <div className="space-y-3">
             <Link
               href="/admin/verifications"
-              className="flex items-center justify-between p-4 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors"
+              className="flex items-center justify-between p-4 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center space-x-3">
                 <SafetyOutlined />
@@ -221,7 +166,7 @@ export default function AdminDashboardPage() {
             </Link>
             <Link
               href="/admin/verifications"
-              className="flex items-center justify-between p-4 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors"
+              className="flex items-center justify-between p-4 rounded-xl bg-blue-50 text-blue-800 hover:bg-blue-100 transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center space-x-3">
                 <ProjectOutlined />
@@ -235,7 +180,7 @@ export default function AdminDashboardPage() {
             </Link>
             <Link
               href="/admin/events"
-              className="flex items-center justify-between p-4 rounded-lg bg-green-50 text-green-800 hover:bg-green-100 transition-colors"
+              className="flex items-center justify-between p-4 rounded-xl bg-green-50 text-green-800 hover:bg-green-100 transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center space-x-3">
                 <CalendarOutlined />
@@ -245,7 +190,7 @@ export default function AdminDashboardPage() {
             </Link>
             <Link
               href="/admin/users"
-              className="flex items-center justify-between p-4 rounded-lg bg-purple-50 text-purple-800 hover:bg-purple-100 transition-colors"
+              className="flex items-center justify-between p-4 rounded-xl bg-purple-50 text-purple-800 hover:bg-purple-100 transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center space-x-3">
                 <UserOutlined />
@@ -256,31 +201,31 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-custom border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-[#0a2a5c] mb-4">平台概况</h2>
+        <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+          <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-4">平台概况</h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">注册用户</span>
+            <div className="flex items-center justify-between p-3 bg-[#faf7f2] rounded-xl">
+              <span className="text-sm text-[#6b5e4a]">注册用户</span>
               <span className="font-semibold text-[#0a2a5c]">{stats.totalUsers} 人</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">认证项目</span>
+            <div className="flex items-center justify-between p-3 bg-[#faf7f2] rounded-xl">
+              <span className="text-sm text-[#6b5e4a]">认证项目</span>
               <span className="font-semibold text-[#0a2a5c]">{stats.totalProjects} 个</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">招募信息</span>
+            <div className="flex items-center justify-between p-3 bg-[#faf7f2] rounded-xl">
+              <span className="text-sm text-[#6b5e4a]">招募信息</span>
               <span className="font-semibold text-[#0a2a5c]">{stats.totalRecruitments} 条</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">创业活动</span>
+            <div className="flex items-center justify-between p-3 bg-[#faf7f2] rounded-xl">
+              <span className="text-sm text-[#6b5e4a]">创业活动</span>
               <span className="font-semibold text-[#0a2a5c]">{stats.totalEvents} 场</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">资源合作</span>
+            <div className="flex items-center justify-between p-3 bg-[#faf7f2] rounded-xl">
+              <span className="text-sm text-[#6b5e4a]">资源合作</span>
               <span className="font-semibold text-[#0a2a5c]">{stats.totalResources} 条</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">创业团队</span>
+            <div className="flex items-center justify-between p-3 bg-[#faf7f2] rounded-xl">
+              <span className="text-sm text-[#6b5e4a]">创业团队</span>
               <span className="font-semibold text-[#0a2a5c]">{stats.totalTeams} 个</span>
             </div>
           </div>
