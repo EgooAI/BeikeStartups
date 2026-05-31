@@ -7,10 +7,10 @@ import { projectApi } from '@/lib/api';
 import { Project } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { message } from 'antd';
-import { 
-  PlusOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
   SendOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
@@ -21,22 +21,11 @@ export default function TeamProjectsPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-
-    if (user) {
-      loadProjects();
-    }
-  }, [user, authLoading]);
-
   const loadProjects = async () => {
     try {
       const res = await projectApi.list({ status: '' });
       if (res.data) {
-        const data = res.data as any;
+        const data = res.data as { items: Project[] };
         setProjects(data.items || []);
       }
     } catch (err) {
@@ -46,13 +35,27 @@ export default function TeamProjectsPage() {
     }
   };
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (user) {
+      requestAnimationFrame(() => {
+        loadProjects();
+      });
+    }
+  }, [user, authLoading]);
+
   const handleRequestOnline = async (projectId: number) => {
     try {
       await projectApi.requestOnline(projectId);
       message.success('已提交上架申请，请等待管理员审核');
       loadProjects();
-    } catch (err: any) {
-      message.error(err.message || '申请上架失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '申请上架失败';
+      message.error(errorMessage);
     }
   };
 
@@ -63,8 +66,9 @@ export default function TeamProjectsPage() {
       await projectApi.delete(projectId);
       loadProjects();
       message.success('项目已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      message.error(errorMessage);
     }
   };
 
@@ -115,7 +119,7 @@ export default function TeamProjectsPage() {
           {user?.role !== 'student' && (
             <button
               onClick={() => router.push('/projects/create')}
-              className="px-6 py-3 bg-[#0a2a5c] text-white rounded-xl hover:bg-[#0a2a5c]/90 transition-colors font-medium flex items-center"
+              className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors font-medium flex items-center"
             >
               <PlusOutlined className="mr-2" />创建项目
             </button>
@@ -128,7 +132,7 @@ export default function TeamProjectsPage() {
             {user?.role !== 'student' && (
               <button
                 onClick={() => router.push('/projects/create')}
-                className="text-[#0a2a5c] hover:text-[#0a2a5c]/80 font-medium"
+                className="text-primary hover:text-primary/80 font-medium"
               >
                 创建第一个项目 →
               </button>
@@ -171,13 +175,13 @@ export default function TeamProjectsPage() {
                     )}
                     <button
                       onClick={() => router.push(`/projects/${project.id}`)}
-                      className="px-4 py-2 border border-gray-200 rounded-lg hover:border-[#0a2a5c]/20 transition-colors text-sm"
+                      className="px-4 py-2 border border-gray-200 rounded-lg hover:border-primary/20 transition-colors text-sm"
                     >
                       查看
                     </button>
                     <button
                       onClick={() => router.push(`/projects/${project.id}/edit`)}
-                      className="px-4 py-2 border border-gray-200 rounded-lg hover:border-[#0a2a5c]/20 transition-colors text-sm"
+                      className="px-4 py-2 border border-gray-200 rounded-lg hover:border-primary/20 transition-colors text-sm"
                     >
                       <EditOutlined />
                     </button>

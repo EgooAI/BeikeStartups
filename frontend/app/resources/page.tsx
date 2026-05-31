@@ -286,43 +286,6 @@ export default function ResourcesPage() {
             </form>
           </div>
         )}
-
-        {/* Resource Opportunities */}
-        <div>
-          <h2 className="text-2xl font-bold text-[#0a2a5c] mb-6">开放资源合作机会</h2>
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#0a2a5c] border-t-transparent" />
-            </div>
-          ) : resources.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {resources.map((res: any) => (
-                <div key={res.id} className="bg-white rounded-xl shadow-custom p-6 border border-gray-100 hover:shadow-custom-lg transition-all">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="px-3 py-1 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded-lg text-xs font-medium">
-                      {res.resource_type}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-[#0a2a5c] mb-2">{res.title}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-2 mb-4">{res.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {res.tags?.split(',').map((tag: string, i: number) => (
-                      <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-400 rounded text-xs">{tag.trim()}</span>
-                    ))}
-                  </div>
-                  <div className="border-t border-gray-100 pt-3 text-xs text-gray-400">
-                    联系人: {res.contact}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-10 text-gray-400">
-              <BuildOutlined className="text-5xl mb-3 block" />
-              <p>暂无开放资源合作机会</p>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

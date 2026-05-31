@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { authApi, api, teamApi } from '@/lib/api';
 import { UserOutlined, MailOutlined, PhoneOutlined, SmileOutlined, CameraOutlined, CheckCircleOutlined, LockOutlined, CloseOutlined, DeleteOutlined, ExclamationCircleOutlined, RightOutlined } from '@ant-design/icons';
 import Link from 'next/link';
+import { Team } from '@/types';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -26,25 +27,27 @@ export default function ProfilePage() {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [myTeam, setMyTeam] = useState<any>(null);
-
-  useEffect(() => {
-    if (user && (user.role === 'team_owner' || user.role === 'team_member')) {
-      loadMyTeam();
-    }
-  }, [user]);
+  const [myTeam, setMyTeam] = useState<Team | null>(null);
 
   async function loadMyTeam() {
     try {
       const res = await teamApi.getMyMembers();
       if (res.data) {
-        const data = res.data as any;
+        const data = res.data as { team: Team };
         setMyTeam(data.team || null);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to load team:', err);
     }
   }
+
+  useEffect(() => {
+    if (user && (user.role === 'team_owner' || user.role === 'team_member')) {
+      requestAnimationFrame(() => {
+        loadMyTeam();
+      });
+    }
+  }, [user]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,8 +64,8 @@ export default function ProfilePage() {
       } else {
         throw new Error('上传失败，未返回头像地址');
       }
-    } catch (err: any) {
-      setAvatarUploadError(err.message || '头像上传失败，请重试');
+    } catch (err: unknown) {
+      setAvatarUploadError((err as Error).message || '头像上传失败，请重试');
     } finally {
       setAvatarUploading(false);
     }
@@ -78,8 +81,8 @@ export default function ProfilePage() {
         setNotification({ type: 'success', text: '个人信息更新成功' });
         setTimeout(() => window.location.href = '/dashboard', 100);
       }
-    } catch (err: any) {
-      setNotification({ type: 'error', text: err.message || '更新失败，请重试' });
+    } catch (err: unknown) {
+      setNotification({ type: 'error', text: (err as Error).message || '更新失败，请重试' });
     } finally {
       setSaving(false);
     }
@@ -117,8 +120,8 @@ export default function ProfilePage() {
       setShowPasswordModal(false);
       setPasswordForm({ old_password: '', new_password: '', confirm_password: '' });
       setTimeout(() => window.location.href = '/dashboard', 100);
-    } catch (err: any) {
-      setPasswordError(err.message || '密码修改失败');
+    } catch (err: unknown) {
+      setPasswordError((err as Error).message || '密码修改失败');
     } finally {
       setPasswordSaving(false);
     }
@@ -189,13 +192,13 @@ export default function ProfilePage() {
               <h2 className="text-xl font-semibold text-[#0a2a5c]">{user.nickname || user.username}</h2>
               <p className="text-gray-500 text-sm">@{user.username}</p>
               <span className="inline-block mt-1 px-2 py-0.5 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded text-xs font-medium">
-                {user.role === 'student' ? '学生' : 
-                 user.role === 'team_member' ? '团队成员' :
-                 user.role === 'team_owner' ? '团队负责人' :
-                 user.role === 'mentor' ? '导师' :
-                 user.role === 'investor' ? '投资人' :
-                 user.role === 'partner' ? '资源方' :
-                 user.role === 'admin' ? '管理员' : '超级管理员'}
+                {user.role === 'student' ? '学生' :
+                  user.role === 'team_member' ? '团队成员' :
+                    user.role === 'team_owner' ? '团队负责人' :
+                      user.role === 'mentor' ? '导师' :
+                        user.role === 'investor' ? '投资人' :
+                          user.role === 'partner' ? '资源方' :
+                            user.role === 'admin' ? '管理员' : '超级管理员'}
               </span>
             </div>
           </div>
@@ -265,9 +268,8 @@ export default function ProfilePage() {
             </div>
 
             {notification && (
-              <div className={`p-4 rounded-xl text-sm flex items-center ${
-                notification.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
+              <div className={`p-4 rounded-xl text-sm flex items-center ${notification.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                }`}>
                 {notification.type === 'success' && <CheckCircleOutlined className="mr-2" />}
                 {notification.text}
               </div>
@@ -427,7 +429,7 @@ export default function ProfilePage() {
               {user?.role === 'team_owner' && myTeam && (
                 <div className="bg-amber-50 rounded-xl p-4">
                   <p className="text-amber-700 text-sm mb-3">
-                    <strong>提示：</strong>您是团队"<span className="font-medium">{myTeam.name}</span>"的负责人，注销账号前需要先解散团队。
+                    <strong>提示：</strong>您是团队&quot;<span className="font-medium">{myTeam.name}</span>&quot;的负责人，注销账号前需要先解散团队。
                   </p>
                   <Link
                     href="/dashboard"
@@ -444,16 +446,15 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  请输入"删除账号"确认此操作
+                  请输入&quot;删除账号&quot;确认此操作
                 </label>
                 <input
                   type="text"
                   value={deleteConfirm}
                   onChange={(e) => setDeleteConfirm(e.target.value)}
                   placeholder="请输入'删除账号'"
-                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 ${
-                    deleteError ? 'border-red-300 focus:ring-red-200 focus:border-red-500' : 'border-gray-200 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]'
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 ${deleteError ? 'border-red-300 focus:ring-red-200 focus:border-red-500' : 'border-gray-200 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]'
+                    }`}
                 />
                 {deleteError && !deleteError.includes('团队负责人') && (
                   <p className="text-red-500 text-sm mt-1">{deleteError}</p>
@@ -474,7 +475,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={handleDeleteAccount}
-                  disabled={deleteLoading || (user?.role === 'team_owner' && myTeam)}
+                  disabled={deleteLoading || (user?.role === 'team_owner' && !!myTeam)}
                   className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
                 >
                   {deleteLoading ? '处理中...' : '确认注销'}

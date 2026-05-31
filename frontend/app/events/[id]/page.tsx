@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { eventApi } from '@/lib/api';
+import { Signup } from '@/types';
 import Link from 'next/link';
 import { message } from 'antd';
 import {
@@ -45,25 +46,11 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [signedUp, setSignedUp] = useState(false);
   const [signingUp, setSigningUp] = useState(false);
-  const [mySignup, setMySignup] = useState<any>(null);
-  const [signups, setSignups] = useState<any[]>([]);
+  const [mySignup, setMySignup] = useState<Signup | null>(null);
+  const [signups, setSignups] = useState<Signup[]>([]);
   const [loadingSignups, setLoadingSignups] = useState(false);
 
-  useEffect(() => {
-    if (params.id) {
-      fetchEvent();
-    }
-  }, [params.id]);
 
-  useEffect(() => {
-    if (user && params.id) {
-      if (user.role === 'admin' || user.role === 'super_admin') {
-        fetchSignups();
-      } else {
-        fetchMySignup();
-      }
-    }
-  }, [user, params.id]);
 
   async function fetchEvent() {
     try {
@@ -82,7 +69,7 @@ export default function EventDetailPage() {
     try {
       const res = await eventApi.getMySignup(Number(params.id));
       if (res.data) {
-        setMySignup(res.data);
+        setMySignup(res.data as Signup);
         setSignedUp(true);
       }
     } catch (err) {
@@ -95,7 +82,7 @@ export default function EventDetailPage() {
     try {
       const res = await eventApi.getSignups(Number(params.id));
       if (res.data) {
-        setSignups(res.data as any[]);
+        setSignups(res.data as Signup[]);
       }
     } catch (err) {
       console.error('Failed to fetch signups:', err);
@@ -103,7 +90,25 @@ export default function EventDetailPage() {
       setLoadingSignups(false);
     }
   }
+  useEffect(() => {
+    if (params.id) {
+      requestAnimationFrame(() => {
+        fetchEvent();
+      });
+    }
+  }, [params.id]);
 
+  useEffect(() => {
+    if (user && params.id) {
+      requestAnimationFrame(() => {
+        if (user.role === 'admin' || user.role === 'super_admin') {
+          fetchSignups();
+        } else {
+          fetchMySignup();
+        }
+      });
+    }
+  }, [user, params.id]);
   const handleSignup = async () => {
     if (!user) {
       router.push('/login');
@@ -114,8 +119,9 @@ export default function EventDetailPage() {
       await eventApi.signup(Number(params.id));
       setSignedUp(true);
       message.success('报名成功！');
-    } catch (err: any) {
-      message.error(err.message || '报名失败，请重试');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '报名失败，请重试';
+      message.error(errorMessage);
     } finally {
       setSigningUp(false);
     }
@@ -233,13 +239,12 @@ export default function EventDetailPage() {
                   {mySignup && (
                     <div className="mt-2 text-sm">
                       状态：
-                      <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        mySignup.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                      <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-medium ${mySignup.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                         mySignup.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                        'bg-amber-100 text-amber-700'
-                      }`}>
+                          'bg-amber-100 text-amber-700'
+                        }`}>
                         {mySignup.status === 'confirmed' ? '已确认' :
-                         mySignup.status === 'cancelled' ? '已取消' : '待确认'}
+                          mySignup.status === 'cancelled' ? '已取消' : '待确认'}
                       </span>
                     </div>
                   )}
@@ -327,13 +332,12 @@ export default function EventDetailPage() {
                             </p>
                           </div>
                         </div>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          signup.status === 'confirmed' ? 'bg-green-50 text-green-600' :
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${signup.status === 'confirmed' ? 'bg-green-50 text-green-600' :
                           signup.status === 'cancelled' ? 'bg-red-50 text-red-500' :
-                          'bg-amber-50 text-amber-600'
-                        }`}>
+                            'bg-amber-50 text-amber-600'
+                          }`}>
                           {signup.status === 'confirmed' ? '已确认' :
-                           signup.status === 'cancelled' ? '已取消' : '待确认'}
+                            signup.status === 'cancelled' ? '已取消' : '待确认'}
                         </span>
                       </div>
                     ))}

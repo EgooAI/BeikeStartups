@@ -219,8 +219,9 @@ export default function RegisterForm() {
         formData.phone
       );
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || '注册失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '注册失败';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -233,7 +234,7 @@ export default function RegisterForm() {
           {error}
         </div>
       )}
-      
+
       <div className="space-y-4">
         <div>
           <label htmlFor="username" className="block text-sm font-medium text-gray-700">
@@ -246,13 +247,12 @@ export default function RegisterForm() {
             required
             minLength={1}
             maxLength={50}
-            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${
-              showError('username')
+            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${showError('username')
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                 : showSuccess('username', formData.username, true)
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
-            }`}
+              }`}
             value={formData.username}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -280,13 +280,12 @@ export default function RegisterForm() {
             name="email"
             type="email"
             required
-            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${
-              showError('email')
+            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${showError('email')
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                 : showSuccess('email', formData.email, true)
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
-            }`}
+              }`}
             value={formData.email}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -313,15 +312,14 @@ export default function RegisterForm() {
             type="password"
             required
             minLength={6}
-            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${
-              showError('password')
+            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${showError('password')
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                 : showSuccess('password', formData.password, true)
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : formData.password && formData.password.length < 6
                     ? 'border-amber-300 focus:ring-amber-500 focus:border-amber-500'
                     : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
-            }`}
+              }`}
             value={formData.password}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -356,13 +354,12 @@ export default function RegisterForm() {
             type="text"
             minLength={1}
             maxLength={50}
-            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${
-              showError('nickname')
+            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${showError('nickname')
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                 : showSuccess('nickname', formData.nickname, false)
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
-            }`}
+              }`}
             value={formData.nickname}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -389,13 +386,12 @@ export default function RegisterForm() {
             id="phone"
             name="phone"
             type="tel"
-            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${
-              showError('phone')
+            className={`mt-1 appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm ${showError('phone')
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                 : showSuccess('phone', formData.phone, false)
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
-            }`}
+              }`}
             value={formData.phone}
             onChange={handleChange}
             onBlur={handleBlur}

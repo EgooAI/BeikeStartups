@@ -19,6 +19,19 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
   const router = useRouter();
   const responseId = parseInt(id);
 
+  const loadResponse = async () => {
+    try {
+      const result = await responseApi.get(responseId);
+      if (result.data) {
+        setResponse(result.data as RecruitmentResponse);
+      }
+    } catch (err: unknown) {
+      setError((err as Error).message || '加载详情失败');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -26,22 +39,11 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
     }
 
     if (user) {
-      loadResponse();
+      requestAnimationFrame(() => {
+        loadResponse();
+      });
     }
   }, [user, authLoading]);
-
-  const loadResponse = async () => {
-    try {
-      const result = await responseApi.get(responseId);
-      if (result.data) {
-        setResponse(result.data as RecruitmentResponse);
-      }
-    } catch (err: any) {
-      setError(err.message || '加载详情失败');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleAccept = async () => {
     if (!reviewNote.trim()) {
@@ -53,8 +55,8 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
       loadResponse();
       setReviewNote('');
       message.success('已通过申请');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      message.error((err as Error).message || '操作失败');
     }
   };
 
@@ -68,8 +70,8 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
       loadResponse();
       setReviewNote('');
       message.success('已拒绝申请');
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      message.error((err as Error).message || '操作失败');
     }
   };
 
@@ -80,8 +82,8 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
       await responseApi.invalidate(responseId);
       loadResponse();
       message.success('应聘已作废');
-    } catch (err: any) {
-      message.error(err.message || '作废失败');
+    } catch (err: unknown) {
+      message.error((err as Error).message || '作废失败');
     }
   };
 
@@ -92,8 +94,8 @@ export default function ResponseDetailPage({ params }: { params: Promise<{ id: s
       await responseApi.delete(responseId);
       router.push('/responses');
       message.success('应聘记录已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      message.error((err as Error).message || '删除失败');
     }
   };
 

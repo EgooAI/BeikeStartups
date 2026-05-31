@@ -64,8 +64,8 @@ export default function RoleRequestPage() {
         ...form,
       });
       setMessage('申请已提交，请等待管理员审核。');
-    } catch (err: any) {
-      setMessage(err.message || '提交失败，请重试');
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : '提交失败，请重试');
     } finally {
       setSubmitting(false);
     }
@@ -94,11 +94,10 @@ export default function RoleRequestPage() {
             <button
               key={role.value}
               onClick={() => setSelectedRole(role.value)}
-              className={`p-6 rounded-xl border-2 text-left transition-all ${
-                selectedRole === role.value
+              className={`p-6 rounded-xl border-2 text-left transition-all ${selectedRole === role.value
                   ? 'border-[#0a2a5c] bg-white shadow-custom'
                   : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
+                }`}
             >
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${role.color} text-white mb-3`}>
                 {role.icon}
@@ -177,9 +176,8 @@ export default function RoleRequestPage() {
             </div>
 
             {message && (
-              <div className={`p-4 rounded-xl text-sm ${
-                message.includes('成功') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
+              <div className={`p-4 rounded-xl text-sm ${message.includes('成功') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                }`}>
                 {message}
               </div>
             )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { eventApi } from '@/lib/api';
+import { Signup, Event } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { message } from 'antd';
 import {
@@ -17,13 +18,13 @@ import {
 } from '@ant-design/icons';
 
 export default function AdminEventsPage() {
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [showSignups, setShowSignups] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [signups, setSignups] = useState<any[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [signups, setSignups] = useState<Signup[]>([]);
   const [loadingSignups, setLoadingSignups] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -43,7 +44,7 @@ export default function AdminEventsPage() {
     try {
       const res = await eventApi.list();
       if (res.data) {
-        const data = res.data as any;
+        const data = res.data as { items: Event[] };
         setEvents(data.items || []);
       }
     } catch (err) {
@@ -85,12 +86,12 @@ export default function AdminEventsPage() {
       }
       resetForm();
       loadEvents();
-    } catch (err: any) {
-      message.error(err.message || '操作失败');
+    } catch (err: unknown) {
+      message.error(err instanceof Error ? err.message : '操作失败');
     }
   };
 
-  const handleEdit = (event: any) => {
+  const handleEdit = (event: Event) => {
     setFormData({
       title: event.title,
       description: event.description || '',
@@ -110,22 +111,22 @@ export default function AdminEventsPage() {
       await eventApi.delete(id);
       loadEvents();
       message.success('活动已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      message.error(err instanceof Error ? err.message : '删除失败');
     }
   };
 
-  const handleViewSignups = async (event: any) => {
+  const handleViewSignups = async (event: Event) => {
     setSelectedEvent(event);
     setLoadingSignups(true);
     setShowSignups(true);
     try {
       const res = await eventApi.getSignups(event.id);
       if (res.data) {
-        setSignups(res.data as any[]);
+        setSignups(res.data as Signup[]);
       }
-    } catch (err: any) {
-      message.error(err.message || '获取报名列表失败');
+    } catch (err: unknown) {
+      message.error(err instanceof Error ? err.message : '获取报名列表失败');
     } finally {
       setLoadingSignups(false);
     }
@@ -134,13 +135,13 @@ export default function AdminEventsPage() {
   const handleConfirmSignup = async (signupId: number) => {
     try {
       await eventApi.confirmSignup(signupId);
-      const res = await eventApi.getSignups(selectedEvent.id);
+      const res = await eventApi.getSignups(selectedEvent?.id || 0);
       if (res.data) {
-        setSignups(res.data as any[]);
+        setSignups(res.data as Signup[]);
       }
       message.success('已确认报名');
-    } catch (err: any) {
-      message.error(err.message || '确认失败');
+    } catch (err: unknown) {
+      message.error(err instanceof Error ? err.message : '确认失败');
     }
   };
 
@@ -332,13 +333,12 @@ export default function AdminEventsPage() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        signup.status === 'confirmed' ? 'bg-green-50 text-green-600' :
-                        signup.status === 'cancelled' ? 'bg-red-50 text-red-500' :
-                        'bg-amber-50 text-amber-600'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${signup.status === 'confirmed' ? 'bg-green-50 text-green-600' :
+                          signup.status === 'cancelled' ? 'bg-red-50 text-red-500' :
+                            'bg-amber-50 text-amber-600'
+                        }`}>
                         {signup.status === 'confirmed' ? '已确认' :
-                         signup.status === 'cancelled' ? '已取消' : '待确认'}
+                          signup.status === 'cancelled' ? '已取消' : '待确认'}
                       </span>
                       {signup.status !== 'confirmed' && signup.status !== 'cancelled' && (
                         <button
@@ -392,7 +392,7 @@ export default function AdminEventsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {events.map((event: any) => (
+                {events.map((event: Event) => (
                   <tr key={event.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-[#0a2a5c]">{event.title}</td>
                     <td className="px-6 py-4">

@@ -26,8 +26,16 @@ export default function AdminProjectsPage() {
     try {
       const res = await projectApi.list();
       if (res.data) {
-        const data = res.data as Project[];
-        setProjects(data || []);
+        const data = res.data;
+        if (Array.isArray(data)) {
+          setProjects(data);
+        } else if (data && typeof data === 'object' && 'items' in data && Array.isArray(data.items)) {
+          setProjects(data.items);
+        } else if (data && typeof data === 'object' && 'content' in data && Array.isArray(data.content)) {
+          setProjects(data.content);
+        } else {
+          setProjects([]);
+        }
       }
     } catch (err) {
       console.error('Failed to load projects:', err);

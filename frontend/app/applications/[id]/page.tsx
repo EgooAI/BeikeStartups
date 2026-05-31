@@ -19,6 +19,20 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
   const router = useRouter();
   const appId = parseInt(id);
 
+  const loadApplication = async () => {
+    try {
+      const response = await applicationApi.get(appId);
+      if (response.data) {
+        setApplication(response.data as Application);
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '加载申请详情失败';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -26,30 +40,20 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
     }
 
     if (user) {
-      loadApplication();
+      requestAnimationFrame(() => {
+        loadApplication();
+      });
     }
   }, [user, authLoading]);
-
-  const loadApplication = async () => {
-    try {
-      const response = await applicationApi.get(appId);
-      if (response.data) {
-        setApplication(response.data as Application);
-      }
-    } catch (err: any) {
-      setError(err.message || '加载申请详情失败');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmit = async () => {
     try {
       await applicationApi.submit(appId);
       loadApplication();
       message.success('创业申请已提交');
-    } catch (err: any) {
-      message.error(err.message || '提交失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '提交失败';
+      message.error(errorMessage);
     }
   };
 
@@ -63,8 +67,9 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
       loadApplication();
       setReviewNote('');
       message.success('已通过创业申请');
-    } catch (err: any) {
-      message.error(err.message || '审批失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '审批失败';
+      message.error(errorMessage);
     }
   };
 
@@ -78,8 +83,9 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
       loadApplication();
       setReviewNote('');
       message.success('已拒绝创业申请');
-    } catch (err: any) {
-      message.error(err.message || '拒绝失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '拒绝失败';
+      message.error(errorMessage);
     }
   };
 
@@ -90,8 +96,9 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
       await applicationApi.delete(appId);
       router.push('/applications');
       message.success('申请已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      message.error(errorMessage);
     }
   };
 

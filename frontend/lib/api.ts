@@ -41,7 +41,7 @@ class ApiClient {
     try {
       const response = await fetch(url, config);
       const text = await response.text();
-      let data: any = null;
+      let data: unknown = null;
 
       if (text) {
         try {
@@ -52,11 +52,11 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        const message = data?.message || response.statusText || '请求失败';
+        const message = (data as { message: string })?.message || response.statusText || '请求失败';
         throw new Error(message);
       }
 
-      return data;
+      return data as ApiResponse<T>;
     } catch (error) {
       console.error('API请求错误:', error);
       throw error;
@@ -67,7 +67,7 @@ class ApiClient {
     return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -94,7 +94,7 @@ class ApiClient {
         body: formData,
       });
       const text = await response.text();
-      let data: any = null;
+      let data: unknown = null;
 
       if (text) {
         try {
@@ -105,18 +105,18 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        const message = data?.message || response.statusText || '请求失败';
+        const message = (data as { message: string })?.message || response.statusText || '请求失败';
         throw new Error(message);
       }
 
-      return data;
+      return data as ApiResponse<T>;
     } catch (error) {
       console.error('API请求错误:', error);
       throw error;
     }
   }
 
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -133,13 +133,13 @@ export const api = new ApiClient();
 export const authApi = {
   register: (data: { username: string; email: string; password: string; nickname?: string; phone?: string }) =>
     api.post('/api/auth/register', data),
-  
+
   login: (data: { username: string; password: string }) =>
     api.post('/api/auth/login', data),
-  
+
   getCurrentUser: () =>
     api.get('/api/auth/me'),
-  
+
   updateProfile: (data: { nickname?: string; avatar?: string; phone?: string; email?: string }) =>
     api.put('/api/auth/me', data),
 
@@ -153,25 +153,25 @@ export const authApi = {
 export const applicationApi = {
   list: () =>
     api.get('/api/applications'),
-  
+
   get: (id: number) =>
     api.get(`/api/applications/${id}`),
-  
+
   create: (data: { title: string; description: string; business_plan?: string }) =>
     api.post('/api/applications', data),
-  
+
   update: (id: number, data: { title?: string; description?: string; business_plan?: string }) =>
     api.put(`/api/applications/${id}`, data),
-  
+
   delete: (id: number) =>
     api.delete(`/api/applications/${id}`),
-  
+
   submit: (id: number) =>
     api.post(`/api/applications/${id}/submit`),
-  
+
   approve: (id: number, note: string) =>
     api.post(`/api/applications/${id}/approve`, { note }),
-  
+
   reject: (id: number, note: string) =>
     api.post(`/api/applications/${id}/reject`, { note }),
 };
@@ -179,22 +179,22 @@ export const applicationApi = {
 export const teamApi = {
   list: (status?: string) =>
     api.get(`/api/teams${status ? `?status=${status}` : ''}`),
-  
+
   get: (id: number) =>
     api.get(`/api/teams/${id}`),
-  
+
   getMyMembers: () =>
     api.get('/api/teams/my/members'),
-  
+
   create: (data: { name: string; description?: string; logo?: string }) =>
     api.post('/api/teams', data),
-  
+
   update: (id: number, data: { name?: string; description?: string; logo?: string }) =>
     api.put(`/api/teams/${id}`, data),
-  
+
   delete: (id: number) =>
     api.delete(`/api/teams/${id}`),
-  
+
   leave: (id: number) =>
     api.post(`/api/teams/${id}/leave`),
 };
@@ -211,37 +211,37 @@ export const projectApi = {
     const queryString = query.toString();
     return api.get(`/api/projects${queryString ? `?${queryString}` : ''}`);
   },
-  
+
   get: (id: number) =>
     api.get(`/api/projects/${id}`),
-  
+
   create: (data: { title: string; description: string; content?: string; cover_image?: string; is_public?: boolean; tags?: string; industry?: string; stage?: string }) =>
     api.post('/api/projects', data),
-  
+
   update: (id: number, data: { title?: string; description?: string; content?: string; cover_image?: string; is_public?: boolean; tags?: string; industry?: string; stage?: string }) =>
     api.put(`/api/projects/${id}`, data),
-  
+
   delete: (id: number) =>
     api.delete(`/api/projects/${id}`),
-  
+
   requestOnline: (id: number) =>
     api.post(`/api/projects/${id}/request-online`),
-  
+
   approveOnline: (id: number) =>
     api.post(`/api/projects/${id}/approve-online`),
-  
+
   rejectOnline: (id: number) =>
     api.post(`/api/projects/${id}/reject-online`),
-  
+
   requestOffline: (id: number) =>
     api.post(`/api/projects/${id}/request-offline`),
-  
+
   approveOffline: (id: number) =>
     api.post(`/api/projects/${id}/approve-offline`),
-  
+
   rejectOffline: (id: number) =>
     api.post(`/api/projects/${id}/reject-offline`),
-  
+
   invalidate: (id: number) =>
     api.post(`/api/projects/${id}/invalidate`),
 };
@@ -259,37 +259,37 @@ export const recruitmentApi = {
     if (params.length > 0) url += `?${params.join('&')}`;
     return api.get(url);
   },
-  
+
   get: (id: number) =>
     api.get(`/api/recruitments/${id}`),
-  
+
   create: (data: { title: string; description: string; requirements?: string; position: string; salary?: string; deadline?: string }) =>
     api.post('/api/recruitments', data),
-  
+
   update: (id: number, data: { title?: string; description?: string; requirements?: string; position?: string; salary?: string; deadline?: string }) =>
     api.put(`/api/recruitments/${id}`, data),
-  
+
   delete: (id: number) =>
     api.delete(`/api/recruitments/${id}`),
-  
+
   solve: (id: number) =>
     api.post(`/api/recruitments/${id}/solve`),
-  
+
   invalidate: (id: number) =>
     api.post(`/api/recruitments/${id}/invalidate`),
-  
+
   apply: (id: number, data: { cover_letter: string; resume?: string }) =>
     api.post(`/api/recruitments/${id}/apply`, data),
-  
+
   getResponses: (id: number) =>
     api.get(`/api/recruitments/${id}/responses`),
-  
+
   acceptResponse: (id: number, responseId: number) =>
     api.post(`/api/recruitments/${id}/responses/${responseId}/accept`),
-  
+
   rejectResponse: (id: number, responseId: number) =>
     api.post(`/api/recruitments/${id}/responses/${responseId}/reject`),
-  
+
   getMyApplications: () =>
     api.get('/api/responses/my'),
 };
@@ -297,22 +297,22 @@ export const recruitmentApi = {
 export const responseApi = {
   create: (data: { recruitment_id: number; cover_letter: string; resume?: string }) =>
     api.post('/api/responses', data),
-  
+
   get: (id: number) =>
     api.get(`/api/responses/${id}`),
-  
+
   update: (id: number, data: { cover_letter?: string; resume?: string }) =>
     api.put(`/api/responses/${id}`, data),
-  
+
   delete: (id: number) =>
     api.delete(`/api/responses/${id}`),
-  
+
   accept: (id: number, note: string) =>
     api.post(`/api/responses/${id}/accept`, { note }),
-  
+
   reject: (id: number, note: string) =>
     api.post(`/api/responses/${id}/reject`, { note }),
-  
+
   invalidate: (id: number) =>
     api.post(`/api/responses/${id}/invalidate`),
 };
@@ -327,7 +327,7 @@ export const eventApi = {
   create: (data: { title: string; description: string; event_type: string; location: string; start_at: string; end_at: string; status: string }) =>
     api.post('/api/events', data),
 
-  update: (id: number, data: any) =>
+  update: (id: number, data: { title?: string; description?: string; event_type?: string; location?: string; start_at?: string; end_at?: string; status?: string }) =>
     api.put(`/api/events/${id}`, data),
 
   delete: (id: number) =>
@@ -385,7 +385,7 @@ export const resourceApi = {
   create: (data: { title: string; description: string; resource_type: string; tags?: string; contact: string }) =>
     api.post('/api/resources', data),
 
-  update: (id: number, data: any) =>
+  update: (id: number, data: { title?: string; description?: string; resource_type?: string; tags?: string; contact?: string }) =>
     api.put(`/api/resources/${id}`, data),
 
   delete: (id: number) =>

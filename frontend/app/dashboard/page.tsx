@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ComponentType } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectApi, teamApi, recruitmentApi, applicationApi, responseApi, eventApi, resourceApi, connectionApi } from '@/lib/api';
-import { Project, Team, Recruitment, Application } from '@/types';
+import { Project, Team, TeamMember, TeamStatus, Recruitment, Application } from '@/types';
 import { message } from 'antd';
 import Link from 'next/link';
 import {
@@ -31,7 +31,7 @@ import {
   LinkOutlined,
 } from '@ant-design/icons';
 
-const roleConfig: Record<string, { label: string; color: string; icon: any }> = {
+const roleConfig: Record<string, { label: string; color: string; icon: ComponentType<{ className?: string }> }> = {
   student: { label: '同学', color: 'from-blue-400 to-blue-600', icon: UserOutlined },
   team_member: { label: '团队成员', color: 'from-amber-400 to-amber-600', icon: TeamOutlined },
   team_owner: { label: '团队负责人', color: 'from-orange-400 to-orange-600', icon: RocketOutlined },
@@ -50,83 +50,46 @@ export default function DashboardPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [recruitments, setRecruitments] = useState<Recruitment[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [stats, setStats] = useState<any>({});
+  const [stats, setStats] = useState<TeamStatus>({} as TeamStatus);
   const [loading, setLoading] = useState(true);
-  const [myTeam, setMyTeam] = useState<any>(null);
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [myTeam, setMyTeam] = useState<Team>({} as Team);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [showDisbandModal, setShowDisbandModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
 
-  async function handleDisbandTeam() {
-    if (!myTeam) return;
-    try {
-      await teamApi.delete(myTeam.id);
-      setShowDisbandModal(false);
-      router.push('/dashboard');
-      message.success('团队已解散');
-    } catch (err: any) {
-      message.error(err.message || '解散团队失败');
-    }
-  }
-
-  async function handleLeaveTeam() {
-    if (!myTeam) return;
-    try {
-      await teamApi.leave(myTeam.id);
-      setShowLeaveModal(false);
-      window.location.replace('/dashboard');
-      message.success('已退出团队');
-    } catch (err: any) {
-      message.error(err.message || '退出团队失败');
-    }
-  }
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-    if (user) {
-      loadAllData();
-    }
-  }, [user, authLoading]);
-
-  function normalizeData(data: any): any[] {
-    if (Array.isArray(data)) return data;
-    if (data?.items && Array.isArray(data.items)) return data.items;
-    if (data?.data && Array.isArray(data.data)) return data.data;
+  function normalizeData<T>(data: unknown): T[] {
+    if (Array.isArray(data)) return data as T[];
+    if (data && typeof data === 'object' && 'items' in data && Array.isArray((data as { items: unknown }).items)) return (data as { items: T[] }).items;
+    if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as { data: unknown }).data)) return (data as { data: T[] }).data;
     return [];
   }
 
   async function loadAllData() {
     try {
-      const promises: Promise<any>[] = [
+      const promises = [
         projectApi.list(),
         teamApi.list(),
         applicationApi.list(),
       ];
-      
-      // 团队负责人加载自己的招募
+
       if (user?.role === 'team_owner') {
         promises.push(recruitmentApi.list(undefined, true));
       } else {
         promises.push(recruitmentApi.list());
       }
-      
-      // 投资人/导师/资源方加载对接项目
+
       if (user?.role === 'investor' || user?.role === 'mentor' || user?.role === 'partner') {
         promises.push(connectionApi.getMyConnectedProjects());
       }
-      
-      // 团队成员和团队所有者加载团队成员信息
+
       let teamMembersIndex = -1;
       if (user?.role === 'team_owner' || user?.role === 'team_member') {
         teamMembersIndex = promises.length;
         promises.push(teamApi.getMyMembers());
       }
-      
+
       const results = await Promise.allSettled(promises);
-      const [projRes, teamRes, appRes, recRes, connRes] = results;
+      const [projRes, teamRes, appRes, recRes, connRes] = results as PromiseFulfilledResult<{ data: unknown }>[];
 
       if (projRes.status === 'fulfilled' && projRes.value.data) {
         setProjects(normalizeData(projRes.value.data));
@@ -143,9 +106,8 @@ export default function DashboardPage() {
       if (connRes?.status === 'fulfilled' && connRes.value.data) {
         setConnectedProjects(normalizeData(connRes.value.data));
       }
-      // 处理团队成员数据
       if (teamMembersIndex >= 0 && results[teamMembersIndex].status === 'fulfilled') {
-        const teamResData = (results[teamMembersIndex] as PromiseFulfilledResult<any>).value?.data;
+        const teamResData = (results[teamMembersIndex] as PromiseFulfilledResult<{ data: { team: Team; members: TeamMember[] } }>).value?.data;
         if (teamResData) {
           setMyTeam(teamResData.team);
           setTeamMembers(teamResData.members || []);
@@ -155,6 +117,42 @@ export default function DashboardPage() {
       console.error('Failed to load dashboard data:', err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+    if (user) {
+      requestAnimationFrame(() => {
+        loadAllData();
+      });
+    }
+  }, [user, authLoading]);
+
+  async function handleDisbandTeam() {
+    if (!myTeam) return;
+    try {
+      await teamApi.delete(myTeam.id);
+      setShowDisbandModal(false);
+      router.push('/dashboard');
+      message.success('团队已解散');
+    } catch (err: unknown) {
+      message.error(err instanceof Error ? err.message : '解散团队失败');
+    }
+  }
+
+  async function handleLeaveTeam() {
+    if (!myTeam) return;
+    try {
+      await teamApi.leave(myTeam.id);
+      setShowLeaveModal(false);
+      window.location.replace('/dashboard');
+      message.success('已退出团队');
+    } catch (err: unknown) {
+      message.error(err instanceof Error ? err.message : '退出团队失败');
     }
   }
 
@@ -294,14 +292,13 @@ export default function DashboardPage() {
                               </p>
                             </div>
                           </div>
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                            project.status === 'online' ? 'bg-green-50 text-green-600' :
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${project.status === 'online' ? 'bg-green-50 text-green-600' :
                             project.status === 'pending_online' ? 'bg-amber-50 text-amber-600' :
-                            'bg-gray-100 text-gray-500'
-                          }`}>
+                              'bg-gray-100 text-gray-500'
+                            }`}>
                             {project.status === 'online' ? '已上架' :
-                             project.status === 'pending_online' ? '待审核' :
-                             project.status === 'draft' ? '草稿' : project.status}
+                              project.status === 'pending_online' ? '待审核' :
+                                project.status === 'draft' ? '草稿' : project.status}
                           </span>
                         </Link>
                       ))}
@@ -349,14 +346,13 @@ export default function DashboardPage() {
                               </p>
                             </div>
                           </div>
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                            project.status === 'online' ? 'bg-green-50 text-green-600' :
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${project.status === 'online' ? 'bg-green-50 text-green-600' :
                             project.status === 'pending_online' ? 'bg-amber-50 text-amber-600' :
-                            'bg-gray-100 text-gray-500'
-                          }`}>
+                              'bg-gray-100 text-gray-500'
+                            }`}>
                             {project.status === 'online' ? '已上架' :
-                             project.status === 'pending_online' ? '待审核' :
-                             project.status === 'draft' ? '草稿' : project.status}
+                              project.status === 'pending_online' ? '待审核' :
+                                project.status === 'draft' ? '草稿' : project.status}
                           </span>
                         </Link>
                       ))}
@@ -395,16 +391,15 @@ export default function DashboardPage() {
                           className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors group"
                         >
                           <div className="flex items-center space-x-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              app.status === 'approved' ? 'bg-green-50 text-green-600' :
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${app.status === 'approved' ? 'bg-green-50 text-green-600' :
                               app.status === 'rejected' ? 'bg-red-50 text-red-500' :
-                              app.status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                              'bg-gray-50 text-gray-400'
-                            }`}>
+                                app.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                                  'bg-gray-50 text-gray-400'
+                              }`}>
                               {app.status === 'approved' ? <CheckCircleOutlined /> :
-                               app.status === 'rejected' ? <ExclamationCircleOutlined /> :
-                               app.status === 'pending' ? <ClockCircleOutlined /> :
-                               <FileTextOutlined />}
+                                app.status === 'rejected' ? <ExclamationCircleOutlined /> :
+                                  app.status === 'pending' ? <ClockCircleOutlined /> :
+                                    <FileTextOutlined />}
                             </div>
                             <div>
                               <p className="font-medium text-[#0a2a5c]">{app.title}</p>
@@ -413,16 +408,15 @@ export default function DashboardPage() {
                               </p>
                             </div>
                           </div>
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                            app.status === 'approved' ? 'bg-green-50 text-green-600' :
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${app.status === 'approved' ? 'bg-green-50 text-green-600' :
                             app.status === 'rejected' ? 'bg-red-50 text-red-500' :
-                            app.status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                            'bg-gray-100 text-gray-500'
-                          }`}>
+                              app.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                                'bg-gray-100 text-gray-500'
+                            }`}>
                             {app.status === 'draft' ? '草稿' :
-                             app.status === 'pending' ? '审核中' :
-                             app.status === 'approved' ? '已通过' :
-                             app.status === 'rejected' ? '已拒绝' : app.status}
+                              app.status === 'pending' ? '审核中' :
+                                app.status === 'approved' ? '已通过' :
+                                  app.status === 'rejected' ? '已拒绝' : app.status}
                           </span>
                         </Link>
                       ))}
@@ -469,13 +463,12 @@ export default function DashboardPage() {
                               <p className="text-xs text-gray-400 mt-0.5">{rec.title}</p>
                             </div>
                           </div>
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                            rec.status === 'active' ? 'bg-green-50 text-green-600' :
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${rec.status === 'active' ? 'bg-green-50 text-green-600' :
                             rec.status === 'solved' ? 'bg-blue-50 text-blue-600' :
-                            'bg-gray-100 text-gray-500'
-                          }`}>
+                              'bg-gray-100 text-gray-500'
+                            }`}>
                             {rec.status === 'active' ? '招募中' :
-                             rec.status === 'solved' ? '已解决' : '已关闭'}
+                              rec.status === 'solved' ? '已解决' : '已关闭'}
                           </span>
                         </Link>
                       ))}
@@ -585,13 +578,13 @@ export default function DashboardPage() {
                       <div className="mb-4">
                         <p className="text-sm font-medium text-gray-700 mb-2">团队成员 ({teamMembers.length}人)</p>
                         <div className="space-y-2">
-                          {teamMembers.slice().sort((a: any, b: any) => {
+                          {teamMembers.slice().sort((a: TeamMember, b: TeamMember) => {
                             // 团队负责人排在第一位
-                            if (a.role === 'team_owner') return -1;
-                            if (b.role === 'team_owner') return 1;
+                            if (a.role === 'owner') return -1;
+                            if (b.role === 'owner') return 1;
                             return 0;
-                          }).map((member: any) => {
-                            const displayName = member.nickname || member.username || member.name;
+                          }).map((member: TeamMember) => {
+                            const displayName = member.user?.nickname || member.user?.username || '未知用户';
                             return (
                               <div key={member.id} className="flex items-center space-x-3">
                                 <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${roleConfig[member.role]?.color || 'from-gray-400 to-gray-600'} flex items-center justify-center text-white text-sm`}>
@@ -621,18 +614,16 @@ export default function DashboardPage() {
             {(user.role === 'investor' || user.role === 'mentor' || user.role === 'partner') && (
               <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl shadow-custom border border-purple-100 p-6">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
-                    user.role === 'investor' ? 'bg-purple-500' :
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${user.role === 'investor' ? 'bg-purple-500' :
                     user.role === 'mentor' ? 'bg-green-500' : 'bg-teal-500'
-                  }`}>
+                    }`}>
                     {user.role === 'investor' ? <FundOutlined /> :
-                     user.role === 'mentor' ? <ExperimentOutlined /> : <BuildOutlined />}
+                      user.role === 'mentor' ? <ExperimentOutlined /> : <BuildOutlined />}
                   </div>
                   <div>
-                    <h3 className={`font-semibold ${
-                      user.role === 'investor' ? 'text-purple-800' :
+                    <h3 className={`font-semibold ${user.role === 'investor' ? 'text-purple-800' :
                       user.role === 'mentor' ? 'text-green-800' : 'text-teal-800'
-                    }`}>
+                      }`}>
                       {user.role === 'investor' ? '投资人' : user.role === 'mentor' ? '校外导师' : '资源方'}
                     </h3>
                     <p className="text-xs text-gray-500">已认证身份</p>
@@ -640,8 +631,8 @@ export default function DashboardPage() {
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
                   {user.role === 'investor' ? '浏览认证项目，申请查看BP，参与项目路演与投融资对接。' :
-                   user.role === 'mentor' ? '查看项目，提供项目建议，参与线上/线下辅导。' :
-                   '发布资源合作机会，查看适合合作的项目，对接创业团队。'}
+                    user.role === 'mentor' ? '查看项目，提供项目建议，参与线上/线下辅导。' :
+                      '发布资源合作机会，查看适合合作的项目，对接创业团队。'}
                 </p>
                 <Link
                   href="/projects"

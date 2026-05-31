@@ -13,7 +13,7 @@ export default function TeamList() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    loadTeams();
+    // loadTeams will be called after component mounts via useEffect
   }, []);
 
   const loadTeams = async () => {
@@ -22,8 +22,9 @@ export default function TeamList() {
       if (response.data) {
         setTeams(response.data as Team[]);
       }
-    } catch (err: any) {
-      setError(err.message || '加载团队列表失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '加载团队列表失败';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -31,12 +32,13 @@ export default function TeamList() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除这个团队吗？')) return;
-    
+
     try {
       await teamApi.delete(id);
       loadTeams();
-    } catch (err: any) {
-      alert(err.message || '删除失败');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '删除失败';
+      alert(errorMessage);
     }
   };
 

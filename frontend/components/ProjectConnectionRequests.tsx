@@ -26,7 +26,7 @@ export default function ProjectConnectionRequests({ projectId }: Props) {
   async function checkAccessAndFetchRequests() {
     try {
       setLoading(true);
-      
+
       // 获取项目信息
       const projectRes = await projectApi.get(projectId);
       if (!projectRes.data) {
@@ -35,17 +35,17 @@ export default function ProjectConnectionRequests({ projectId }: Props) {
       }
       const projectData = projectRes.data as Project;
       setProject(projectData);
-      
+
       // 获取用户所在团队
       const teamRes = await teamApi.list();
       if (!teamRes.data) {
         setHasAccess(false);
         return;
       }
-      
-      const teams = (teamRes.data as any).items || [];
-      const teamIds = teams.map((t: any) => t.id);
-      
+
+      const teams = (teamRes.data as { items?: { id: number }[] }).items || [];
+      const teamIds = teams.map((t: { id: number }) => t.id);
+
       // 验证用户是否是该项目的团队成员
       if (teamIds.includes(projectData.team_id)) {
         setHasAccess(true);

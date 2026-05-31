@@ -27,6 +27,15 @@ export interface Team {
   members?: User[];
 }
 
+export interface TeamMember {
+  id: number;
+  team_id: number;
+  user_id: number;
+  user?: User;
+  role: 'owner' | 'member';
+  joined_at: string;
+}
+
 export type TeamStatus = 'pending' | 'approved' | 'rejected';
 
 export interface Application {
@@ -65,14 +74,14 @@ export interface Project {
   funding_need?: string;
 }
 
-export type ProjectStatus = 
-  | 'draft' 
-  | 'pending_online' 
-  | 'online' 
-  | 'rejected_online' 
-  | 'pending_offline' 
-  | 'offline' 
-  | 'rejected_offline' 
+export type ProjectStatus =
+  | 'draft'
+  | 'pending_online'
+  | 'online'
+  | 'rejected_online'
+  | 'pending_offline'
+  | 'offline'
+  | 'rejected_offline'
   | 'invalid';
 
 export type ProjectStage = 'idea' | 'seed' | 'prototype' | 'launched' | 'revenue';
@@ -110,6 +119,18 @@ export interface Response {
 
 export type ResponseStatus = 'pending' | 'accepted' | 'rejected' | 'invalid';
 
+export interface Signup {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  event_id: number;
+  event?: Event;
+  user_id: number;
+  user?: User;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  review_note?: string;
+}
+
 export interface ConnectionRequest {
   id: number;
   created_at: string;
@@ -128,7 +149,25 @@ export type ConnectionRequestType = 'bp_access' | 'become_mentor' | 'resource_pa
 
 export type ConnectionRequestStatus = 'pending' | 'approved' | 'rejected' | 'expired';
 
-export interface ApiResponse<T = any> {
+export interface Event {
+  id: number;
+  title: string;
+  description: string;
+  event_type: 'roadshow' | 'workshop' | 'mentoring' | 'other';
+  location: string;
+  start_at: string;
+  end_at: string;
+  status: 'active' | 'closed' | 'cancelled';
+  cover_image?: string;
+  max_participants?: number;
+  current_participants: number;
+  created_at: string;
+  updated_at: string;
+  user_id: number;
+  user?: User;
+}
+
+export interface ApiResponse<T = Event> {
   code: number;
   message: string;
   data?: T;

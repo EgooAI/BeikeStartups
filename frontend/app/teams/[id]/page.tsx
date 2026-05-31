@@ -18,6 +18,19 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
   const router = useRouter();
   const teamId = parseInt(id);
 
+  const loadTeam = async () => {
+    try {
+      const response = await teamApi.get(teamId);
+      if (response.data) {
+        setTeam(response.data as Team);
+      }
+    } catch (err: unknown) {
+      setError((err as Error).message || '加载团队详情失败');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -25,22 +38,11 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
     }
 
     if (user) {
-      loadTeam();
+      requestAnimationFrame(() => {
+        loadTeam();
+      });
     }
   }, [user, authLoading]);
-
-  const loadTeam = async () => {
-    try {
-      const response = await teamApi.get(teamId);
-      if (response.data) {
-        setTeam(response.data as Team);
-      }
-    } catch (err: any) {
-      setError(err.message || '加载团队详情失败');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDelete = async () => {
     if (!confirm('确定要删除这个团队吗？')) return;
@@ -49,8 +51,8 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
       await teamApi.delete(teamId);
       router.push('/teams');
       message.success('团队已删除');
-    } catch (err: any) {
-      message.error(err.message || '删除失败');
+    } catch (err: unknown) {
+      message.error((err as Error).message || '删除失败');
     }
   };
 

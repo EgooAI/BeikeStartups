@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { eventApi } from '@/lib/api';
+import { Event } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { message } from 'antd';
@@ -18,26 +19,17 @@ import {
 export default function EventsPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [signedUpEventIds, setSignedUpEventIds] = useState<Set<number>>(new Set());
   const [signingUpId, setSigningUpId] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  useEffect(() => {
-    if (user && events.length > 0) {
-      fetchMySignups();
-    }
-  }, [user, events]);
 
   async function fetchEvents() {
     try {
       const res = await eventApi.list('active');
       if (res.data) {
-        const data = res.data as any;
+        const data = res.data as { items: Event[] };
         setEvents(data.items || []);
       }
     } catch (err) {
@@ -62,6 +54,20 @@ export default function EventsPage() {
     }
   }
 
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      fetchEvents();
+    });
+  }, []);
+
+  useEffect(() => {
+    if (user && events.length > 0) {
+      requestAnimationFrame(() => {
+        fetchMySignups();
+      });
+    }
+  }, [user, events]);
+
   const handleSignup = async (eventId: number) => {
     if (!user) {
       router.push('/login');
@@ -72,8 +78,9 @@ export default function EventsPage() {
       await eventApi.signup(eventId);
       setSignedUpEventIds(prev => new Set([...prev, eventId]));
       message.success('报名成功！');
-    } catch (err: any) {
-      message.error(err.message || '报名失败，请重试');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '报名失败，请重试';
+      message.error(errorMessage);
     } finally {
       setSigningUpId(null);
     }
@@ -101,86 +108,86 @@ export default function EventsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!user && (
-        <div className="bg-gradient-to-r from-[#0a2a5c]/5 to-[#f59e0b]/5 rounded-xl p-6 mb-8 border border-[#0a2a5c]/10">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-[#0a2a5c] mb-1">登录后即可报名活动</h3>
-              <p className="text-sm text-gray-500">注册成为平台会员，参与创业活动、项目路演，与创业者面对面交流。</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <a
-                href="/login"
-                className="inline-flex items-center px-6 py-2.5 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors text-sm"
-              >
-                立即登录
-              </a>
-              <a
-                href="/register"
-                className="inline-flex items-center px-6 py-2.5 bg-white text-[#0a2a5c] font-semibold rounded-xl border border-[#0a2a5c]/20 hover:bg-[#0a2a5c]/5 transition-colors text-sm"
-              >
-                立即注册
-              </a>
+          <div className="bg-gradient-to-r from-[#0a2a5c]/5 to-[#f59e0b]/5 rounded-xl p-6 mb-8 border border-[#0a2a5c]/10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-[#0a2a5c] mb-1">登录后即可报名活动</h3>
+                <p className="text-sm text-gray-500">注册成为平台会员，参与创业活动、项目路演，与创业者面对面交流。</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <a
+                  href="/login"
+                  className="inline-flex items-center px-6 py-2.5 bg-[#0a2a5c] text-white font-semibold rounded-xl hover:bg-[#0a2a5c]/90 transition-colors text-sm"
+                >
+                  立即登录
+                </a>
+                <a
+                  href="/register"
+                  className="inline-flex items-center px-6 py-2.5 bg-white text-[#0a2a5c] font-semibold rounded-xl border border-[#0a2a5c]/20 hover:bg-[#0a2a5c]/5 transition-colors text-sm"
+                >
+                  立即注册
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {loading ? (
+        {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0a2a5c] border-t-transparent" />
           </div>
         ) : events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event: any) => {
+            {events.map((event: Event) => {
               const isSignedUp = signedUpEventIds.has(event.id);
               return (
-              <Link href={`/events/${event.id}`} key={event.id} className="block bg-white rounded-xl shadow-custom overflow-hidden border border-gray-100 hover:shadow-custom-lg transition-all">
-                <div className="h-3 bg-gradient-to-r from-[#0a2a5c] to-[#f59e0b]" />
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="px-3 py-1 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded-lg text-xs font-medium">
-                      {getEventTypeLabel(event.event_type)}
-                    </span>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      event.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {event.status === 'active' ? '进行中' : event.status === 'closed' ? '已结束' : '已取消'}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-[#0a2a5c] mb-3 line-clamp-2">{event.title}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-2 mb-4">{event.description}</p>
-                  <div className="space-y-2 text-sm text-gray-400 mb-5">
-                    <div className="flex items-center">
-                      <CalendarOutlined className="mr-2" />
-                      {new Date(event.start_at).toLocaleDateString('zh-CN')} - {new Date(event.end_at).toLocaleDateString('zh-CN')}
+                <Link href={`/events/${event.id}`} key={event.id} className="block bg-white rounded-xl shadow-custom overflow-hidden border border-gray-100 hover:shadow-custom-lg transition-all">
+                  <div className="h-3 bg-gradient-to-r from-[#0a2a5c] to-[#f59e0b]" />
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <span className="px-3 py-1 bg-[#0a2a5c]/5 text-[#0a2a5c] rounded-lg text-xs font-medium">
+                        {getEventTypeLabel(event.event_type)}
+                      </span>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${event.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'
+                        }`}>
+                        {event.status === 'active' ? '进行中' : event.status === 'closed' ? '已结束' : '已取消'}
+                      </span>
                     </div>
-                    <div className="flex items-center">
-                      <EnvironmentOutlined className="mr-2" />
-                      {event.location}
-                    </div>
-                  </div>
-                  {user && !(user.role === 'admin' || user.role === 'super_admin') && (
-                    isSignedUp ? (
-                      <div className="w-full px-4 py-2.5 bg-green-50 text-green-600 rounded-lg text-sm font-medium text-center flex items-center justify-center">
-                        <CheckCircleOutlined className="mr-1.5" />
-                        已报名
+                    <h3 className="text-lg font-semibold text-[#0a2a5c] mb-3 line-clamp-2">{event.title}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-2 mb-4">{event.description}</p>
+                    <div className="space-y-2 text-sm text-gray-400 mb-5">
+                      <div className="flex items-center">
+                        <CalendarOutlined className="mr-2" />
+                        {new Date(event.start_at).toLocaleDateString('zh-CN')} - {new Date(event.end_at).toLocaleDateString('zh-CN')}
                       </div>
-                    ) : (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleSignup(event.id);
-                        }}
-                        disabled={signingUpId === event.id}
-                        className="w-full px-4 py-2.5 bg-[#f59e0b] text-white rounded-lg hover:bg-[#f59e0b]/90 transition-colors text-sm font-medium disabled:opacity-50"
-                      >
-                        {signingUpId === event.id ? '报名中...' : '立即报名'}
-                      </button>
-                    )
-                  )}
-                </div>
-              </Link>
-            )})}
+                      <div className="flex items-center">
+                        <EnvironmentOutlined className="mr-2" />
+                        {event.location}
+                      </div>
+                    </div>
+                    {user && !(user.role === 'admin' || user.role === 'super_admin') && (
+                      isSignedUp ? (
+                        <div className="w-full px-4 py-2.5 bg-green-50 text-green-600 rounded-lg text-sm font-medium text-center flex items-center justify-center">
+                          <CheckCircleOutlined className="mr-1.5" />
+                          已报名
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSignup(event.id);
+                          }}
+                          disabled={signingUpId === event.id}
+                          className="w-full px-4 py-2.5 bg-[#f59e0b] text-white rounded-lg hover:bg-[#f59e0b]/90 transition-colors text-sm font-medium disabled:opacity-50"
+                        >
+                          {signingUpId === event.id ? '报名中...' : '立即报名'}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
 
           </div>
         ) : (

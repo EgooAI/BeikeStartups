@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { projectApi } from '@/lib/api';
 import { Project, ProjectStage } from '@/types';
-import { 
-  RocketOutlined, 
-  SearchOutlined, 
+import {
+  RocketOutlined,
+  SearchOutlined,
   TeamOutlined,
   EyeOutlined,
   ArrowRightOutlined,
@@ -63,19 +63,19 @@ export default function ProjectsPage() {
   async function fetchProjects() {
     setLoading(true);
     try {
-      const res = await projectApi.list({ 
-        status: 'online', 
+      const res = await projectApi.list({
+        status: 'online',
         is_public: 'true',
         ...(search ? { search } : {}),
         ...(stageFilter ? { stage: stageFilter } : {}),
         ...(industryFilter ? { industry: industryFilter } : {}),
       });
       if (res.data) {
-        const data = res.data as any;
+        const data = res.data as { items: Project[] };
         const items = data.items || [];
         setProjects(items);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to fetch projects:', err);
     } finally {
       setLoading(false);
@@ -147,11 +147,10 @@ export default function ProjectsPage() {
                 <button
                   key={option.value}
                   onClick={() => setStageFilter(option.value)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    stageFilter === option.value
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${stageFilter === option.value
                       ? 'bg-primary text-white shadow-sm'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   {option.label}
                 </button>
@@ -165,11 +164,10 @@ export default function ProjectsPage() {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setIndustryFilter('')}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  industryFilter === ''
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${industryFilter === ''
                     ? 'bg-accent text-white shadow-sm'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 全部领域
               </button>
@@ -177,11 +175,10 @@ export default function ProjectsPage() {
                 <button
                   key={industry}
                   onClick={() => setIndustryFilter(industryFilter === industry ? '' : industry)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    industryFilter === industry
+                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${industryFilter === industry
                       ? 'bg-accent text-white shadow-sm'
                       : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   {industry}
                 </button>
@@ -206,9 +203,9 @@ export default function ProjectsPage() {
               >
                 <div className={`${viewMode === 'grid' ? 'h-48 relative' : 'w-48 flex-shrink-0 relative'} bg-gradient-to-br from-primary/5 to-primary-light/10 flex items-center justify-center overflow-hidden`}>
                   {project.cover_image ? (
-                    <img 
-                      src={project.cover_image} 
-                      alt={project.title} 
+                    <img
+                      src={project.cover_image}
+                      alt={project.title}
                       className={`w-full h-full object-cover ${viewMode === 'grid' ? 'group-hover:scale-105 transition-transform duration-500' : ''}`}
                     />
                   ) : (
@@ -253,7 +250,7 @@ export default function ProjectsPage() {
             <p className="text-sm mt-2">还没有项目发布，敬请期待</p>
           </div>
         )}
-        
+
         {/* Load More */}
         {projects.length > 0 && (
           <div className="text-center mt-12">
