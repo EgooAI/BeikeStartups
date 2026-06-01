@@ -205,7 +205,7 @@ export default function ProfilePage() {
             <div>
               <h2 className="text-xl font-semibold text-white">{user.nickname || user.username}</h2>
               <p className="text-gray-400 text-sm">@{user.username}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 bg-white/[0.05] text-gray-300 rounded text-xs font-medium">
+              <span className="inline-block mt-1 px-2 py-0.5 bg-white/[0.05] text-white rounded text-xs font-medium">
                 {user.role === 'student' ? '学生' :
                   user.role === 'team_member' ? '团队成员' :
                     user.role === 'team_owner' ? '团队负责人' :
