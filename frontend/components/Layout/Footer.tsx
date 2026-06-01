@@ -88,7 +88,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <div>
+            <div className="hidden md:block">
               <h4 className="text-sm font-bold tracking-[0.2em] uppercase text-[#00f0ff] mb-6">快速链接</h4>
               <ul className="space-y-3">
                 {footerLinks.quick.map((link) => (
@@ -101,7 +101,7 @@ export default function Footer() {
               </ul>
             </div>
 
-            <div>
+            <div className="hidden md:block">
               <h4 className="text-sm font-bold tracking-[0.2em] uppercase text-[#b347ea] mb-6">关于我们</h4>
               <ul className="space-y-3">
                 {footerLinks.about.map((link) => (
@@ -116,7 +116,7 @@ export default function Footer() {
               </ul>
             </div>
 
-            <div>
+            <div className="hidden md:block">
               <h4 className="text-sm font-bold tracking-[0.2em] uppercase text-[#ffb800] mb-6">其他</h4>
               <ul className="space-y-3">
                 {footerLinks.support.map((link) => (
@@ -134,14 +134,9 @@ export default function Footer() {
 
           <div className="border-t border-white/5 mt-12 pt-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <p className="text-gray-600 text-sm text-center md:text-left">
+              <p className="text-gray-600 text-sm">
                 &copy; {new Date().getFullYear()} 贝壳创业俱乐部. All rights reserved.
               </p>
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
-                <Link href="/about" className="hover:text-gray-400 transition-colors">隐私政策</Link>
-                <Link href="/about" className="hover:text-gray-400 transition-colors">服务条款</Link>
-                <Link href="/about" className="hover:text-gray-400 transition-colors">Cookie 设置</Link>
-              </div>
             </div>
           </div>
         </div>

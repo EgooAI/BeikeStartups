@@ -46,20 +46,29 @@ export default function AboutPage() {
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
   const rippleRef = useRef(0);
   const starCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // isLoggedIn & isVisible initialized lazily above
-
-  // 鼠标跟踪
+  // 移动端检测
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // 鼠标跟踪 (仅桌面端)
+  useEffect(() => {
+    if (isMobile) return;
     let seq = 0;
     const mm = (e: MouseEvent) => { const pp = { x: e.clientX, y: e.clientY }; setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }); setCursorPixel(pp); seq += 1; const id = seq; setTrailSeq(id); setTrail(p => { const n = [...p]; n[id % trailLen] = { ...pp, id }; return n; }); };
     window.addEventListener('mousemove', mm); return () => window.removeEventListener('mousemove', mm);
-  }, []);
+  }, [isMobile]);
   // 点击涟漪
   useEffect(() => { const h = (e: MouseEvent) => { const id = ++rippleRef.current; setRipples(p => [...p.slice(-6), { x: e.clientX, y: e.clientY, id }]); }; window.addEventListener('click', h); return () => window.removeEventListener('click', h); }, []);
 
-  // 交互星图
+  // 交互星图 (仅桌面端)
   useEffect(() => {
+    if (isMobile) return;
     const canvas = starCanvasRef.current; if (!canvas) return; const ctx = canvas.getContext('2d')!; const w = () => window.innerWidth; const h = () => window.innerHeight; canvas.width = w(); canvas.height = h();
     const stars: { x: number; y: number; ox: number; oy: number; vx: number; vy: number; r: number; alpha: number; twinkle: number; color: string }[] = [];
     const colors = ['#ffffff', '#00f0ff', '#ffb800', '#b347ea', '#00ff88'];
@@ -85,7 +94,7 @@ export default function AboutPage() {
       } aid = requestAnimationFrame(draw);
     } draw();
     return () => { window.removeEventListener('mousemove', um); window.removeEventListener('resize', rs); cancelAnimationFrame(aid); };
-  }, []);
+  }, [isMobile]);
 
   const tilt = (e: React.MouseEvent) => { const r = e.currentTarget.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - 0.5; const y = (e.clientY - r.top) / r.height - 0.5; (e.currentTarget as HTMLElement).style.transform = `perspective(800px) rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateZ(8px)`; };
   const reset = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = 'perspective(800px) rotateY(0deg) rotateX(0deg) translateZ(0)'; };
