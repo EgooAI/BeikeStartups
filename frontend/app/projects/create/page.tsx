@@ -128,7 +128,7 @@ export default function CreateProjectPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-black tracking-tight text-white">创建项目</h1>
-          <p className="mt-2 text-gray-400">展示您的创新成果</p>
+          <p className="mt-2 text-white">展示您的创新成果</p>
         </div>
 
         <form onSubmit={handleSubmit} className="holo-card p-8 space-y-6">
@@ -139,7 +139,7 @@ export default function CreateProjectPage() {
           )}
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-white mb-2">
               项目名称 *
             </label>
             <input
@@ -150,13 +150,13 @@ export default function CreateProjectPage() {
               maxLength={200}
               value={formData.title}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-gray-600 text-white"
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-white text-white"
               placeholder="输入项目名称"
             />
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="description" className="block text-sm font-medium text-white mb-2">
               项目描述 *
             </label>
             <textarea
@@ -166,13 +166,13 @@ export default function CreateProjectPage() {
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-gray-600 text-white resize-none"
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-white text-white resize-none"
               placeholder="简要描述您的项目"
             />
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="content" className="block text-sm font-medium text-white mb-2">
               详细内容
             </label>
             <textarea
@@ -181,13 +181,13 @@ export default function CreateProjectPage() {
               rows={8}
               value={formData.content}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-gray-600 text-white resize-none"
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-white text-white resize-none"
               placeholder="详细描述项目内容、技术实现等"
             />
           </div>
 
           <div>
-            <label htmlFor="cover_image" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="cover_image" className="block text-sm font-medium text-white mb-2">
               封面图片上传
             </label>
             <input
@@ -196,7 +196,7 @@ export default function CreateProjectPage() {
               name="cover_image"
               accept="image/*"
               onChange={handleCoverFileChange}
-              className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-white/[0.05] file:text-gray-300 hover:file:bg-white/[0.08] file:cursor-pointer file:transition-colors"
+              className="w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-white/[0.05] file:text-white hover:file:bg-white/[0.08] file:cursor-pointer file:transition-colors"
             />
             {coverPreview && (
               <img
@@ -208,7 +208,7 @@ export default function CreateProjectPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               项目领域 *
             </label>
             <div className="flex flex-wrap gap-2">
@@ -218,7 +218,7 @@ export default function CreateProjectPage() {
                   className={`px-4 py-2 rounded-xl text-sm cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
                     formData.domains.includes(option.value)
                       ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold'
-                      : 'bg-white/[0.03] text-gray-400 border border-white/[0.06] hover:bg-white/[0.06]'
+                      : 'bg-white/[0.03] text-white border border-white/[0.06] hover:bg-white/[0.06]'
                   }`}
                 >
                   <input
@@ -234,7 +234,7 @@ export default function CreateProjectPage() {
           </div>
 
           <div>
-            <label htmlFor="stage" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="stage" className="block text-sm font-medium text-white mb-2">
               项目阶段 *
             </label>
             <select
@@ -243,7 +243,7 @@ export default function CreateProjectPage() {
               required
               value={formData.stage}
               onChange={handleStageChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none text-white"
+              className="w-full px-4 py-3 bg-black border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none text-white"
             >
               {STAGE_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>
@@ -254,7 +254,7 @@ export default function CreateProjectPage() {
           </div>
 
           <div>
-            <label htmlFor="tags" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="tags" className="block text-sm font-medium text-white mb-2">
               标签
             </label>
             <input
@@ -263,7 +263,7 @@ export default function CreateProjectPage() {
               name="tags"
               value={formData.tags}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-gray-600 text-white"
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none placeholder:text-white text-white"
               placeholder="用逗号分隔多个标签，如：AI,Web,移动应用"
             />
           </div>
@@ -277,7 +277,7 @@ export default function CreateProjectPage() {
               onChange={handleChange}
               className="h-4 w-4 text-[#00f0ff] focus:ring-[#00f0ff]/20 border-white/[0.08] rounded bg-white/[0.03]"
             />
-            <label htmlFor="is_public" className="ml-2 block text-sm text-gray-300">
+            <label htmlFor="is_public" className="ml-2 block text-sm text-white">
               公开项目（其他人可以查看）
             </label>
           </div>
@@ -293,7 +293,7 @@ export default function CreateProjectPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-3 border border-white/[0.08] text-gray-300 rounded-xl hover:bg-white/[0.03] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+              className="px-6 py-3 border border-white/[0.08] text-white rounded-xl hover:bg-white/[0.03] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
             >
               取消
             </button>

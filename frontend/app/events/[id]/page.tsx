@@ -65,6 +65,16 @@ export default function EventDetailPage() {
     }
   }
 
+  function formatDateTime(dateStr: string) {
+    const d = new Date(dateStr);
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    return `${y}-${mo}-${day} ${h}:${mi}`;
+  }
+
   async function fetchMySignup() {
     try {
       const res = await eventApi.getMySignup(Number(params.id));
@@ -196,7 +206,7 @@ export default function EventDetailPage() {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
-                <span className="px-4 py-1.5 bg-white/[0.04] text-gray-300 rounded-lg text-sm font-medium">
+                <span className="px-4 py-1.5 bg-white/[0.04] text-white rounded-lg text-sm font-medium">
                   {getEventTypeLabel(event.event_type)}
                 </span>
                 <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${statusInfo.color}`}>
@@ -208,13 +218,7 @@ export default function EventDetailPage() {
                 <div className="flex items-center">
                   <CalendarOutlined className="mr-2 text-[#00f0ff]" />
                   <span>
-                    {new Date(event.start_at).toLocaleDateString('zh-CN')} - {new Date(event.end_at).toLocaleDateString('zh-CN')}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <ClockCircleOutlined className="mr-2 text-[#00f0ff]" />
-                  <span>
-                    {new Date(event.start_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                    {formatDateTime(event.start_at)} - {formatDateTime(event.end_at)}
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -272,7 +276,7 @@ export default function EventDetailPage() {
                 活动介绍
               </h2>
               <div className="max-w-none">
-                <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                <p className="text-white whitespace-pre-wrap leading-relaxed">
                   {event.description || '暂无活动介绍'}
                 </p>
               </div>
@@ -284,7 +288,7 @@ export default function EventDetailPage() {
                 <ExclamationCircleOutlined className="mr-2 text-[#ffb800]" />
                 活动须知
               </h2>
-              <ul className="space-y-3 text-gray-300">
+              <ul className="space-y-3 text-white">
                 <li className="flex items-start">
                   <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
                   <span>请提前15分钟到达活动现场签到</span>
@@ -378,13 +382,13 @@ export default function EventDetailPage() {
                 <div className="flex items-center justify-between py-3 border-b border-white/[0.05]">
                   <span className="text-gray-400">开始时间</span>
                   <span className="font-medium text-white">
-                    {new Date(event.start_at).toLocaleDateString('zh-CN')}
+                    {formatDateTime(event.start_at)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3 border-b border-white/[0.05]">
                   <span className="text-gray-400">结束时间</span>
                   <span className="font-medium text-white">
-                    {new Date(event.end_at).toLocaleDateString('zh-CN')}
+                    {formatDateTime(event.end_at)}
                   </span>
                 </div>
                 {event.owner && (
@@ -410,23 +414,6 @@ export default function EventDetailPage() {
                   className="inline-flex items-center px-4 py-2.5 bg-[#b347ea] text-white rounded-xl font-bold hover:shadow-[0_0_20px_rgba(179,71,234,0.3)] hover:scale-105 transition-all duration-300 text-sm"
                 >
                   <FundOutlined className="mr-2" />
-                  浏览项目库
-                </Link>
-              </div>
-            )}
-
-            {/* 学生/团队入口 */}
-            {user && (user.role === 'student' || user.role === 'team_owner') && (
-              <div className="bg-gradient-to-br from-[#ffb800]/10 to-[#ffb800]/5 rounded-2xl border border-[#ffb800]/20 p-6">
-                <h3 className="text-lg font-black tracking-tight text-[#ffb800] mb-3">创业机会</h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  发现优质创业项目，寻找志同道合的团队成员，共同实现创业梦想。
-                </p>
-                <Link
-                  href="/projects"
-                  className="inline-flex items-center px-4 py-2.5 bg-[#ffb800] text-[#050510] rounded-xl font-bold hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:scale-105 transition-all duration-300 text-sm"
-                >
-                  <RocketOutlined className="mr-2" />
                   浏览项目库
                 </Link>
               </div>

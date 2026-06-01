@@ -199,12 +199,24 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-[#050510]">
-      <div className="bg-gradient-to-br from-[#0a0a1a] via-[#050510] to-[#0a0a1a] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">连接校内项目与校外资源</h1>
-          <p className="text-lg text-gray-400 max-w-3xl">
-            贝壳创业俱乐部欢迎投资机构、创业导师、产业资源方、校友企业和孵化平台共同参与校园创新生态建设。
-          </p>
+      <div className="relative bg-gradient-to-br from-[#0a0a1a] via-[#050510] to-[#0a0a1a] border-b border-white/[0.06] overflow-hidden">
+        <div className="absolute inset-0 bg-dot-matrix opacity-40" />
+        <div className="absolute top-0 right-0 w-[22rem] h-[22rem] bg-blue-100/30 rounded-full blur-3xl translate-x-1/3 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-[16rem] h-[16rem] bg-amber-100/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#00f0ff]/10 text-[#00f0ff] text-xs font-semibold rounded-full mb-3 tracking-wide">
+                <FundOutlined />
+                创投资源
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2">连接校内项目与校外资源</h1>
+              <p className="text-gray-500 text-base sm:text-lg">
+                贝壳创业俱乐部欢迎投资机构、创业导师、产业资源方、校友企业和孵化平台共同参与校园创新生态建设。
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

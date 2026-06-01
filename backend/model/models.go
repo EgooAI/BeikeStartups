@@ -403,7 +403,7 @@ type Event struct {
 	EventType   string      `gorm:"size:100" json:"event_type"`
 	Location    string      `gorm:"size:255" json:"location"`
 	StartAt     time.Time   `json:"start_at"`
-	EndAt       time.Time   `gorm:"end_at"`
+	EndAt       time.Time   `json:"end_at"`
 	Status      EventStatus `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
 
 	OwnerID uint  `gorm:"not null;index" json:"owner_id"`

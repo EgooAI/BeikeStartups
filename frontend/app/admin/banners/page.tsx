@@ -43,6 +43,16 @@ export default function AdminBannersPage() {
     loadBanners();
   }, []);
 
+  // 弹窗打开时禁用滚动
+  useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showForm]);
+
   async function loadBanners() {
     try {
       const res = await bannerApi.listAll();
@@ -164,121 +174,139 @@ export default function AdminBannersPage() {
         </button>
       </div>
 
+      {/* 添加/编辑轮播图弹窗 */}
       {showForm && (
-        <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-6 mb-6">
-          <h3 className="text-lg font-black tracking-tight text-white mb-4">
-            {editingBanner ? '编辑轮播图' : '添加轮播图'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                标题 <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-                maxLength={200}
-                placeholder="请输入轮播图标题"
-                className="w-full px-4 py-2 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white placeholder:text-gray-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                图片 <span className="text-red-400">*</span>
-              </label>
-              <div className="flex items-center space-x-3">
-                {uploading ? (
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <LoadingOutlined />
-                    <span>上传中...</span>
-                  </div>
-                ) : formData.image_url && !imagePreviewError ? (
-                  <div className="relative">
-                    <img
-                      src={formData.image_url}
-                      alt="预览"
-                      className="h-20 w-32 object-cover rounded-xl border border-white/[0.08]"
-                      onError={() => setImagePreviewError(true)}
-                    />
-                    {imagePreviewError && (
-                      <div className="absolute inset-0 bg-white/[0.03] rounded-xl flex items-center justify-center">
-                        <PictureOutlined className="text-gray-500 text-xl" />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="h-20 w-32 bg-white/[0.03] rounded-xl flex items-center justify-center">
-                    <PictureOutlined className="text-gray-500 text-xl" />
-                  </div>
-                )}
-                <label className="px-4 py-2 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl hover:opacity-90 transition-all duration-300 cursor-pointer flex items-center gap-2">
-                  <UploadOutlined />
-                  {formData.image_url ? '重新上传' : '上传图片'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              {uploadError && (
-                <p className="mt-2 text-sm text-red-400">{uploadError}</p>
-              )}
-              {formData.image_url && (
-                <p className="mt-2 text-sm text-gray-500 truncate">图片地址：{formData.image_url}</p>
-              )}
-              <p className="mt-2 text-xs text-gray-500">支持 JPG/PNG/GIF/WebP 图片，建议尺寸 1920x500</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                链接地址
-              </label>
-              <input
-                type="url"
-                value={formData.link_url}
-                onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
-                placeholder="https://example.com (点击轮播图跳转的地址，选填)"
-                className="w-full px-4 py-2 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white placeholder:text-gray-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                状态
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-4 py-2 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-gray-300"
-              >
-                <option value="active">显示</option>
-                <option value="inactive">隐藏</option>
-              </select>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={!formData.image_url}
-                className="px-6 py-2 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl hover:opacity-90 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {editingBanner ? '保存修改' : '添加'}
-              </button>
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={resetForm}
+        >
+          <div
+            className="bg-[#0f0f1f] rounded-2xl border border-[#00f0ff]/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] max-w-xl w-full max-h-[90vh] overflow-y-auto p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-black tracking-tight text-white">
+                {editingBanner ? '编辑轮播图' : '添加轮播图'}
+              </h3>
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-6 py-2 bg-transparent border border-white/10 text-white rounded-xl hover:bg-white/[0.05] transition-all duration-300"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:text-white hover:bg-white/[0.04] transition-colors"
               >
-                取消
+                ✕
               </button>
             </div>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  标题 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  required
+                  maxLength={200}
+                  placeholder="请输入轮播图标题"
+                  className="w-full px-4 py-2 bg-black border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white placeholder:text-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  图片 <span className="text-red-400">*</span>
+                </label>
+                <div className="flex items-center space-x-3">
+                  {uploading ? (
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <LoadingOutlined />
+                      <span>上传中...</span>
+                    </div>
+                  ) : formData.image_url && !imagePreviewError ? (
+                    <div className="relative">
+                      <img
+                        src={formData.image_url}
+                        alt="预览"
+                        className="h-20 w-32 object-cover rounded-xl border border-white/[0.08]"
+                        onError={() => setImagePreviewError(true)}
+                      />
+                      {imagePreviewError && (
+                        <div className="absolute inset-0 bg-black rounded-xl flex items-center justify-center">
+                          <PictureOutlined className="text-gray-500 text-xl" />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="h-20 w-32 bg-black rounded-xl flex items-center justify-center">
+                      <PictureOutlined className="text-gray-500 text-xl" />
+                    </div>
+                  )}
+                  <label className="px-4 py-2 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl hover:opacity-90 transition-all duration-300 cursor-pointer flex items-center gap-2">
+                    <UploadOutlined />
+                    {formData.image_url ? '重新上传' : '上传图片'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {uploadError && (
+                  <p className="mt-2 text-sm text-red-400">{uploadError}</p>
+                )}
+                {formData.image_url && (
+                  <p className="mt-2 text-sm text-gray-500 truncate">图片地址：{formData.image_url}</p>
+                )}
+                <p className="mt-2 text-xs text-gray-500">支持 JPG/PNG/GIF/WebP 图片，建议尺寸 1920x500</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  链接地址
+                </label>
+                <input
+                  type="url"
+                  value={formData.link_url}
+                  onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
+                  placeholder="https://example.com (点击轮播图跳转的地址，选填)"
+                  className="w-full px-4 py-2 bg-black border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white placeholder:text-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  状态
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-4 py-2 bg-black border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white"
+                >
+                  <option value="active">显示</option>
+                  <option value="inactive">隐藏</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={!formData.image_url}
+                  className="px-6 py-2 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl hover:opacity-90 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {editingBanner ? '保存修改' : '添加'}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-6 py-2 bg-transparent border border-white/10 text-white rounded-xl hover:bg-white/[0.05] transition-all duration-300"
+                >
+                  取消
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

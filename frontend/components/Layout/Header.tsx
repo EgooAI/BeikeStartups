@@ -71,11 +71,10 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive(item.href)
+                  className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive(item.href)
                       ? 'bg-[#00f0ff]/10 text-[#00f0ff] shadow-[0_0_10px_rgba(0,240,255,0.1)]'
                       : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-                  }`}
+                    }`}
                 >
                   <span className="text-sm">{item.icon}</span>
                   <span>{item.name}</span>
@@ -90,11 +89,10 @@ export default function Header() {
                 {(user.role === 'team_owner' || user.role === 'team_member') && (
                   <Link
                     href="/my-projects"
-                    className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isActive('/my-projects')
+                    className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive('/my-projects')
                         ? 'bg-[#b347ea]/10 text-[#b347ea]'
                         : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-                    }`}
+                      }`}
                   >
                     <RocketOutlined className="text-sm" />
                     <span>团队项目</span>
@@ -110,7 +108,7 @@ export default function Header() {
                       <UserOutlined className="text-white text-xs" />
                     </div>
                     <span className="font-bold text-white">{user.nickname || user.username}</span>
-                    <DownOutlined className={`text-xs transition-transform text-gray-500 ${userMenuOpen ? 'rotate-180' : ''}`} />
+                    <DownOutlined className={`text-xs transition-transform text-white ${userMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {userMenuOpen && (
@@ -188,11 +186,10 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  isActive(item.href)
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive(item.href)
                     ? 'bg-[#00f0ff]/10 text-[#00f0ff]'
                     : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-                }`}
+                  }`}
               >
                 <span className="text-base">{item.icon}</span>
                 <span>{item.name}</span>

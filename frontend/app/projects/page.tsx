@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { projectApi } from '@/lib/api';
 import { Project, ProjectStage } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 import {
   RocketOutlined,
   SearchOutlined,
@@ -16,6 +17,7 @@ import {
   ClearOutlined,
   FireOutlined,
   SortAscendingOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 
 const STAGE_OPTIONS: { value: ProjectStage | ''; label: string }[] = [
@@ -61,6 +63,7 @@ const INDUSTRY_OPTIONS = [
 ];
 
 export default function ProjectsPage() {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -74,13 +77,14 @@ export default function ProjectsPage() {
   const PAGE_SIZE = 18;
 
   useEffect(() => {
-    setPage(1);
-    setProjects([]);
     fetchProjects(1, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stageFilter, industryFilter, sortOrder]);
 
   async function fetchProjects(pageNum: number, reset = false) {
     if (reset) {
+      setPage(1);
+      setProjects([]);
       setLoading(true);
     } else {
       setLoadingMore(true);
@@ -157,6 +161,15 @@ export default function ProjectsPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {user?.role === 'team_owner' && (
+                <Link
+                  href="/projects/create"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:scale-105 transition-all duration-300 text-sm"
+                >
+                  <PlusOutlined />
+                  发布项目
+                </Link>
+              )}
               <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1.5">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -214,8 +227,8 @@ export default function ProjectsPage() {
                   key={option.value}
                   onClick={() => setStageFilter(option.value)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${stageFilter === option.value
-                      ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] shadow-md shadow-primary/15'
-                      : 'bg-white/[0.04] text-gray-400 hover:bg-white/[0.05] hover:text-gray-200'
+                    ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] shadow-md shadow-primary/15'
+                    : 'bg-white/[0.04] text-gray-400 hover:bg-white/[0.05] hover:text-gray-200'
                     }`}
                 >
                   {option.label}
@@ -233,8 +246,8 @@ export default function ProjectsPage() {
               <button
                 onClick={() => setIndustryFilter('')}
                 className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${industryFilter === ''
-                    ? 'bg-accent-gradient text-white shadow-md shadow-amber-500/15'
-                    : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
+                  ? 'bg-accent-gradient text-black shadow-md shadow-amber-500/15'
+                  : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
                   }`}
               >
                 全部领域
@@ -244,8 +257,8 @@ export default function ProjectsPage() {
                   key={industry}
                   onClick={() => setIndustryFilter(industryFilter === industry ? '' : industry)}
                   className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${industryFilter === industry
-                      ? 'bg-accent-gradient text-white shadow-md shadow-amber-500/15'
-                      : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
+                    ? 'bg-accent-gradient text-black shadow-md shadow-amber-500/15'
+                    : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
                     }`}
                 >
                   {industry}
@@ -295,11 +308,10 @@ export default function ProjectsPage() {
               {projects.length < total && <span>（已加载 {projects.length} 项）</span>}
             </div>
 
-            <div className={`grid gap-5 sm:gap-6 ${
-              viewMode === 'grid'
+            <div className={`grid gap-5 sm:gap-6 ${viewMode === 'grid'
                 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
                 : 'grid-cols-1'
-            }`}>
+              }`}>
               {projects.map((project, index) => (
                 <Link
                   key={project.id}
@@ -307,11 +319,10 @@ export default function ProjectsPage() {
                   className={`group bg-white/[0.02] backdrop-blur-sm rounded-2xl shadow-[0_2px_12px_rgba(10,42,92,0.03)] hover:shadow-[0_16px_40px_rgba(10,42,92,0.08)] transition-all duration-500 overflow-hidden border border-white/[0.06] hover:-translate-y-1.5 card-enter ${viewMode === 'list' ? 'flex flex-row' : ''}`}
                 >
                   {/* 封面 */}
-                  <div className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0a0a1a] to-[#101025] ${
-                    viewMode === 'grid'
+                  <div className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0a0a1a] to-[#101025] ${viewMode === 'grid'
                       ? 'h-48'
                       : 'w-44 sm:w-52 flex-shrink-0'
-                  }`}>
+                    }`}>
                     {project.cover_image ? (
                       <>
                         <img

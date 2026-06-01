@@ -99,10 +99,22 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-[#050510]">
-      <div className="bg-gradient-to-br from-[#0a0a1a] to-[#050510] border-b border-white/[0.05]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-black tracking-tight text-white mb-2">活动路演</h1>
-          <p className="text-gray-400">创业活动、项目路演、训练营，发现更多创业机会。</p>
+      <div className="relative bg-gradient-to-br from-[#0a0a1a] via-[#050510] to-[#0a0a1a] border-b border-white/[0.06] overflow-hidden">
+        <div className="absolute inset-0 bg-dot-matrix opacity-40" />
+        <div className="absolute top-0 right-0 w-[22rem] h-[22rem] bg-blue-100/30 rounded-full blur-3xl translate-x-1/3 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-[16rem] h-[16rem] bg-amber-100/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#00f0ff]/10 text-[#00f0ff] text-xs font-semibold rounded-full mb-3 tracking-wide">
+                <CalendarOutlined />
+                活动路演
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2">活动路演</h1>
+              <p className="text-gray-500 text-base sm:text-lg">创业活动、项目路演、训练营，发现更多创业机会。</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -148,7 +160,7 @@ export default function EventsPage() {
                   <div className="h-3 bg-gradient-to-r from-[#00f0ff] to-[#b347ea]" />
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <span className="px-3 py-1 bg-white/[0.04] text-gray-300 rounded-lg text-xs font-medium">
+                      <span className="px-3 py-1 bg-white/[0.04] text-white rounded-lg text-xs font-medium">
                         {getEventTypeLabel(event.event_type)}
                       </span>
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${event.status === 'active' ? 'bg-[#00ff88]/10 text-[#00ff88]' : 'bg-gray-500/10 text-gray-400'

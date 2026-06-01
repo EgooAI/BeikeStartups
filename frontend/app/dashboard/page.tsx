@@ -503,7 +503,7 @@ export default function DashboardPage() {
                     </span>
                     招募管理
                   </h2>
-                  <Link href="/recruitments" className="inline-flex items-center gap-1 text-sm font-medium text-[#00f0ff] hover:text-[#00d4e0] transition-colors">
+                  <Link href="/my-recruitments" className="inline-flex items-center gap-1 text-sm font-medium text-[#00f0ff] hover:text-[#00d4e0] transition-colors">
                     查看全部 <RightOutlined className="text-xs" />
                   </Link>
                 </div>

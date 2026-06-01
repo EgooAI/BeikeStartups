@@ -331,7 +331,7 @@ ${formData.team_introduction}
                     name="team_size"
                     value={formData.team_size}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/10 focus:border-[#00f0ff]/40 transition-all text-white"
+                    className="w-full px-4 py-3 bg-black border border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/10 focus:border-[#00f0ff]/40 transition-all text-white [color-scheme:dark]"
                   >
                     <option value="">请选择团队规模</option>
                     {teamSizes.map((s) => (
@@ -346,7 +346,7 @@ ${formData.team_introduction}
                     name="stage"
                     value={formData.stage}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/10 focus:border-[#00f0ff]/40 transition-all text-white"
+                    className="w-full px-4 py-3 bg-black border border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00f0ff]/10 focus:border-[#00f0ff]/40 transition-all text-white [color-scheme:dark]"
                   >
                     <option value="">请选择项目阶段</option>
                     {stages.map((s) => (

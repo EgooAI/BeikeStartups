@@ -205,6 +205,15 @@ export default function HomePage() {
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
   const rippleRef = useRef(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 移动端检测
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // 平台核心卡片定时轮播
   useEffect(() => {
@@ -212,8 +221,9 @@ export default function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  // 粒子物理画布
+  // 粒子物理画布 (仅桌面端)
   useEffect(() => {
+    if (isMobile) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const system = createParticles(canvas, 100);
@@ -231,7 +241,7 @@ export default function HomePage() {
       window.removeEventListener('mousemove', updateMouse);
       window.removeEventListener('resize', resize);
     };
-  }, []);
+  }, [isMobile]);
 
   // 光标与卡片交互 — 3D倾斜
   const handleCardTilt = (e: React.MouseEvent) => {
@@ -265,13 +275,15 @@ export default function HomePage() {
     (async () => { try { const r = await projectApi.list({ status: 'online', is_public: 'true' }); if (r.data) { const d = r.data as { items?: Project[] }; setFeaturedProjects(d.items?.slice(0, 4) || []); } } catch (e) { console.error(e) } finally { setLoading(false); } })();
   }, []);
 
+  // 光标跟踪 (仅桌面端)
   useEffect(() => {
+    if (isMobile) return;
     let seq = 0;
     const mm = (e: MouseEvent) => { const pp = { x: e.clientX, y: e.clientY }; const rp = { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }; setMousePos(rp); setCursorPixel(pp); seq += 1; const id = seq; setTrailSeq(id); setTrail(p => { const n = [...p]; n[id % trailLen] = { ...pp, id }; return n; }); };
     const sm = () => setScrollY(window.scrollY);
     window.addEventListener('mousemove', mm); window.addEventListener('scroll', sm, { passive: true });
     return () => { window.removeEventListener('mousemove', mm); window.removeEventListener('scroll', sm); };
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="overflow-x-hidden bg-[#050510] relative">
@@ -281,9 +293,7 @@ export default function HomePage() {
       </div>
 
       <div className="relative z-[1]">
-        <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[2]" />
-        <BannerCarousel />
-
+        {!isMobile && <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[2]" />}
         {/* ════════════════════════════════════════════
               HERO
            ════════════════════════════════════════════ */}
@@ -354,10 +364,12 @@ export default function HomePage() {
           <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#0a0a1a] to-transparent pointer-events-none" />
         </section>
 
+        <BannerCarousel />
+
         {/* ════════════════════════════════════════════
               STATS — 斜面过渡 + 浮动数据卡
            ════════════════════════════════════════════ */}
-        <section className="relative -mt-24 pb-28 z-10">
+        <section className="relative pb-28 z-10">
           {/* 斜面切割 */}
           <div className="absolute top-0 left-0 right-0 h-32 bg-[#0a0a1a]" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 0%)' }} />
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
@@ -568,16 +580,20 @@ export default function HomePage() {
         />
       ))}
 
-      {/* ── 拖尾 + 光标 ── */}
-      {trail.map((p) => { const age = (trailSeq - p.id) / trailLen; if (age > 1 || age < 0 || p.x < 0) return null; const t = age; const r = Math.round(0 + t * 179); const g = Math.round(240 - t * 210); const b = Math.round(255 - t * 120 + (t > 0.5 ? (t - 0.5) * 2 * 135 : 0)); const color = `rgb(${r},${g},${b})`; const size = (1 - t) * 5 + 1.5; const alpha = (1 - t) * 0.85 + 0.15; return (<div key={p.id} className="fixed rounded-full pointer-events-none z-[9998]" style={{ width: `${size}px`, height: `${size}px`, left: `${p.x}px`, top: `${p.y}px`, background: `radial-gradient(circle, ${color} 0%, transparent 60%)`, boxShadow: `0 0 ${size * 4}px ${color}, 0 0 ${size * 2}px #fff`, opacity: alpha, transform: 'translate(-50%,-50%)' }} />); })}
-      <div className="fixed pointer-events-none z-[9999]" style={{ left: `${cursorPixel.x}px`, top: `${cursorPixel.y}px`, transform: 'translate(-50%,-50%)' }}>
-        <div className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00f0ff]/10 blur-xl animate-pulse-slow" />
-        <div className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#00f0ff]/30 animate-spin" style={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%)', animationDuration: '3s' }} />
-        <div className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#b347ea]/20 animate-spin" style={{ clipPath: 'polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%)', animationDuration: '3s', animationDirection: 'reverse' }} />
-        <div className="absolute w-8 h-[1px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-transparent via-[#00f0ff]/40 to-transparent" />
-        <div className="absolute h-8 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-b from-transparent via-[#00f0ff]/40 to-transparent" />
-        <div className="absolute w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full shadow-[0_0_20px_rgba(0,240,255,0.9),0_0_40px_rgba(0,240,255,0.5)]" />
-      </div>
+      {/* ── 拖尾 + 光标 (仅桌面端) ── */}
+      {!isMobile && (
+        <>
+          {trail.map((p) => { const age = (trailSeq - p.id) / trailLen; if (age > 1 || age < 0 || p.x < 0) return null; const t = age; const r = Math.round(0 + t * 179); const g = Math.round(240 - t * 210); const b = Math.round(255 - t * 120 + (t > 0.5 ? (t - 0.5) * 2 * 135 : 0)); const color = `rgb(${r},${g},${b})`; const size = (1 - t) * 5 + 1.5; const alpha = (1 - t) * 0.85 + 0.15; return (<div key={p.id} className="fixed rounded-full pointer-events-none z-[9998]" style={{ width: `${size}px`, height: `${size}px`, left: `${p.x}px`, top: `${p.y}px`, background: `radial-gradient(circle, ${color} 0%, transparent 60%)`, boxShadow: `0 0 ${size * 4}px ${color}, 0 0 ${size * 2}px #fff`, opacity: alpha, transform: 'translate(-50%,-50%)' }} />); })}
+          <div className="fixed pointer-events-none z-[9999]" style={{ left: `${cursorPixel.x}px`, top: `${cursorPixel.y}px`, transform: 'translate(-50%,-50%)' }}>
+            <div className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00f0ff]/10 blur-xl animate-pulse-slow" />
+            <div className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#00f0ff]/30 animate-spin" style={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%)', animationDuration: '3s' }} />
+            <div className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#b347ea]/20 animate-spin" style={{ clipPath: 'polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%)', animationDuration: '3s', animationDirection: 'reverse' }} />
+            <div className="absolute w-8 h-[1px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-transparent via-[#00f0ff]/40 to-transparent" />
+            <div className="absolute h-8 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-b from-transparent via-[#00f0ff]/40 to-transparent" />
+            <div className="absolute w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full shadow-[0_0_20px_rgba(0,240,255,0.9),0_0_40px_rgba(0,240,255,0.5)]" />
+          </div>
+        </>
+      )}
     </div>
   );
 }

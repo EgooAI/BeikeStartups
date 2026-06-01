@@ -218,7 +218,7 @@ export default function AdminAdminsPage() {
               <select
                 value={selectedUserId || ''}
                 onChange={(e) => setSelectedUserId(e.target.value ? Number(e.target.value) : null)}
-                className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-gray-300"
+                className="w-full px-4 py-2.5 bg-black border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white"
               >
                 <option value="">请选择用户</option>
                 {nonAdminUsers.map((u) => (

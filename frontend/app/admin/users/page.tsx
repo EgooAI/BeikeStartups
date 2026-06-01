@@ -183,7 +183,7 @@ export default function AdminUsersPage() {
                         <select
                           value={u.role}
                           onChange={(e) => changeRole(u.id, e.target.value)}
-                          className="text-xs px-2 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 text-white"
+                          className="text-xs px-2 py-1.5 bg-black border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 text-white"
                         >
                           <option value="student">同学</option>
                           <option value="investor">投资人</option>

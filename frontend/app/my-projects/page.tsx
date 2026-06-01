@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { projectApi } from '@/lib/api';
@@ -115,9 +116,16 @@ export default function TeamProjectsPage() {
   return (
     <div className="min-h-screen bg-[#050510]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-4"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          返回主页
+        </Link>
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-white">我的项目</h1>
+            <h1 className="text-3xl font-black tracking-tight text-white">团队项目</h1>
             <p className="text-gray-400 mt-1">管理您团队的所有项目</p>
           </div>
           {user?.role !== 'student' && (

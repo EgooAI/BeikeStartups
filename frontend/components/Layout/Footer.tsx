@@ -159,14 +159,14 @@ export default function Footer() {
               <div className="flex items-center justify-between p-4 bg-white/[0.03] rounded-xl border border-white/[0.06]">
                 <div className="flex items-center space-x-3">
                   <MailOutlined className="text-[#00f0ff] text-lg" />
-                  <span className="text-gray-300 text-sm">contact@beike-startups.com</span>
+                  <span className="text-white text-sm">contact@beike-startups.com</span>
                 </div>
                 <button onClick={handleCopyEmail} className="flex items-center space-x-1 px-3 py-1.5 bg-[#00f0ff]/10 text-[#00f0ff] rounded-lg hover:bg-[#00f0ff]/20 transition-colors text-sm"><CopyOutlined /><span>复制</span></button>
               </div>
               <div className="flex items-center justify-between p-4 bg-white/[0.03] rounded-xl border border-white/[0.06]">
                 <div className="flex items-center space-x-3">
                   <PhoneOutlined className="text-[#b347ea] text-lg" />
-                  <span className="text-gray-300 text-sm">400-888-8888</span>
+                  <span className="text-white text-sm">400-888-8888</span>
                 </div>
                 <button onClick={handleCopyPhone} className="flex items-center space-x-1 px-3 py-1.5 bg-[#b347ea]/10 text-[#b347ea] rounded-lg hover:bg-[#b347ea]/20 transition-colors text-sm"><CopyOutlined /><span>复制</span></button>
               </div>

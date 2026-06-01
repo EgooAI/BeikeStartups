@@ -109,12 +109,20 @@ export default function RecruitmentsPage() {
 
   return (
     <div className="min-h-screen bg-[#050510]">
-      <div className="bg-gradient-to-br from-[#0a0a1a] via-[#050510] to-[#0a0a1a] border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex items-center justify-between">
+      <div className="relative bg-gradient-to-br from-[#0a0a1a] via-[#050510] to-[#0a0a1a] border-b border-white/[0.06] overflow-hidden">
+        <div className="absolute inset-0 bg-dot-matrix opacity-40" />
+        <div className="absolute top-0 right-0 w-[22rem] h-[22rem] bg-blue-100/30 rounded-full blur-3xl translate-x-1/3 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-[16rem] h-[16rem] bg-amber-100/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-white mb-2">创业团队招募广场</h1>
-              <p className="text-gray-500">汇聚正在招募成员的校内创业团队，找到适合你的创业机会。</p>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#00f0ff]/10 text-[#00f0ff] text-xs font-semibold rounded-full mb-3 tracking-wide">
+                <TeamOutlined />
+                招募广场
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2">创业团队招募广场</h1>
+              <p className="text-gray-500 text-base sm:text-lg">汇聚正在招募成员的校内创业团队，找到适合你的创业机会。</p>
             </div>
             {user?.role === 'team_owner' && (
               <Link href="/recruitments/create" className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-medium rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
@@ -156,15 +164,14 @@ export default function RecruitmentsPage() {
               <FilterOutlined /> 招募状态
             </p>
             <div className="flex flex-wrap gap-2">
-              {[{v:'',l:'全部状态'},{v:'active',l:'招募中'},{v:'solved',l:'已解决'}].map(o => (
+              {[{ v: '', l: '全部状态' }, { v: 'active', l: '招募中' }, { v: 'solved', l: '已解决' }].map(o => (
                 <button
                   key={o.v}
                   onClick={() => setStatusFilter(statusFilter === o.v ? '' : o.v)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    statusFilter === o.v
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${statusFilter === o.v
                       ? o.v === '' ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] shadow-md shadow-primary/15' : 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] shadow-md shadow-primary/15'
                       : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
-                  }`}
+                    }`}
                 >
                   {o.l}
                 </button>
@@ -173,16 +180,15 @@ export default function RecruitmentsPage() {
           </div>
 
           {/* 岗位筛选 */}
-          <div className="mb-5">
+          <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
               <FilterOutlined /> 招募岗位
             </p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setPositionFilter('')}
-                className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  positionFilter === '' ? 'bg-accent-gradient text-white shadow-md shadow-amber-500/15' : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
-                }`}
+                className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${positionFilter === '' ? 'bg-accent-gradient text-black shadow-md shadow-amber-500/15' : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
+                  }`}
               >
                 全部岗位
               </button>
@@ -190,9 +196,8 @@ export default function RecruitmentsPage() {
                 <button
                   key={p}
                   onClick={() => setPositionFilter(positionFilter === p ? '' : p)}
-                  className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    positionFilter === p ? 'bg-accent-gradient text-white shadow-md shadow-amber-500/15' : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
-                  }`}
+                  className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${positionFilter === p ? 'bg-accent-gradient text-black shadow-md shadow-amber-500/15' : 'bg-white/[0.04] text-gray-500 hover:bg-white/[0.05] hover:text-gray-300'
+                    }`}
                 >
                   {positionLabel(p)}
                 </button>
@@ -201,7 +206,7 @@ export default function RecruitmentsPage() {
           </div>
 
           {/* 排序 + 清空 */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
+          <div className="flex items-center justify-between pt-4 border-t border-white/[0.05]">
             <button
               onClick={() => setSortOrder(s => s === 'newest' ? 'oldest' : 'newest')}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/[0.04] hover:bg-white/[0.05] rounded-xl text-sm text-gray-500 transition-colors"

@@ -167,7 +167,7 @@ export default function AdminResourcesPage() {
                 <select
                   value={formData.resource_type}
                   onChange={(e) => setFormData({ ...formData, resource_type: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-gray-300"
+                  className="w-full px-4 py-2.5 bg-black border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white"
                 >
                   <option value="office">办公空间</option>
                   <option value="tech">技术服务</option>

@@ -225,7 +225,7 @@ export default function AdminEventsPage() {
                 <select
                   value={formData.event_type}
                   onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-gray-300"
+                  className="w-full px-4 py-2.5 bg-black border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white"
                 >
                   <option value="roadshow">路演</option>
                   <option value="salon">沙龙</option>
@@ -264,7 +264,7 @@ export default function AdminEventsPage() {
                     required
                     value={formData.start_at}
                     onChange={(e) => setFormData({ ...formData, start_at: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white [color-scheme:dark]"
+                    className="w-full px-4 py-2.5 bg-black border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white [color-scheme:dark]"
                   />
                 </div>
                 <div>
@@ -273,8 +273,9 @@ export default function AdminEventsPage() {
                     type="datetime-local"
                     required
                     value={formData.end_at}
+                    min={formData.start_at || undefined}
                     onChange={(e) => setFormData({ ...formData, end_at: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white [color-scheme:dark]"
+                    className="w-full px-4 py-2.5 bg-black border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -406,13 +407,14 @@ export default function AdminEventsPage() {
                   <tr key={event.id} className="hover:bg-white/[0.03] transition-colors">
                     <td className="px-6 py-4 font-medium text-white">{event.title}</td>
                     <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 bg-white/[0.05] text-gray-300 rounded-xl text-xs font-medium">
+                      <span className="px-2.5 py-1 bg-white/[0.05] text-white rounded-xl text-xs font-medium">
                         {getEventTypeLabel(event.event_type)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-400">{event.location}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(event.start_at).toLocaleDateString('zh-CN')}
+                    <td className="px-6 py-4 text-sm text-gray-400">
+                      <div>{new Date(event.start_at).toLocaleDateString('zh-CN')}</div>
+                      <div>至 {new Date(event.end_at).toLocaleDateString('zh-CN')}</div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>

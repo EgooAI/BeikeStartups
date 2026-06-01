@@ -77,7 +77,7 @@ export default function CreateRecruitmentPage() {
           <div className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/20 border-t-[#00f0ff] animate-spin" />
           <div className="absolute inset-[6px] rounded-full border-2 border-[#b347ea]/20 border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }} />
         </div>
-        <p className="text-gray-500 text-sm animate-pulse">正在加载中...</p>
+        <p className="text-white text-sm animate-pulse">正在加载中...</p>
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function CreateRecruitmentPage() {
             </div>
             <div>
               <h1 className="text-3xl font-black tracking-tight text-white">发布招聘</h1>
-              <p className="mt-1 text-gray-400">寻找优秀的团队成员</p>
+              <p className="mt-1 text-white">寻找优秀的团队成员</p>
             </div>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function CreateRecruitmentPage() {
           )}
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-white mb-2">
               招聘标题 *
             </label>
             <input
@@ -116,13 +116,13 @@ export default function CreateRecruitmentPage() {
               maxLength={200}
               value={formData.title}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-gray-500"
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-white"
               placeholder="例如：诚聘前端开发工程师"
             />
           </div>
 
           <div>
-            <label htmlFor="position" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="position" className="block text-sm font-medium text-white mb-2">
               招募岗位 *
             </label>
             <select
@@ -131,7 +131,7 @@ export default function CreateRecruitmentPage() {
               required
               value={formData.position}
               onChange={handlePositionChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white"
+              className="w-full px-4 py-3 bg-black border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white"
             >
               {POSITION_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>
@@ -143,7 +143,7 @@ export default function CreateRecruitmentPage() {
 
           {formData.position === 'other' && (
             <div>
-              <label htmlFor="customPosition" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="customPosition" className="block text-sm font-medium text-white mb-2">
                 自定义岗位名称 *
               </label>
               <input
@@ -154,14 +154,14 @@ export default function CreateRecruitmentPage() {
                 maxLength={100}
                 value={formData.customPosition}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-gray-500"
+                className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-white"
                 placeholder="请输入自定义岗位名称"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="description" className="block text-sm font-medium text-white mb-2">
               职位描述 *
             </label>
             <textarea
@@ -171,13 +171,13 @@ export default function CreateRecruitmentPage() {
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-gray-500"
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-white"
               placeholder="描述工作内容、职责等"
             />
           </div>
 
           <div>
-            <label htmlFor="requirements" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="requirements" className="block text-sm font-medium text-white mb-2">
               任职要求
             </label>
             <textarea
@@ -186,13 +186,13 @@ export default function CreateRecruitmentPage() {
               rows={4}
               value={formData.requirements}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-gray-500"
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-white"
               placeholder="列出技能要求、经验要求等"
             />
           </div>
 
           <div>
-            <label htmlFor="deadline" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="deadline" className="block text-sm font-medium text-white mb-2">
               截止日期
             </label>
             <input
@@ -201,7 +201,7 @@ export default function CreateRecruitmentPage() {
               name="deadline"
               value={formData.deadline}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white"
+              className="w-full px-4 py-3 bg-black border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white"
             />
           </div>
 
