@@ -177,12 +177,15 @@ function createParticles(canvas: HTMLCanvasElement, count: number) {
       ctx.globalAlpha = 1;
     }
 
-    requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
   }
+
+  let rafId = 0;
 
   return {
     particles,
-    animate,
+    start() { rafId = requestAnimationFrame(animate); },
+    cancel() { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } },
     get mouse() { return mouse; },
     set mouse(pos: { x: number; y: number }) { mouse.x = pos.x; mouse.y = pos.y; },
   };
@@ -206,6 +209,18 @@ export default function HomePage() {
   const rippleRef = useRef(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [particlesEnabled, setParticlesEnabled] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('particlesEnabled') !== 'false';
+    return true;
+  });
+
+  const toggleParticles = () => {
+    setParticlesEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('particlesEnabled', String(next));
+      return next;
+    });
+  };
 
   // 移动端检测
   useEffect(() => {
@@ -221,27 +236,29 @@ export default function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  // 粒子物理画布 (仅桌面端)
+  // 粒子物理画布 (仅桌面端，可手动关闭)
+  const particleSystemRef = useRef<ReturnType<typeof createParticles> | null>(null);
+
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || !particlesEnabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const system = createParticles(canvas, 100);
-    system.animate();
+    particleSystemRef.current = system;
+    system.start();
     const updateMouse = (e: MouseEvent) => {
       system.mouse = { x: e.clientX, y: e.clientY };
     };
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    const handleResize = () => {
+      window.location.reload();
     };
     window.addEventListener('mousemove', updateMouse);
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('mousemove', updateMouse);
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [isMobile]);
+  }, [isMobile, particlesEnabled]);
 
   // 光标与卡片交互 — 3D倾斜
   const handleCardTilt = (e: React.MouseEvent) => {
@@ -275,15 +292,15 @@ export default function HomePage() {
     (async () => { try { const r = await projectApi.list({ status: 'online', is_public: 'true' }); if (r.data) { const d = r.data as { items?: Project[] }; setFeaturedProjects(d.items?.slice(0, 4) || []); } } catch (e) { console.error(e) } finally { setLoading(false); } })();
   }, []);
 
-  // 光标跟踪 (仅桌面端)
+  // 光标跟踪 (仅桌面端，可手动关闭)
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || !particlesEnabled) return;
     let seq = 0;
     const mm = (e: MouseEvent) => { const pp = { x: e.clientX, y: e.clientY }; const rp = { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }; setMousePos(rp); setCursorPixel(pp); seq += 1; const id = seq; setTrailSeq(id); setTrail(p => { const n = [...p]; n[id % trailLen] = { ...pp, id }; return n; }); };
     const sm = () => setScrollY(window.scrollY);
     window.addEventListener('mousemove', mm); window.addEventListener('scroll', sm, { passive: true });
     return () => { window.removeEventListener('mousemove', mm); window.removeEventListener('scroll', sm); };
-  }, [isMobile]);
+  }, [isMobile, particlesEnabled]);
 
   return (
     <div className="overflow-x-hidden bg-[#050510] relative">
@@ -293,7 +310,7 @@ export default function HomePage() {
       </div>
 
       <div className="relative z-[1]">
-        {!isMobile && <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[2]" />}
+        {!isMobile && particlesEnabled && <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[2]" />}
         {/* ════════════════════════════════════════════
               HERO
            ════════════════════════════════════════════ */}
@@ -580,8 +597,8 @@ export default function HomePage() {
         />
       ))}
 
-      {/* ── 拖尾 + 光标 (仅桌面端) ── */}
-      {!isMobile && (
+      {/* ── 拖尾 + 光标 (仅桌面端，可手动关闭) ── */}
+      {!isMobile && particlesEnabled && (
         <>
           {trail.map((p) => { const age = (trailSeq - p.id) / trailLen; if (age > 1 || age < 0 || p.x < 0) return null; const t = age; const r = Math.round(0 + t * 179); const g = Math.round(240 - t * 210); const b = Math.round(255 - t * 120 + (t > 0.5 ? (t - 0.5) * 2 * 135 : 0)); const color = `rgb(${r},${g},${b})`; const size = (1 - t) * 5 + 1.5; const alpha = (1 - t) * 0.85 + 0.15; return (<div key={p.id} className="fixed rounded-full pointer-events-none z-[9998]" style={{ width: `${size}px`, height: `${size}px`, left: `${p.x}px`, top: `${p.y}px`, background: `radial-gradient(circle, ${color} 0%, transparent 60%)`, boxShadow: `0 0 ${size * 4}px ${color}, 0 0 ${size * 2}px #fff`, opacity: alpha, transform: 'translate(-50%,-50%)' }} />); })}
           <div className="fixed pointer-events-none z-[9999]" style={{ left: `${cursorPixel.x}px`, top: `${cursorPixel.y}px`, transform: 'translate(-50%,-50%)' }}>
@@ -593,6 +610,21 @@ export default function HomePage() {
             <div className="absolute w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full shadow-[0_0_20px_rgba(0,240,255,0.9),0_0_40px_rgba(0,240,255,0.5)]" />
           </div>
         </>
+      )}
+
+      {/* ── 粒子开关 (仅桌面端) ── */}
+      {!isMobile && (
+        <button
+          onClick={toggleParticles}
+          className="fixed bottom-6 right-6 z-[10000] flex items-center gap-2 px-3.5 py-2.5 bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-xl text-xs text-gray-400 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300 shadow-lg"
+          title={particlesEnabled ? '关闭粒子交互' : '开启粒子交互'}
+        >
+          <span className={`relative flex h-2 w-2 ${particlesEnabled ? '' : 'opacity-40'}`}>
+            <span className={`absolute inline-flex h-full w-full rounded-full ${particlesEnabled ? 'bg-[#00ff88] animate-ping opacity-75' : 'bg-gray-500'}`} />
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${particlesEnabled ? 'bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.6)]' : 'bg-gray-500'}`} />
+          </span>
+          <span>粒子交互</span>
+        </button>
       )}
     </div>
   );

@@ -47,6 +47,18 @@ export default function AboutPage() {
   const rippleRef = useRef(0);
   const starCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [particlesEnabled, setParticlesEnabled] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('particlesEnabled') !== 'false';
+    return true;
+  });
+
+  const toggleParticles = () => {
+    setParticlesEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('particlesEnabled', String(next));
+      return next;
+    });
+  };
 
   // 移动端检测
   useEffect(() => {
@@ -56,19 +68,19 @@ export default function AboutPage() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // 鼠标跟踪 (仅桌面端)
+  // 鼠标跟踪 (仅桌面端，可手动关闭)
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || !particlesEnabled) return;
     let seq = 0;
     const mm = (e: MouseEvent) => { const pp = { x: e.clientX, y: e.clientY }; setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }); setCursorPixel(pp); seq += 1; const id = seq; setTrailSeq(id); setTrail(p => { const n = [...p]; n[id % trailLen] = { ...pp, id }; return n; }); };
     window.addEventListener('mousemove', mm); return () => window.removeEventListener('mousemove', mm);
-  }, [isMobile]);
+  }, [isMobile, particlesEnabled]);
   // 点击涟漪
   useEffect(() => { const h = (e: MouseEvent) => { const id = ++rippleRef.current; setRipples(p => [...p.slice(-6), { x: e.clientX, y: e.clientY, id }]); }; window.addEventListener('click', h); return () => window.removeEventListener('click', h); }, []);
 
-  // 交互星图 (仅桌面端)
+  // 交互星图 (仅桌面端，可手动关闭)
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || !particlesEnabled) return;
     const canvas = starCanvasRef.current; if (!canvas) return; const ctx = canvas.getContext('2d')!; const w = () => window.innerWidth; const h = () => window.innerHeight; canvas.width = w(); canvas.height = h();
     const stars: { x: number; y: number; ox: number; oy: number; vx: number; vy: number; r: number; alpha: number; twinkle: number; color: string }[] = [];
     const colors = ['#ffffff', '#00f0ff', '#ffb800', '#b347ea', '#00ff88'];
@@ -94,14 +106,14 @@ export default function AboutPage() {
       } aid = requestAnimationFrame(draw);
     } draw();
     return () => { window.removeEventListener('mousemove', um); window.removeEventListener('resize', rs); cancelAnimationFrame(aid); };
-  }, [isMobile]);
+  }, [isMobile, particlesEnabled]);
 
   const tilt = (e: React.MouseEvent) => { const r = e.currentTarget.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - 0.5; const y = (e.clientY - r.top) / r.height - 0.5; (e.currentTarget as HTMLElement).style.transform = `perspective(800px) rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateZ(8px)`; };
   const reset = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = 'perspective(800px) rotateY(0deg) rotateX(0deg) translateZ(0)'; };
 
   return (
     <div className="min-h-screen bg-[#050510] text-white overflow-x-hidden">
-      <canvas ref={starCanvasRef} className="fixed inset-0 pointer-events-none z-[2]" />
+      {!isMobile && particlesEnabled && <canvas ref={starCanvasRef} className="fixed inset-0 pointer-events-none z-[2]" />}
       <div className="fixed inset-0 bg-scanlines opacity-30 pointer-events-none z-[1]" />
 
       <div className="relative z-[3]">
@@ -267,17 +279,36 @@ export default function AboutPage() {
         </section>
       </div>
 
-      {/* 涟漪 */}
-      {ripples.map(r => (<div key={r.id} className="fixed pointer-events-none z-[9997] rounded-full" style={{ left: r.x, top: r.y, border: '1.5px solid rgba(0,240,255,0.5)', boxShadow: '0 0 15px rgba(0,240,255,0.4)', transform: 'translate(-50%,-50%)', animation: 'ripple-expand 0.8s ease-out forwards' }} />))}
-      {/* 拖尾 */}
-      {trail.map(p => { const a = (trailSeq - p.id) / trailLen; if (a > 1 || a < 0 || p.x < 0) return null; const t = a, rr = Math.round(0 + t * 179), g = Math.round(240 - t * 210), b = Math.round(255 - t * 120 + (t > 0.5 ? (t - 0.5) * 2 * 135 : 0)), c = `rgb(${rr},${g},${b})`, s = (1 - t) * 5 + 1.5, al = (1 - t) * 0.85 + 0.15; return (<div key={p.id} className="fixed rounded-full pointer-events-none z-[9998]" style={{ width: `${s}px`, height: `${s}px`, left: `${p.x}px`, top: `${p.y}px`, background: `radial-gradient(circle,${c} 0%,transparent 60%)`, boxShadow: `0 0 ${s * 4}px ${c},0 0 ${s * 2}px #fff`, opacity: al, transform: 'translate(-50%,-50%)' }} />); })}
-      {/* 光标 */}
-      <div className="fixed pointer-events-none z-[9999]" style={{ left: `${cursorPixel.x}px`, top: `${cursorPixel.y}px`, transform: 'translate(-50%,-50%)' }}>
-        <div className="absolute w-14 h-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00f0ff]/8 blur-xl animate-pulse-slow" />
-        <div className="absolute w-8 h-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#00f0ff]/25 animate-spin" style={{ clipPath: 'polygon(0% 0%,100% 0%,100% 50%,0% 50%)', animationDuration: '3s' }} />
-        <div className="absolute w-8 h-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#b347ea]/15 animate-spin" style={{ clipPath: 'polygon(0% 50%,100% 50%,100% 100%,0% 100%)', animationDuration: '3s', animationDirection: 'reverse' }} />
-        <div className="absolute w-2 h-2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full shadow-[0_0_15px_rgba(0,240,255,0.8)]" />
-      </div>
+      {/* 涟漪 + 拖尾 + 光标 (仅桌面端，可手动关闭) */}
+      {!isMobile && particlesEnabled && (
+        <>
+          {ripples.map(r => (<div key={r.id} className="fixed pointer-events-none z-[9997] rounded-full" style={{ left: r.x, top: r.y, border: '1.5px solid rgba(0,240,255,0.5)', boxShadow: '0 0 15px rgba(0,240,255,0.4)', transform: 'translate(-50%,-50%)', animation: 'ripple-expand 0.8s ease-out forwards' }} />))}
+          {/* 拖尾 */}
+          {trail.map(p => { const a = (trailSeq - p.id) / trailLen; if (a > 1 || a < 0 || p.x < 0) return null; const t = a, rr = Math.round(0 + t * 179), g = Math.round(240 - t * 210), b = Math.round(255 - t * 120 + (t > 0.5 ? (t - 0.5) * 2 * 135 : 0)), c = `rgb(${rr},${g},${b})`, s = (1 - t) * 5 + 1.5, al = (1 - t) * 0.85 + 0.15; return (<div key={p.id} className="fixed rounded-full pointer-events-none z-[9998]" style={{ width: `${s}px`, height: `${s}px`, left: `${p.x}px`, top: `${p.y}px`, background: `radial-gradient(circle,${c} 0%,transparent 60%)`, boxShadow: `0 0 ${s * 4}px ${c},0 0 ${s * 2}px #fff`, opacity: al, transform: 'translate(-50%,-50%)' }} />); })}
+          {/* 光标 */}
+          <div className="fixed pointer-events-none z-[9999]" style={{ left: `${cursorPixel.x}px`, top: `${cursorPixel.y}px`, transform: 'translate(-50%,-50%)' }}>
+            <div className="absolute w-14 h-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00f0ff]/8 blur-xl animate-pulse-slow" />
+            <div className="absolute w-8 h-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#00f0ff]/25 animate-spin" style={{ clipPath: 'polygon(0% 0%,100% 0%,100% 50%,0% 50%)', animationDuration: '3s' }} />
+            <div className="absolute w-8 h-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#b347ea]/15 animate-spin" style={{ clipPath: 'polygon(0% 50%,100% 50%,100% 100%,0% 100%)', animationDuration: '3s', animationDirection: 'reverse' }} />
+            <div className="absolute w-2 h-2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full shadow-[0_0_15px_rgba(0,240,255,0.8)]" />
+          </div>
+        </>
+      )}
+
+      {/* ── 粒子开关 (仅桌面端) ── */}
+      {!isMobile && (
+        <button
+          onClick={toggleParticles}
+          className="fixed bottom-6 right-6 z-[10000] flex items-center gap-2 px-3.5 py-2.5 bg-white/[0.04] backdrop-blur-md border border-white/[0.08] rounded-xl text-xs text-gray-400 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300 shadow-lg"
+          title={particlesEnabled ? '关闭粒子交互' : '开启粒子交互'}
+        >
+          <span className={`relative flex h-2 w-2 ${particlesEnabled ? '' : 'opacity-40'}`}>
+            <span className={`absolute inline-flex h-full w-full rounded-full ${particlesEnabled ? 'bg-[#00ff88] animate-ping opacity-75' : 'bg-gray-500'}`} />
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${particlesEnabled ? 'bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.6)]' : 'bg-gray-500'}`} />
+          </span>
+          <span>粒子交互</span>
+        </button>
+      )}
     </div>
   );
 }
