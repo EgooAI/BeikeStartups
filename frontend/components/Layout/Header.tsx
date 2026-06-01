@@ -108,7 +108,7 @@ export default function Header() {
                       <UserOutlined className="text-white text-xs" />
                     </div>
                     <span className="font-bold text-white">{user.nickname || user.username}</span>
-                    <DownOutlined className={`text-xs transition-transform text-white ${userMenuOpen ? 'rotate-180' : ''}`} />
+                    <DownOutlined className={`text-xs transition-transform !text-white ${userMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {userMenuOpen && (
