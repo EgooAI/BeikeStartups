@@ -205,7 +205,8 @@ func ListRecruitments(c *gin.Context) {
 	if status != "" {
 		query = query.Where("status = ?", status)
 	} else {
-		query = query.Where("status = ?", model.RecruitStatusActive)
+		// 默认显示活跃和已解决的招募
+		query = query.Where("status IN (?)", []string{string(model.RecruitStatusActive), string(model.RecruitStatusSolved)})
 	}
 
 	// 如果是项目负责人查看自己发布的招募

@@ -104,11 +104,10 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f7f3ec]/50">
-        <div className="relative h-12 w-12">
-          <div className="absolute inset-0 rounded-full border-4 border-[#e8dfd0] opacity-40"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#f59e0b] animate-spin"></div>
-          <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-[#0a2a5c] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }}></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#050510]">
+        <div className="relative w-14 h-14">
+          <div className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/20 border-t-[#00f0ff] animate-spin" />
+          <div className="absolute inset-[6px] rounded-full border-2 border-[#b347ea]/20 border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }} />
         </div>
       </div>
     );
@@ -116,14 +115,14 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
 
   if (!application) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f7f3ec]/50">
-        <div className="bg-[#fefcf8] rounded-2xl border border-[#e8dfd0] shadow-sm p-12 text-center">
-          <div className="w-16 h-16 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-[#0a2a5c]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <div className="min-h-screen flex items-center justify-center bg-[#050510]">
+        <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-12 text-center">
+          <div className="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
           </div>
-          <p className="text-[#0a2a5c]/60 font-medium">申请不存在</p>
+          <p className="text-gray-400 font-medium">申请不存在</p>
         </div>
       </div>
     );
@@ -133,23 +132,23 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
   const isOwner = application.user_id === user?.id;
 
   return (
-    <div className="min-h-screen bg-[#f7f3ec]/50 py-8">
+    <div className="min-h-screen bg-[#050510] py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="text-[#0a2a5c]/60 hover:text-[#0a2a5c] mb-4 transition-colors font-medium inline-flex items-center"
+            className="text-gray-400 hover:text-white mb-4 transition-colors font-medium inline-flex items-center"
           >
             <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
             返回列表
           </button>
         </div>
 
-        <div className="bg-[#fefcf8] rounded-2xl border border-[#e8dfd0] shadow-sm p-8">
+        <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-8">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">{application.title}</h1>
-              <p className="text-[#0a2a5c]/40 text-sm">
+              <h1 className="text-3xl font-black tracking-tight text-white mb-2">{application.title}</h1>
+              <p className="text-gray-500 text-sm">
                 创建于 {formatDate(application.created_at)}
               </p>
             </div>
@@ -160,23 +159,23 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
 
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-2">项目描述</h2>
-              <p className="text-[#0a2a5c]/70 whitespace-pre-wrap">{application.description}</p>
+              <h2 className="text-lg font-black tracking-tight text-white mb-2">项目描述</h2>
+              <p className="text-gray-300 whitespace-pre-wrap">{application.description}</p>
             </div>
 
             {application.business_plan && (
               <div>
-                <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-2">商业计划</h2>
-                <p className="text-[#0a2a5c]/70 whitespace-pre-wrap">{application.business_plan}</p>
+                <h2 className="text-lg font-black tracking-tight text-white mb-2">商业计划</h2>
+                <p className="text-gray-300 whitespace-pre-wrap">{application.business_plan}</p>
               </div>
             )}
 
             {application.review_note && (
-              <div className="bg-[#faf7f2] p-4 rounded-xl border border-[#e8dfd0]/50">
-                <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c] mb-2">审核意见</h2>
-                <p className="text-[#0a2a5c]/70">{application.review_note}</p>
+              <div className="bg-white/[0.03] p-4 rounded-xl border border-white/[0.05]">
+                <h2 className="text-lg font-black tracking-tight text-white mb-2">审核意见</h2>
+                <p className="text-gray-300">{application.review_note}</p>
                 {application.reviewed_at && (
-                  <p className="text-[#0a2a5c]/40 text-sm mt-2">
+                  <p className="text-gray-500 text-sm mt-2">
                     审核时间：{formatDate(application.reviewed_at)}
                   </p>
                 )}
@@ -189,13 +188,13 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
               <>
                 <button
                   onClick={handleSubmit}
-                  className="bg-green-600 text-white px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
+                  className="bg-[#00ff88] text-[#050510] px-6 py-2.5 rounded-xl font-bold hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] hover:scale-105 transition-all duration-300"
                 >
                   提交审核
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="bg-red-500 text-white px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
+                  className="bg-red-500/80 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-red-500 hover:scale-105 transition-all duration-300"
                 >
                   删除申请
                 </button>
@@ -208,19 +207,19 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
                   value={reviewNote}
                   onChange={(e) => setReviewNote(e.target.value)}
                   placeholder="输入审核意见..."
-                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-[#f59e0b]/20 focus:border-[#f59e0b] focus:outline-none transition-all resize-none"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:border-[#00f0ff]/40 focus:ring-[#00f0ff]/10 focus:ring-2 focus:outline-none transition-all resize-none text-white placeholder:text-gray-500"
                   rows={3}
                 />
                 <div className="flex space-x-4">
                   <button
                     onClick={handleApprove}
-                    className="bg-green-600 text-white px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
+                    className="bg-[#00ff88] text-[#050510] px-6 py-2.5 rounded-xl font-bold hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] hover:scale-105 transition-all duration-300"
                   >
                     通过
                   </button>
                   <button
                     onClick={handleReject}
-                    className="bg-red-500 text-white px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
+                    className="bg-red-500/80 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-red-500 hover:scale-105 transition-all duration-300"
                   >
                     拒绝
                   </button>

@@ -33,11 +33,11 @@ const STAGE_OPTIONS: { value: ProjectStage; label: string }[] = [
 ];
 
 const STAGE_COLORS: Record<ProjectStage, string> = {
-  idea: 'bg-purple-500',
-  seed: 'bg-blue-500',
-  prototype: 'bg-[#0a2a5c]',
-  launched: 'bg-[#f59e0b]',
-  revenue: 'bg-green-500',
+  idea: 'bg-[#b347ea]',
+  seed: 'bg-[#00f0ff]',
+  prototype: 'bg-gradient-to-r from-[#00f0ff] to-[#b347ea]',
+  launched: 'bg-[#ffb800]',
+  revenue: 'bg-[#00ff88]',
 };
 
 export default function ProjectDetailPage() {
@@ -104,10 +104,10 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
-        <div className="relative h-12 w-12">
-          <div className="absolute inset-0 rounded-full border-[3px] border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
-          <div className="absolute inset-[4px] rounded-full border-[3px] border-[#e8dfd0] border-b-[#0a2a5c] animate-[spin_0.8s_linear_reverse_infinite]" />
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center">
+        <div className="relative w-14 h-14">
+          <div className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/20 border-t-[#00f0ff] animate-spin" />
+          <div className="absolute inset-[6px] rounded-full border-2 border-[#b347ea]/20 border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }} />
         </div>
       </div>
     );
@@ -115,69 +115,71 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-24 h-24 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <ExclamationCircleOutlined className="text-4xl text-[#8b7e6a]" />
+          <div className="w-24 h-24 bg-white/[0.03] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/[0.06]">
+            <ExclamationCircleOutlined className="text-4xl text-gray-500" />
           </div>
-          <p className="text-[#8b7e6a] text-lg mb-4">项目不存在</p>
-          <Link href="/projects" className="text-[#0a2a5c] hover:underline font-medium">返回项目库</Link>
+          <p className="text-gray-400 text-lg mb-4">项目不存在</p>
+          <Link href="/projects" className="text-[#00f0ff] hover:underline font-medium">返回项目库</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f3ec]/50">
+    <div className="min-h-screen bg-[#050510]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center text-[#8b7e6a] hover:text-[#0a2a5c] transition-colors mb-6"
+          className="flex items-center text-gray-400 hover:text-[#00f0ff] transition-colors mb-6"
         >
           <ArrowLeftOutlined className="mr-2" /> 返回
         </button>
 
-        <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm overflow-hidden">
+        <div className="holo-card overflow-hidden">
           {/* Cover */}
-          <div className="h-64 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] relative flex items-center justify-center">
+          <div className="h-64 bg-gradient-to-br from-[#0a0a1a] via-[#101025] to-[#0a0a1a] relative flex items-center justify-center overflow-hidden">
+            {/* Scanline overlay */}
+            <div className="absolute inset-0 bg-scanlines opacity-30 pointer-events-none" />
             {project.cover_image ? (
               <img src={project.cover_image} alt={project.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <RocketOutlined className="text-5xl text-white/40" />
+              <div className="flex flex-col items-center gap-3 relative z-10">
+                <div className="w-20 h-20 bg-white/[0.03] backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/[0.06]">
+                  <RocketOutlined className="text-5xl text-[#00f0ff]/30" />
                 </div>
               </div>
             )}
             <div className="absolute top-4 left-4 flex items-center gap-2">
               {editingStage ? (
-                <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                <div className="flex items-center gap-2 bg-[#050510]/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/[0.08]">
                   <select
                     value={newStage}
                     onChange={(e) => setNewStage(e.target.value as ProjectStage)}
-                    className="text-sm bg-transparent border-none focus:outline-none text-[#0a2a5c]"
+                    className="text-sm bg-transparent border-none focus:outline-none text-white"
                   >
                     {STAGE_OPTIONS.map(option => (
-                      <option key={option.value} value={option.value}>
+                      <option key={option.value} value={option.value} className="bg-[#101025] text-white">
                         {option.label}
                       </option>
                     ))}
                   </select>
                   <button
                     onClick={handleSaveStage}
-                    className="text-green-600 hover:text-green-700 font-bold"
+                    className="text-[#00ff88] hover:text-[#00ff88]/80 font-bold"
                   >
                     ✓
                   </button>
                   <button
                     onClick={handleCancelEditStage}
-                    className="text-red-400 hover:text-red-500 font-bold"
+                    className="text-red-400 hover:text-red-300 font-bold"
                   >
                     ✕
                   </button>
                 </div>
               ) : (
-                <span className={`px-4 py-1.5 ${STAGE_COLORS[project.stage] || 'bg-[#f59e0b]'} text-white text-sm rounded-full font-medium shadow-sm`}>
+                <span className={`px-4 py-1.5 ${STAGE_COLORS[project.stage] || 'bg-[#ffb800]'} text-white text-sm rounded-full font-medium shadow-sm`}>
                   {STAGE_OPTIONS.find(s => s.value === project.stage)?.label || '未知阶段'}
                 </span>
               )}
@@ -187,14 +189,14 @@ export default function ProjectDetailPage() {
           <div className="p-8">
             <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-extrabold tracking-tight text-[#0a2a5c] mb-2">{project.title}</h1>
-                <p className="text-[#8b7e6a] text-lg">{project.description}</p>
+                <h1 className="text-3xl font-black tracking-tight text-white mb-2">{project.title}</h1>
+                <p className="text-gray-400 text-lg">{project.description}</p>
               </div>
               <div className="flex gap-2">
-                <button className="px-4 py-2 border border-[#e8dfd0] rounded-xl text-[#8b7e6a] hover:bg-[#faf7f2] hover:border-red-200 hover:text-red-500 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                <button className="px-4 py-2 border border-white/[0.06] rounded-xl text-gray-400 hover:bg-white/[0.03] hover:border-red-500/30 hover:text-red-400 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                   <HeartOutlined />
                 </button>
-                <button className="px-4 py-2 border border-[#e8dfd0] rounded-xl text-[#8b7e6a] hover:bg-[#faf7f2] hover:border-[#0a2a5c]/20 hover:text-[#0a2a5c] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                <button className="px-4 py-2 border border-white/[0.06] rounded-xl text-gray-400 hover:bg-white/[0.03] hover:border-[#00f0ff]/30 hover:text-[#00f0ff] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                   <ShareAltOutlined />
                 </button>
               </div>
@@ -204,7 +206,7 @@ export default function ProjectDetailPage() {
             {project.tags && (
               <div className="flex flex-wrap gap-2 mb-6">
                 {project.tags.split(',').map((tag, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-[#f5f0e8] text-[#8b7e6a] rounded-xl text-sm font-medium">
+                  <span key={i} className="px-3 py-1.5 bg-white/[0.03] text-gray-400 rounded-xl text-sm font-medium border border-white/[0.06]">
                     {tag.trim()}
                   </span>
                 ))}
@@ -214,19 +216,19 @@ export default function ProjectDetailPage() {
             {/* Project Content */}
             {project.content && (
               <div className="prose max-w-none mb-8">
-                <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-4">项目介绍</h2>
-                <div className="text-[#5c4f3c] leading-relaxed whitespace-pre-wrap">{project.content}</div>
+                <h2 className="text-xl font-black tracking-tight text-white mb-4">项目介绍</h2>
+                <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">{project.content}</div>
               </div>
             )}
 
             {/* Project Stage */}
-            <div className="p-6 bg-[#faf7f2] rounded-xl border border-[#e8dfd0] mb-8">
+            <div className="p-6 bg-white/[0.02] rounded-xl border border-white/[0.06] mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c]">项目阶段</h2>
+                <h2 className="text-lg font-black tracking-tight text-white">项目阶段</h2>
                 {canEditStage && !editingStage && (
                   <button
                     onClick={handleStartEditStage}
-                    className="px-3 py-1.5 bg-[#0a2a5c] text-white text-sm rounded-xl hover:bg-[#0a2a5c]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-1"
+                    className="px-3 py-1.5 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold text-sm rounded-xl hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-1"
                   >
                     <EditOutlined className="text-xs" /> 修改阶段
                   </button>
@@ -234,27 +236,27 @@ export default function ProjectDetailPage() {
               </div>
 
               {editingStage ? (
-                <div className="flex items-center gap-3 bg-[#fefcf8] p-4 rounded-xl border border-[#0a2a5c]/20">
+                <div className="flex items-center gap-3 bg-[#050510]/50 p-4 rounded-xl border border-[#00f0ff]/20">
                   <select
                     value={newStage}
                     onChange={(e) => setNewStage(e.target.value as ProjectStage)}
-                    className="flex-1 px-3 py-2 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] focus:outline-none text-sm"
+                    className="flex-1 px-3 py-2 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 focus:outline-none text-sm text-white"
                   >
                     {STAGE_OPTIONS.map(option => (
-                      <option key={option.value} value={option.value}>
+                      <option key={option.value} value={option.value} className="bg-[#101025] text-white">
                         {option.label}
                       </option>
                     ))}
                   </select>
                   <button
                     onClick={handleSaveStage}
-                    className="px-4 py-2 bg-[#0a2a5c] text-white text-sm rounded-xl hover:bg-[#0a2a5c]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                    className="px-4 py-2 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold text-sm rounded-xl hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
                     保存
                   </button>
                   <button
                     onClick={handleCancelEditStage}
-                    className="px-4 py-2 border border-[#e8dfd0] text-[#5c4f3c] text-sm rounded-xl hover:bg-[#faf7f2] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                    className="px-4 py-2 border border-white/[0.08] text-gray-300 text-sm rounded-xl hover:bg-white/[0.03] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
                     取消
                   </button>
@@ -267,7 +269,7 @@ export default function ProjectDetailPage() {
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 shadow-sm ${
                         project.stage === option.value
                           ? `${STAGE_COLORS[option.value]} text-white shadow-md scale-105`
-                          : 'bg-[#fefcf8] text-[#8b7e6a] border border-[#e8dfd0]'
+                          : 'bg-white/[0.02] text-gray-500 border border-white/[0.06]'
                       }`}
                     >
                       <span className="text-sm font-medium">{option.label}</span>
@@ -281,32 +283,32 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Project Info Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-[#faf7f2] rounded-xl border border-[#e8dfd0] mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-white/[0.02] rounded-xl border border-white/[0.06] mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-[#f5f0e8] rounded-xl flex items-center justify-center">
-                  <TeamOutlined className="text-lg text-[#0a2a5c]" />
+                <div className="w-10 h-10 bg-white/[0.03] rounded-xl flex items-center justify-center border border-white/[0.06]">
+                  <TeamOutlined className="text-lg text-[#00f0ff]" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#a89880]">所属团队</p>
-                  <p className="font-medium text-[#0a2a5c]">{project.team?.name || '待定'}</p>
+                  <p className="text-sm text-gray-500">所属团队</p>
+                  <p className="font-medium text-white">{project.team?.name || '待定'}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-[#f5f0e8] rounded-xl flex items-center justify-center">
-                  <EyeOutlined className="text-lg text-[#0a2a5c]" />
+                <div className="w-10 h-10 bg-white/[0.03] rounded-xl flex items-center justify-center border border-white/[0.06]">
+                  <EyeOutlined className="text-lg text-[#00f0ff]" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#a89880]">浏览次数</p>
-                  <p className="font-medium text-[#0a2a5c]">{project.view_count}</p>
+                  <p className="text-sm text-gray-500">浏览次数</p>
+                  <p className="font-medium text-white">{project.view_count}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-[#f5f0e8] rounded-xl flex items-center justify-center">
-                  <CalendarOutlined className="text-lg text-[#0a2a5c]" />
+                <div className="w-10 h-10 bg-white/[0.03] rounded-xl flex items-center justify-center border border-white/[0.06]">
+                  <CalendarOutlined className="text-lg text-[#00f0ff]" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#a89880]">发布时间</p>
-                  <p className="font-medium text-[#0a2a5c]">
+                  <p className="text-sm text-gray-500">发布时间</p>
+                  <p className="font-medium text-white">
                     {new Date(project.created_at).toLocaleDateString('zh-CN')}
                   </p>
                 </div>
@@ -316,22 +318,22 @@ export default function ProjectDetailPage() {
             {/* Recruitment Section */}
             {recruitments.length > 0 && (
               <div className="mb-8">
-                <h2 className="text-xl font-extrabold tracking-tight text-[#0a2a5c] mb-4">招募需求</h2>
+                <h2 className="text-xl font-black tracking-tight text-white mb-4">招募需求</h2>
                 <div className="space-y-4">
                   {recruitments.map((rec) => (
-                    <div key={rec.id} className="p-5 border border-[#e8dfd0] rounded-xl hover:border-[#d4c8b0] hover:bg-[#faf7f2] transition-all duration-300">
+                    <div key={rec.id} className="p-5 border border-white/[0.06] rounded-xl hover:border-[#00f0ff]/20 hover:bg-white/[0.02] transition-all duration-300">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-extrabold tracking-tight text-[#0a2a5c]">{rec.position}</h3>
-                          <p className="text-sm text-[#8b7e6a] mt-1">{rec.description}</p>
+                          <h3 className="font-black tracking-tight text-white">{rec.position}</h3>
+                          <p className="text-sm text-gray-400 mt-1">{rec.description}</p>
                           {rec.requirements && (
-                            <p className="text-sm text-[#a89880] mt-2">要求: {rec.requirements}</p>
+                            <p className="text-sm text-gray-500 mt-2">要求: {rec.requirements}</p>
                           )}
                         </div>
                         {user?.role === 'student' && (
                           <Link
                             href={`/responses/create?recruitment_id=${rec.id}`}
-                            className="px-5 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap"
+                            className="px-5 py-2 bg-[#ffb800] text-[#050510] font-bold text-sm rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap"
                           >
                             申请加入
                           </Link>
@@ -344,13 +346,13 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 border-t border-[#e8dfd0] pt-6">
+            <div className="flex flex-wrap gap-3 border-t border-white/[0.06] pt-6">
               {user ? (
                 <>
                   {user.role === 'student' && (
                     <Link
                       href={user ? `/responses/create?recruitment_id=${recruitments[0]?.id || ''}` : '/login'}
-                      className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
+                      className="px-6 py-3 bg-[#ffb800] text-[#050510] font-bold rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300"
                     >
                       <UserOutlined className="mr-2" />申请加入团队
                     </Link>
@@ -361,13 +363,13 @@ export default function ProjectDetailPage() {
                 <>
                   <Link
                     href="/login"
-                    className="px-6 py-3 bg-[#f59e0b] text-white rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
+                    className="px-6 py-3 bg-[#ffb800] text-[#050510] font-bold rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300"
                   >
                     登录后申请加入
                   </Link>
                   <Link
                     href="/register"
-                    className="px-6 py-3 border border-[#e8dfd0] text-[#5c4f3c] rounded-xl hover:bg-[#faf7f2] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
+                    className="px-6 py-3 border border-white/[0.08] text-gray-300 rounded-xl hover:bg-white/[0.03] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
                   >
                     注册账号
                   </Link>
@@ -377,16 +379,16 @@ export default function ProjectDetailPage() {
 
             {/* Resource Connection for non-student roles */}
             {user?.role !== 'student' && user?.role !== 'team_owner' && (
-              <div className="mt-6 p-5 bg-[#faf7f2] rounded-xl border border-[#e8dfd0]">
-                <h3 className="font-extrabold tracking-tight text-[#0a2a5c] mb-3">资源对接</h3>
-                <p className="text-sm text-[#8b7e6a] mb-4">
+              <div className="mt-6 p-5 bg-white/[0.02] rounded-xl border border-white/[0.06]">
+                <h3 className="font-black tracking-tight text-white mb-3">资源对接</h3>
+                <p className="text-sm text-gray-400 mb-4">
                   投资人可申请查看BP，导师可申请成为项目导师，资源方可提供资源合作。
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {user?.role === 'investor' && (
                     <Link
                       href={`/projects/${project.id}/connect`}
-                      className="px-4 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
+                      className="px-4 py-2 bg-[#ffb800] text-[#050510] font-bold text-sm rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                     >
                       <FileTextOutlined className="mr-2" />申请对接
                     </Link>
@@ -394,7 +396,7 @@ export default function ProjectDetailPage() {
                   {user?.role === 'mentor' && (
                     <Link
                       href={`/projects/${project.id}/connect`}
-                      className="px-4 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
+                      className="px-4 py-2 bg-[#ffb800] text-[#050510] font-bold text-sm rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                     >
                       <BookOutlined className="mr-2" />申请对接
                     </Link>
@@ -402,7 +404,7 @@ export default function ProjectDetailPage() {
                   {user?.role === 'partner' && (
                     <Link
                       href={`/projects/${project.id}/connect`}
-                      className="px-4 py-2 bg-[#f59e0b] text-white text-sm rounded-xl hover:bg-[#f59e0b]/90 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
+                      className="px-4 py-2 bg-[#ffb800] text-[#050510] font-bold text-sm rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                     >
                       <PauseOutlined className="mr-2" />申请对接
                     </Link>

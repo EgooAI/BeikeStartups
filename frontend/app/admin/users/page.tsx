@@ -69,15 +69,15 @@ export default function AdminUsersPage() {
 
   const getRoleColor = (role: string) => {
     const colors: Record<string, string> = {
-      student: 'bg-blue-50 text-blue-600',
-      team: 'bg-orange-50 text-orange-600',
-      investor: 'bg-purple-50 text-purple-600',
-      mentor: 'bg-green-50 text-green-600',
-      partner: 'bg-teal-50 text-teal-600',
-      admin: 'bg-red-50 text-red-600',
-      super_admin: 'bg-yellow-50 text-yellow-600',
+      student: 'bg-[#00f0ff]/10 text-[#00f0ff]',
+      team: 'bg-orange-500/10 text-orange-400',
+      investor: 'bg-[#b347ea]/10 text-[#b347ea]',
+      mentor: 'bg-[#00ff88]/10 text-[#00ff88]',
+      partner: 'bg-teal-500/10 text-teal-400',
+      admin: 'bg-red-500/10 text-red-400',
+      super_admin: 'bg-[#ffb800]/10 text-[#ffb800]',
     };
-    return colors[role] || 'bg-[#f5f0e8] text-[#6b5e4a]';
+    return colors[role] || 'bg-white/[0.05] text-white';
   };
 
   const isSuperAdmin = (role: string) => role === 'super_admin';
@@ -97,10 +97,10 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#f7f3ec]/50">
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#050510]">
         <div className="relative flex justify-center items-center">
-          <div className="w-12 h-12 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
-          <div className="absolute w-7 h-7 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+          <div className="w-12 h-12 rounded-full border-4 border-white/[0.06] border-t-[#00f0ff] animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full border-4 border-white/[0.04] border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
         </div>
       </div>
     );
@@ -109,20 +109,20 @@ export default function AdminUsersPage() {
   return (
     <div className="p-6 lg:p-8 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">用户管理</h1>
-        <p className="text-[#8b7e6a] mt-1">管理平台所有注册用户，共 {users.length} 人</p>
+        <h1 className="text-2xl font-black tracking-tight text-white">用户管理</h1>
+        <p className="text-white mt-1">管理平台所有注册用户，共 {users.length} 人</p>
       </div>
 
-      <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] overflow-hidden">
-        <div className="p-4 border-b border-[#e8dfd0]">
+      <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-white/[0.05]">
           <div className="relative max-w-md">
-            <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a89a80]" />
+            <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               placeholder="搜索用户名、邮箱或昵称..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white placeholder:text-gray-500"
             />
           </div>
         </div>
@@ -130,32 +130,32 @@ export default function AdminUsersPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-[#faf7f2]">
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">用户</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">角色</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">邮箱</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">状态</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">注册时间</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">操作</th>
+              <tr className="bg-white/[0.03]">
+                <th className="text-left px-6 py-4 text-sm font-medium text-white">用户</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-white">角色</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-white">邮箱</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-white">状态</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-white">注册时间</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-white">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e8dfd0]">
+            <tbody className="divide-y divide-white/[0.05]">
               {filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-[#faf7f2]/50 transition-colors">
+                <tr key={u.id} className="hover:bg-white/[0.03] transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isSuperAdmin(u.role) ? 'bg-yellow-50 text-yellow-600' : 'bg-[#0a2a5c]/5 text-[#0a2a5c]'
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isSuperAdmin(u.role) ? 'bg-[#ffb800]/10 text-[#ffb800]' : 'bg-white/[0.05] text-white'
                         }`}>
                         {isSuperAdmin(u.role) ? <CrownOutlined /> : <UserOutlined />}
                       </div>
                       <div>
                         <div className="flex items-center space-x-2">
-                          <p className="font-medium text-[#0a2a5c]">{u.nickname || u.username}</p>
+                          <p className="font-medium text-white">{u.nickname || u.username}</p>
                           {isSuperAdmin(u.role) && (
-                            <span className="text-xs bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded-xl font-medium">SUPER</span>
+                            <span className="text-xs bg-[#ffb800]/10 text-[#ffb800] px-1.5 py-0.5 rounded-xl font-bold">SUPER</span>
                           )}
                         </div>
-                        <p className="text-xs text-[#a89a80]">@{u.username}</p>
+                        <p className="text-xs text-gray-500">@{u.username}</p>
                       </div>
                     </div>
                   </td>
@@ -164,26 +164,26 @@ export default function AdminUsersPage() {
                       {getRoleLabel(u.role)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-[#6b5e4a]">{u.email}</td>
+                  <td className="px-6 py-4 text-sm text-white">{u.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center space-x-1 text-xs font-medium ${u.is_active ? 'text-green-600' : 'text-red-400'
+                    <span className={`inline-flex items-center space-x-1 text-xs font-medium ${u.is_active ? 'text-[#00ff88]' : 'text-red-400'
                       }`}>
                       {u.is_active ? <CheckCircleOutlined /> : <ExclamationCircleOutlined />}
                       <span>{u.is_active ? '正常' : '冻结'}</span>
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-[#a89a80]">
+                  <td className="px-6 py-4 text-sm text-white">
                     {new Date(u.created_at).toLocaleDateString('zh-CN')}
                   </td>
                   <td className="px-6 py-4">
                     {isSuperAdmin(u.role) && !currentUserIsSuperAdmin ? (
-                      <span className="text-xs text-[#a89a80]">不可操作</span>
+                      <span className="text-xs text-white">不可操作</span>
                     ) : (
                       <div className="flex items-center space-x-2">
                         <select
                           value={u.role}
                           onChange={(e) => changeRole(u.id, e.target.value)}
-                          className="text-xs px-2 py-1.5 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0a2a5c]/20"
+                          className="text-xs px-2 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 text-white"
                         >
                           <option value="student">同学</option>
                           <option value="investor">投资人</option>
@@ -193,9 +193,9 @@ export default function AdminUsersPage() {
                         </select>
                         <button
                           onClick={() => toggleActive(u.id, u.is_active)}
-                          className={`text-xs px-3 py-1.5 rounded-xl font-medium transition-all duration-300 hover:-translate-y-0.5 ${u.is_active
-                              ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                              : 'bg-green-50 text-green-600 hover:bg-green-100'
+                          className={`text-xs px-3 py-1.5 rounded-xl font-medium transition-all duration-300 ${u.is_active
+                              ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                              : 'bg-[#00ff88]/10 text-[#00ff88] hover:bg-[#00ff88]/20'
                             }`}
                         >
                           {u.is_active ? '冻结' : '解冻'}
@@ -208,10 +208,10 @@ export default function AdminUsersPage() {
               {filteredUsers.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#f5f0e8] rounded-2xl mb-3">
-                      <UserOutlined className="text-3xl text-[#a89a80]" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white/[0.03] rounded-2xl mb-3">
+                      <UserOutlined className="text-3xl text-gray-500" />
                     </div>
-                    <p className="text-[#a89a80]">未找到匹配的用户</p>
+                    <p className="text-gray-500">未找到匹配的用户</p>
                   </td>
                 </tr>
               )}

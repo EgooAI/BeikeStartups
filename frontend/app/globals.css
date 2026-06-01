@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #0a2a5c;
-  --primary-light: #1a4a8a;
-  --primary-dark: #071f42;
-  --accent: #f59e0b;
-  --accent-hover: #d97706;
-  --accent-light: #fef3c7;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
-  --gray-700: #374151;
-  --gray-800: #1f2937;
-  --gold: #d4a853;
-  --gold-light: #fef3c7;
+  --background: #050510;
+  --foreground: #ffffff;
+  --primary: #050515;
+  --primary-light: #0a0a2e;
+  --primary-dark: #020208;
+  --accent: #00f0ff;
+  --accent-hover: #00d4e0;
+  --accent-light: rgba(0, 240, 255, 0.08);
+  --gray-50: #0a0a10;
+  --gray-100: #111118;
+  --gray-200: #1a1a25;
+  --gray-300: #2a2a38;
+  --gray-400: #6b6b80;
+  --gray-500: #8b8b9a;
+  --gray-600: #aaaaaa;
+  --gray-700: #cccccc;
+  --gray-800: #e0e0e0;
+  --gold: #ffb800;
+  --gold-light: rgba(255, 184, 0, 0.1);
   --shell-white: #fafafa;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
+  --success: #00ff88;
+  --warning: #ffb800;
+  --error: #ff4444;
+  --info: #00f0ff;
 }
 
 @theme inline {
@@ -54,9 +54,9 @@
   --color-info: var(--info);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --shadow-card: 0 2px 8px rgba(10, 42, 92, 0.06);
-  --shadow-card-hover: 0 8px 24px rgba(10, 42, 92, 0.12);
-  --shadow-button: 0 2px 8px rgba(245, 158, 11, 0.25);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-button: 0 2px 8px rgba(0, 240, 255, 0.25);
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -65,8 +65,8 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #050510;
+  color: #ffffff;
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -75,21 +75,21 @@ body {
 @layer utilities {
   .bg-grid {
     background-image:
-      linear-gradient(rgba(10, 42, 92, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(10, 42, 92, 0.03) 1px, transparent 1px);
+      linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
     background-size: 60px 60px;
   }
 
   .bg-grid-dense {
     background-image:
-      linear-gradient(rgba(10, 42, 92, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(10, 42, 92, 0.05) 1px, transparent 1px);
+      linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
     background-size: 30px 30px;
   }
 
   /* 圆点矩阵 */
   .bg-dot-matrix {
-    background-image: radial-gradient(rgba(10, 42, 92, 0.06) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
@@ -101,92 +101,92 @@ body {
   /* 对角线网格 */
   .bg-grid-diagonal {
     background-image:
-      linear-gradient(45deg, rgba(10, 42, 92, 0.03) 1px, transparent 1px),
-      linear-gradient(-45deg, rgba(10, 42, 92, 0.03) 1px, transparent 1px);
+      linear-gradient(45deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(-45deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
-  /* 极光渐变（顶部暖色 + 底部冷色） */
+  /* 极光渐变（暗色主题） */
   .bg-aurora {
     background:
-      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(245, 158, 11, 0.08), transparent),
-      radial-gradient(ellipse 60% 50% at 70% 60%, rgba(59, 130, 246, 0.06), transparent),
-      radial-gradient(ellipse 50% 40% at 50% 80%, rgba(16, 185, 129, 0.04), transparent);
+      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(0, 240, 255, 0.06), transparent),
+      radial-gradient(ellipse 60% 50% at 70% 60%, rgba(179, 71, 234, 0.04), transparent),
+      radial-gradient(ellipse 50% 40% at 50% 80%, rgba(0, 255, 136, 0.03), transparent);
   }
 
   /* 深色极光 */
   .bg-aurora-dark {
     background:
-      radial-gradient(ellipse 70% 50% at 20% 30%, rgba(245, 158, 11, 0.12), transparent),
-      radial-gradient(ellipse 60% 40% at 80% 70%, rgba(59, 130, 246, 0.08), transparent),
-      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(139, 92, 246, 0.06), transparent);
+      radial-gradient(ellipse 70% 50% at 20% 30%, rgba(0, 240, 255, 0.1), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 70%, rgba(179, 71, 234, 0.06), transparent),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 184, 0, 0.05), transparent);
   }
 
-  /* 网格+圆点叠加 */
+  /* 网格+圆点叠加（暗色） */
   .bg-tech-pattern {
     background-image:
-      linear-gradient(rgba(10, 42, 92, 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(10, 42, 92, 0.025) 1px, transparent 1px),
-      radial-gradient(rgba(10, 42, 92, 0.04) 1px, transparent 1px);
+      linear-gradient(rgba(0, 240, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.025) 1px, transparent 1px),
+      radial-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px);
     background-size: 80px 80px, 80px 80px, 20px 20px;
   }
 
   /* 六边形网格（通过多个线性渐变模拟） */
   .bg-hex-pattern {
     background-image:
-      linear-gradient(60deg, rgba(10, 42, 92, 0.025) 1px, transparent 1px),
-      linear-gradient(-60deg, rgba(10, 42, 92, 0.025) 1px, transparent 1px),
-      linear-gradient(0deg, rgba(10, 42, 92, 0.025) 1px, transparent 1px);
+      linear-gradient(60deg, rgba(0, 240, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(-60deg, rgba(0, 240, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(0, 240, 255, 0.025) 1px, transparent 1px);
     background-size: 50px 50px;
   }
   
   .text-gradient {
-    background: linear-gradient(135deg, #0a2a5c, #1a4a8a);
+    background: linear-gradient(135deg, #00f0ff, #b347ea);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .text-gradient-orange {
-    background: linear-gradient(135deg, #f59e0b, #f97316);
+    background: linear-gradient(135deg, #ffb800, #ff8800);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .text-gradient-gold {
-    background: linear-gradient(135deg, #d4a853, #f59e0b);
+    background: linear-gradient(135deg, #ffb800, #ffd700);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .shadow-custom {
     box-shadow: var(--shadow-card);
   }
-  
+
   .shadow-custom-lg {
     box-shadow: var(--shadow-card-hover);
   }
-  
+
   .shadow-button {
-    box-shadow: var(--shadow-button);
+    box-shadow: 0 2px 12px rgba(0, 240, 255, 0.25);
   }
-  
+
   .bg-primary-gradient {
-    background: linear-gradient(135deg, #0a2a5c 0%, #1a4a8a 50%, #0f3a7a 100%);
+    background: linear-gradient(135deg, #0a0a2e 0%, #0f0f3a 50%, #0a0a1a 100%);
   }
-  
+
   .bg-primary-gradient-subtle {
-    background: linear-gradient(135deg, rgba(10, 42, 92, 0.02) 0%, rgba(26, 74, 138, 0.04) 100%);
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.02) 0%, rgba(179, 71, 234, 0.04) 100%);
   }
-  
+
   .bg-accent-gradient {
-    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    background: linear-gradient(135deg, #00f0ff 0%, #00c8ff 100%);
   }
-  
+
   .bg-warm-gradient {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fef3c7 100%);
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.08) 0%, rgba(255, 184, 0, 0.05) 50%, rgba(255, 184, 0, 0.08) 100%);
   }
   
   .bg-card-hover {
@@ -219,13 +219,14 @@ body {
   }
   
   .glass-effect {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(5, 5, 16, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 240, 255, 0.1);
   }
   
   .border-gradient {
-    border-image: linear-gradient(135deg, #0a2a5c, #1a4a8a) 1;
+    border-image: linear-gradient(135deg, #00f0ff, #b347ea) 1;
   }
   
   .line-clamp-1 {
@@ -276,35 +277,35 @@ body {
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
   }
 
-  /* Dashboard 面板卡片 */
+  /* Dashboard 面板卡片（暗色主题） */
   .dashboard-panel {
-    background: rgba(254, 252, 248, 0.9);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid #e8dfd0;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 240, 255, 0.1);
     border-radius: 1rem;
-    box-shadow: 0 2px 12px rgba(10, 42, 92, 0.03);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     transition: box-shadow 0.3s ease;
   }
 
   .dashboard-panel:hover {
-    box-shadow: 0 8px 28px rgba(10, 42, 92, 0.06);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 240, 255, 0.05);
   }
 
-  /* Dashboard 统计卡片 */
+  /* Dashboard 统计卡片（暗色主题） */
   .stat-dashboard-card {
-    background: rgba(254, 252, 248, 0.9);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid #e8dfd0;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 240, 255, 0.1);
     border-radius: 1rem;
     padding: 1.25rem;
-    box-shadow: 0 2px 12px rgba(10, 42, 92, 0.03);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
   }
 
   .stat-dashboard-card:hover {
-    box-shadow: 0 8px 24px rgba(10, 42, 92, 0.06);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(0, 240, 255, 0.05);
     transform: translateY(-2px);
   }
 
@@ -339,9 +340,9 @@ body {
   /* 极光动画背景 */
   .bg-aurora-animated {
     background:
-      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(245, 158, 11, 0.08), transparent),
-      radial-gradient(ellipse 60% 50% at 70% 60%, rgba(59, 130, 246, 0.06), transparent),
-      radial-gradient(ellipse 50% 40% at 50% 80%, rgba(16, 185, 129, 0.04), transparent);
+      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(0, 240, 255, 0.06), transparent),
+      radial-gradient(ellipse 60% 50% at 70% 60%, rgba(179, 71, 234, 0.04), transparent),
+      radial-gradient(ellipse 50% 40% at 50% 80%, rgba(0, 255, 136, 0.03), transparent);
     background-size: 200% 200%;
     animation: aurora-drift 20s ease-in-out infinite;
   }

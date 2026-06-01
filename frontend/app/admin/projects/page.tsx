@@ -90,13 +90,13 @@ export default function AdminProjectsPage() {
 
   const getStageColor = (stage: string) => {
     const colors: Record<ProjectStage, string> = {
-      idea: 'bg-purple-50 text-purple-600',
-      seed: 'bg-blue-50 text-blue-600',
-      prototype: 'bg-[#0a2a5c]/5 text-[#0a2a5c]',
-      launched: 'bg-amber-50 text-amber-600',
-      revenue: 'bg-green-50 text-green-600',
+      idea: 'bg-[#b347ea]/10 text-[#b347ea]',
+      seed: 'bg-[#00f0ff]/10 text-[#00f0ff]',
+      prototype: 'bg-white/[0.05] text-gray-300',
+      launched: 'bg-[#ffb800]/10 text-[#ffb800]',
+      revenue: 'bg-[#00ff88]/10 text-[#00ff88]',
     };
-    return colors[stage as ProjectStage] || 'bg-[#f5f0e8] text-[#8b7e6a]';
+    return colors[stage as ProjectStage] || 'bg-white/[0.05] text-gray-400';
   };
 
   const handleDelete = async (id: number) => {
@@ -127,25 +127,25 @@ export default function AdminProjectsPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      draft: 'bg-[#f5f0e8] text-[#8b7e6a]',
-      pending_online: 'bg-amber-50 text-amber-600',
-      online: 'bg-green-50 text-green-600',
-      rejected_online: 'bg-red-50 text-red-500',
-      pending_offline: 'bg-orange-50 text-orange-600',
-      offline: 'bg-[#f5f0e8] text-[#8b7e6a]',
-      invalid: 'bg-red-50 text-red-400',
+      draft: 'bg-white/[0.05] text-gray-400',
+      pending_online: 'bg-[#ffb800]/10 text-[#ffb800]',
+      online: 'bg-[#00ff88]/10 text-[#00ff88]',
+      rejected_online: 'bg-red-500/10 text-red-400',
+      pending_offline: 'bg-orange-500/10 text-orange-400',
+      offline: 'bg-white/[0.05] text-gray-400',
+      invalid: 'bg-red-500/10 text-red-400/70',
     };
-    return colors[status] || 'bg-[#f5f0e8] text-[#8b7e6a]';
+    return colors[status] || 'bg-white/[0.05] text-gray-400';
   };
 
   const filteredProjects = filter === 'all' ? projects : projects.filter(p => p.status === filter);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#f7f3ec]/50">
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#050510]">
         <div className="relative flex justify-center items-center">
-          <div className="w-12 h-12 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
-          <div className="absolute w-7 h-7 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+          <div className="w-12 h-12 rounded-full border-4 border-white/[0.06] border-t-[#00f0ff] animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full border-4 border-white/[0.04] border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
         </div>
       </div>
     );
@@ -156,36 +156,36 @@ export default function AdminProjectsPage() {
   return (
     <div className="p-6 lg:p-8 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">项目管理</h1>
-        <p className="text-[#8b7e6a] mt-1">审核和管理平台上的创业项目，共 {projects.length} 个项目</p>
+        <h1 className="text-2xl font-black tracking-tight text-white">项目管理</h1>
+        <p className="text-gray-400 mt-1">审核和管理平台上的创业项目，共 {projects.length} 个项目</p>
       </div>
 
-      <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] overflow-hidden">
-        <div className="p-4 border-b border-[#e8dfd0] flex flex-wrap items-center gap-3">
+      <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-white/[0.05] flex flex-wrap items-center gap-3">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'all' ? 'bg-[#0a2a5c] text-white shadow-sm' : 'bg-[#f5f0e8] text-[#6b5e4a] hover:bg-[#e8dfd0]'
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'all' ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold' : 'bg-white/[0.03] text-gray-400 hover:bg-white/[0.06] hover:text-white'
               }`}
           >
             全部 ({projects.length})
           </button>
           <button
             onClick={() => setFilter('pending_online')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'pending_online' ? 'bg-amber-500 text-white shadow-sm' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 hover:-translate-y-0.5'
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'pending_online' ? 'bg-[#ffb800] text-[#050510] font-bold' : 'bg-[#ffb800]/10 text-[#ffb800] hover:bg-[#ffb800]/20'
               }`}
           >
             待审核 ({pendingProjects.length})
           </button>
           <button
             onClick={() => setFilter('online')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'online' ? 'bg-green-500 text-white shadow-sm' : 'bg-green-50 text-green-700 hover:bg-green-100 hover:-translate-y-0.5'
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'online' ? 'bg-[#00ff88] text-[#050510] font-bold' : 'bg-[#00ff88]/10 text-[#00ff88] hover:bg-[#00ff88]/20'
               }`}
           >
             已上架
           </button>
           <button
             onClick={() => setFilter('invalid')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'invalid' ? 'bg-red-500 text-white shadow-sm' : 'bg-red-50 text-red-700 hover:bg-red-100 hover:-translate-y-0.5'
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${filter === 'invalid' ? 'bg-red-500 text-white font-bold' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
               }`}
           >
             已作废
@@ -195,25 +195,25 @@ export default function AdminProjectsPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-[#faf7f2]">
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">项目名称</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">所属团队</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">阶段</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">状态</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">浏览</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">发布时间</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-[#8b7e6a]">操作</th>
+              <tr className="bg-white/[0.03]">
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">项目名称</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">所属团队</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">阶段</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">状态</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">浏览</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">发布时间</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e8dfd0]">
+            <tbody className="divide-y divide-white/[0.05]">
               {filteredProjects.map((project) => (
-                <tr key={project.id} className="hover:bg-[#faf7f2]/50 transition-colors">
+                <tr key={project.id} className="hover:bg-white/[0.03] transition-colors">
                   <td className="px-6 py-4">
-                    <Link href={`/projects/${project.id}`} className="font-medium text-[#0a2a5c] hover:text-[#f59e0b] transition-colors">
+                    <Link href={`/projects/${project.id}`} className="font-medium text-[#00f0ff] hover:text-[#00c8ff] transition-colors">
                       {project.title}
                     </Link>
                   </td>
-                  <td className="px-6 py-4 text-sm text-[#6b5e4a]">{project.team?.name || '未关联'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">{project.team?.name || '未关联'}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStageColor(project.stage)}`}>
                       {getStageLabel(project.stage)}
@@ -224,15 +224,15 @@ export default function AdminProjectsPage() {
                       {getStatusLabel(project.status)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-[#6b5e4a]">{project.view_count}</td>
-                  <td className="px-6 py-4 text-sm text-[#a89a80]">
+                  <td className="px-6 py-4 text-sm text-gray-400">{project.view_count}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(project.created_at).toLocaleDateString('zh-CN')}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
                       <Link
                         href={`/projects/${project.id}`}
-                        className="px-3 py-1.5 text-xs bg-[#f5f0e8] text-[#6b5e4a] rounded-xl hover:bg-[#e8dfd0] transition-all duration-300 hover:-translate-y-0.5"
+                        className="px-3 py-1.5 text-xs bg-white/[0.03] text-gray-400 rounded-xl hover:bg-white/[0.06] hover:text-white transition-all duration-300"
                       >
                         <EyeOutlined className="mr-1" /> 查看
                       </Link>
@@ -240,13 +240,13 @@ export default function AdminProjectsPage() {
                         <>
                           <button
                             onClick={() => handleApproveOnline(project.id)}
-                            className="px-3 py-1.5 text-xs bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all duration-300 hover:-translate-y-0.5"
+                            className="px-3 py-1.5 text-xs bg-[#00ff88]/10 text-[#00ff88] rounded-xl hover:bg-[#00ff88]/20 transition-all duration-300"
                           >
                             <CheckCircleOutlined className="mr-1" /> 通过
                           </button>
                           <button
                             onClick={() => handleRejectOnline(project.id)}
-                            className="px-3 py-1.5 text-xs bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-all duration-300 hover:-translate-y-0.5"
+                            className="px-3 py-1.5 text-xs bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-all duration-300"
                           >
                             <CloseCircleOutlined className="mr-1" /> 拒绝
                           </button>
@@ -255,14 +255,14 @@ export default function AdminProjectsPage() {
                       {project.status === 'online' && (
                         <button
                           onClick={() => handleOffline(project.id)}
-                          className="px-3 py-1.5 text-xs bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-100 transition-all duration-300 hover:-translate-y-0.5"
+                          className="px-3 py-1.5 text-xs bg-orange-500/10 text-orange-400 rounded-xl hover:bg-orange-500/20 transition-all duration-300"
                         >
                           下架
                         </button>
                       )}
                       <button
                         onClick={() => handleDelete(project.id)}
-                        className="px-3 py-1.5 text-xs bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-all duration-300 hover:-translate-y-0.5"
+                        className="px-3 py-1.5 text-xs bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-all duration-300"
                       >
                         <DeleteOutlined className="mr-1" /> 删除
                       </button>
@@ -273,10 +273,10 @@ export default function AdminProjectsPage() {
               {filteredProjects.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#f5f0e8] rounded-2xl mb-3">
-                      <ProjectOutlined className="text-3xl text-[#a89a80]" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white/[0.03] rounded-2xl mb-3">
+                      <ProjectOutlined className="text-3xl text-gray-500" />
                     </div>
-                    <p className="text-[#a89a80]">暂无项目</p>
+                    <p className="text-gray-500">暂无项目</p>
                   </td>
                 </tr>
               )}

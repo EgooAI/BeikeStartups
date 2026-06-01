@@ -182,25 +182,25 @@ ${formData.team_introduction}
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#f7f3ec] to-[#faf7f2]">
-        <div className="relative">
-          <div className="w-14 h-14 rounded-full border-[3px] border-primary/10 border-t-primary animate-spin" />
-          <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-r-accent/30 animate-spin" style={{ animationDuration: '1.5s' }} />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#050510]">
+        <div className="relative w-14 h-14">
+          <div className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/20 border-t-[#00f0ff] animate-spin" />
+          <div className="absolute inset-[6px] rounded-full border-2 border-[#b347ea]/20 border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }} />
         </div>
-        <p className="text-gray-400 text-sm animate-pulse">正在加载中...</p>
+        <p className="text-gray-500 text-sm animate-pulse">正在加载中...</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
-        <div className="dashboard-panel p-12 max-w-md text-center">
-          <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <UserOutlined className="text-4xl text-primary/40" />
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center">
+        <div className="holo-card p-12 max-w-md text-center">
+          <div className="w-20 h-20 bg-white/[0.03] border border-white/[0.06] rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <UserOutlined className="text-4xl text-gray-600" />
           </div>
-          <p className="text-gray-500 mb-8 text-lg">请先登录后再修改团队信息</p>
-          <Link href="/login" className="inline-block px-8 py-3 bg-primary text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium">
+          <p className="text-gray-400 mb-8 text-lg">请先登录后再修改团队信息</p>
+          <Link href="/login" className="inline-block px-8 py-3 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl shadow-sm hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:-translate-y-0.5 transition-all duration-300">
             去登录
           </Link>
         </div>
@@ -209,53 +209,53 @@ ${formData.team_introduction}
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f3ec]/50 py-8">
+    <div className="min-h-screen bg-[#050510] py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/dashboard" className="inline-flex items-center text-primary/60 hover:text-primary mb-4 transition-colors">
+          <Link href="/dashboard" className="inline-flex items-center text-gray-400 hover:text-white mb-4 transition-colors">
             <ArrowLeftOutlined className="mr-2" />
             返回
           </Link>
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-sm">
-              <TeamOutlined className="text-2xl text-white" />
+            <div className="w-14 h-14 bg-gradient-to-br from-[#00f0ff] to-[#00c8ff] rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+              <TeamOutlined className="text-2xl text-[#050510]" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-primary">修改团队信息</h1>
-              <p className="text-gray-500 mt-1">更新你的团队信息</p>
+              <h1 className="text-3xl font-black tracking-tight text-white">修改团队信息</h1>
+              <p className="text-gray-400 mt-1">更新你的团队信息</p>
             </div>
           </div>
         </div>
 
         {/* Progress Steps */}
-        <div className="dashboard-panel p-6 mb-6">
+        <div className="holo-card p-6 mb-6">
           <div className="flex items-center justify-between">
             {[1, 2, 3, 4].map((s) => (
               <div key={s} className="flex items-center">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-lg transition-all duration-300 ${
-                  s <= step ? 'bg-primary text-white shadow-sm' : 'bg-[#f5f0e8] text-gray-400'
+                  s <= step ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] shadow-[0_0_10px_rgba(0,240,255,0.3)]' : 'bg-white/[0.03] border border-white/[0.08] text-gray-400'
                 }`}>
                   {s <= step ? <CheckCircleOutlined className="w-6 h-6" /> : s}
                 </div>
                 {s < totalSteps && (
-                  <div className={`w-20 h-1 mx-3 rounded-full transition-all duration-300 ${s < step ? 'bg-primary' : 'bg-[#e8dfd0]'}`}></div>
+                  <div className={`w-20 h-1 mx-3 rounded-full transition-all duration-300 ${s < step ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff]' : 'bg-white/[0.06]'}`}></div>
                 )}
               </div>
             ))}
           </div>
           <div className="flex justify-between mt-4 px-2">
-            <span className={`font-medium text-sm transition-colors ${step === 1 ? 'text-primary' : 'text-gray-400'}`}>基本信息</span>
-            <span className={`font-medium text-sm transition-colors ${step === 2 ? 'text-primary' : 'text-gray-400'}`}>项目详情</span>
-            <span className={`font-medium text-sm transition-colors ${step === 3 ? 'text-primary' : 'text-gray-400'}`}>团队与市场</span>
-            <span className={`font-medium text-sm transition-colors ${step === 4 ? 'text-primary' : 'text-gray-400'}`}>确认提交</span>
+            <span className={`font-medium text-sm transition-colors ${step === 1 ? 'text-[#00f0ff]' : 'text-gray-500'}`}>基本信息</span>
+            <span className={`font-medium text-sm transition-colors ${step === 2 ? 'text-[#00f0ff]' : 'text-gray-500'}`}>项目详情</span>
+            <span className={`font-medium text-sm transition-colors ${step === 3 ? 'text-[#00f0ff]' : 'text-gray-500'}`}>团队与市场</span>
+            <span className={`font-medium text-sm transition-colors ${step === 4 ? 'text-[#00f0ff]' : 'text-gray-500'}`}>确认提交</span>
           </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="dashboard-panel p-6 mb-6">
+        <form onSubmit={handleSubmit} className="holo-card p-6 mb-6">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">
               {error}
             </div>
           )}
@@ -264,7 +264,7 @@ ${formData.team_introduction}
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   <BuildOutlined className="mr-2" />团队名称 *
                 </label>
                 <input
@@ -272,21 +272,21 @@ ${formData.team_introduction}
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-gray-500"
                   placeholder="请输入团队名称"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     <TagsOutlined className="mr-2" />项目类别 *
                   </label>
                   <select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white"
                   >
                     <option value="">请选择项目类别</option>
                     {projectCategories.map((cat) => (
@@ -296,14 +296,14 @@ ${formData.team_introduction}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     <TeamOutlined className="mr-2" />团队规模 *
                   </label>
                   <select
                     name="team_size"
                     value={formData.team_size}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white"
                   >
                     <option value="">请选择团队规模</option>
                     {teamSizes.map((size) => (
@@ -313,14 +313,14 @@ ${formData.team_introduction}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     <BulbOutlined className="mr-2" />项目阶段 *
                   </label>
                   <select
                     name="stage"
                     value={formData.stage}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white"
                   >
                     <option value="">请选择项目阶段</option>
                     {stages.map((s) => (
@@ -336,7 +336,7 @@ ${formData.team_introduction}
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   <FileTextOutlined className="mr-2" />项目简介
                 </label>
                 <textarea
@@ -344,13 +344,13 @@ ${formData.team_introduction}
                   value={formData.description}
                   onChange={handleChange}
                   rows={6}
-                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-gray-500"
                   placeholder="请简要介绍你的项目..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   <TagsOutlined className="mr-2" />项目标签
                 </label>
                 <input
@@ -358,7 +358,7 @@ ${formData.team_introduction}
                   name="tags"
                   value={formData.tags}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all text-white placeholder:text-gray-500"
                   placeholder="请输入项目标签，多个标签用逗号分隔"
                 />
               </div>
@@ -369,7 +369,7 @@ ${formData.team_introduction}
           {step === 3 && (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   <GlobalOutlined className="mr-2" />市场分析
                 </label>
                 <textarea
@@ -377,13 +377,13 @@ ${formData.team_introduction}
                   value={formData.market_analysis}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-gray-500"
                   placeholder="请分析你的目标市场规模、用户群体、市场趋势等..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   <BulbOutlined className="mr-2" />竞争优势
                 </label>
                 <textarea
@@ -391,13 +391,13 @@ ${formData.team_introduction}
                   value={formData.competitive_advantage}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-gray-500"
                   placeholder="请描述你的项目相比竞争对手的优势..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   <TeamOutlined className="mr-2" />团队介绍
                 </label>
                 <textarea
@@ -405,7 +405,7 @@ ${formData.team_introduction}
                   value={formData.team_introduction}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#00f0ff]/20 focus:border-[#00f0ff]/40 transition-all resize-none text-white placeholder:text-gray-500"
                   placeholder="请介绍团队成员背景、核心能力等..."
                 />
               </div>
@@ -415,66 +415,66 @@ ${formData.team_introduction}
           {/* Step 4: Confirm & Submit */}
           {step === 4 && (
             <div className="space-y-6">
-              <div className="bg-[#faf7f2] rounded-xl p-6 border border-[#e8dfd0]">
-                <h3 className="text-lg font-extrabold tracking-tight text-primary mb-4">确认信息</h3>
+              <div className="bg-white/[0.02] rounded-xl p-6 border border-white/[0.06]">
+                <h3 className="text-lg font-black tracking-tight text-white mb-4">确认信息</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
                     <p className="text-sm text-gray-400">团队名称</p>
-                    <p className="font-medium text-gray-900">{formData.name}</p>
+                    <p className="font-medium text-white">{formData.name}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">项目类别</p>
-                    <p className="font-medium text-gray-900">{formData.category}</p>
+                    <p className="font-medium text-white">{formData.category}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">团队规模</p>
-                    <p className="font-medium text-gray-900">{formData.team_size}</p>
+                    <p className="font-medium text-white">{formData.team_size}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">项目阶段</p>
-                    <p className="font-medium text-gray-900">{formData.stage}</p>
+                    <p className="font-medium text-white">{formData.stage}</p>
                   </div>
                 </div>
 
                 {formData.description && (
                   <div className="mb-6">
                     <p className="text-sm text-gray-400">项目简介</p>
-                    <p className="text-gray-900">{formData.description}</p>
+                    <p className="text-gray-200">{formData.description}</p>
                   </div>
                 )}
 
                 {formData.market_analysis && (
                   <div className="mb-6">
                     <p className="text-sm text-gray-400">市场分析</p>
-                    <p className="text-gray-900">{formData.market_analysis}</p>
+                    <p className="text-gray-200">{formData.market_analysis}</p>
                   </div>
                 )}
 
                 {formData.competitive_advantage && (
                   <div className="mb-6">
                     <p className="text-sm text-gray-400">竞争优势</p>
-                    <p className="text-gray-900">{formData.competitive_advantage}</p>
+                    <p className="text-gray-200">{formData.competitive_advantage}</p>
                   </div>
                 )}
 
                 {formData.team_introduction && (
                   <div className="mb-6">
                     <p className="text-sm text-gray-400">团队介绍</p>
-                    <p className="text-gray-900">{formData.team_introduction}</p>
+                    <p className="text-gray-200">{formData.team_introduction}</p>
                   </div>
                 )}
 
-                <div className="border-t border-[#e8dfd0] pt-4">
+                <div className="border-t border-white/[0.05] pt-4">
                   <div className="flex items-center space-x-4 text-sm">
                     {formData.contact_email && (
-                      <span className="flex items-center text-gray-500">
+                      <span className="flex items-center text-gray-400">
                         <MailOutlined className="mr-1" />
                         {formData.contact_email}
                       </span>
                     )}
                     {formData.contact_phone && (
-                      <span className="flex items-center text-gray-500">
+                      <span className="flex items-center text-gray-400">
                         <PhoneOutlined className="mr-1" />
                         {formData.contact_phone}
                       </span>
@@ -486,13 +486,13 @@ ${formData.team_introduction}
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-[#e8dfd0]/60">
+          <div className="flex justify-between mt-8 pt-6 border-t border-white/[0.05]">
             <div>
               {step > 1 && (
                 <button
                   type="button"
                   onClick={prevStep}
-                  className="px-6 py-3 border border-[#e8dfd0] rounded-xl text-gray-600 hover:bg-[#faf7f2] hover:-translate-y-0.5 transition-all duration-300 font-medium flex items-center"
+                  className="px-6 py-3 border border-white/10 rounded-xl text-white hover:bg-white/[0.03] hover:-translate-y-0.5 transition-all duration-300 font-medium flex items-center"
                 >
                   <ArrowLeftOutlined className="mr-2" />
                   上一步
@@ -504,7 +504,7 @@ ${formData.team_introduction}
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="px-8 py-3 bg-primary text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium flex items-center"
+                  className="px-8 py-3 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl shadow-sm hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                 >
                   下一步
                   <ArrowRightOutlined className="ml-2" />
@@ -513,7 +513,7 @@ ${formData.team_introduction}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-8 py-3 bg-accent-gradient text-white rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium disabled:opacity-50 flex items-center"
+                  className="px-8 py-3 bg-gradient-to-r from-[#00f0ff] to-[#b347ea] text-white font-bold rounded-xl shadow-sm hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 flex items-center"
                 >
                   {isSubmitting ? (
                     <>

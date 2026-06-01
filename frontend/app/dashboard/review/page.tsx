@@ -93,11 +93,11 @@ export default function ReviewPage() {
   const getRequestTypeIcon = (type: ConnectionRequestType) => {
     switch (type) {
       case 'bp_access':
-        return <FileTextOutlined className="text-blue-500" />;
+        return <FileTextOutlined className="text-[#00f0ff]" />;
       case 'become_mentor':
-        return <BookOutlined className="text-green-500" />;
+        return <BookOutlined className="text-[#00ff88]" />;
       case 'resource_partner':
-        return <PauseOutlined className="text-orange-500" />;
+        return <PauseOutlined className="text-[#ffb800]" />;
     }
   };
 
@@ -114,13 +114,13 @@ export default function ReviewPage() {
   const getStatusIcon = (status: ConnectionRequestStatus) => {
     switch (status) {
       case 'pending':
-        return <ClockCircleOutlined className="text-yellow-500" />;
+        return <ClockCircleOutlined className="text-[#ffb800]" />;
       case 'approved':
-        return <CheckCircleOutlined className="text-green-500" />;
+        return <CheckCircleOutlined className="text-[#00ff88]" />;
       case 'rejected':
-        return <CloseCircleOutlined className="text-red-500" />;
+        return <CloseCircleOutlined className="text-red-400" />;
       case 'expired':
-        return <CloseCircleOutlined className="text-gray-400" />;
+        return <CloseCircleOutlined className="text-gray-500" />;
     }
   };
 
@@ -129,10 +129,10 @@ export default function ReviewPage() {
 
   if (!user || user.role !== 'team_owner') {
     return (
-      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[#8b7e6a] mb-4">您没有权限访问此页面</p>
-          <Link href="/dashboard" className="text-[#0a2a5c] hover:underline">返回控制台</Link>
+          <p className="text-gray-400 mb-4">您没有权限访问此页面</p>
+          <Link href="/dashboard" className="text-[#00f0ff] hover:underline">返回控制台</Link>
         </div>
       </div>
     );
@@ -140,30 +140,30 @@ export default function ReviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f3ec]/50 flex items-center justify-center">
-        <div className="relative h-12 w-12">
-          <div className="absolute inset-0 rounded-full border-[3px] border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
-          <div className="absolute inset-[4px] rounded-full border-[3px] border-[#e8dfd0] border-b-[#0a2a5c] animate-[spin_0.8s_linear_reverse_infinite]" />
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center">
+        <div className="relative w-14 h-14">
+          <div className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/20 border-t-[#00f0ff] animate-spin" />
+          <div className="absolute inset-[6px] rounded-full border-2 border-[#b347ea]/20 border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f3ec]/50">
+    <div className="min-h-screen bg-[#050510]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">对接申请审核</h1>
-            <p className="text-[#8b7e6a] mt-1">管理您项目的对接申请，与投资人、导师和资源方建立联系</p>
+            <h1 className="text-2xl font-black tracking-tight text-white">对接申请审核</h1>
+            <p className="text-gray-400 mt-1">管理您项目的对接申请，与投资人、导师和资源方建立联系</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Project List Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm p-4">
-              <h3 className="font-extrabold tracking-tight text-[#0a2a5c] mb-4">我的项目</h3>
+            <div className="holo-card p-4">
+              <h3 className="font-black tracking-tight text-white mb-4">我的项目</h3>
               <div className="space-y-2">
                 {projects.map((project) => (
                   <button
@@ -171,16 +171,19 @@ export default function ReviewPage() {
                     onClick={() => setSelectedProject(project)}
                     className={`w-full text-left p-3 rounded-xl transition-all duration-300 flex items-center space-x-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
                       selectedProject?.id === project.id
-                        ? 'bg-[#0a2a5c] text-white'
-                        : 'hover:bg-[#faf7f2] text-[#5c4f3c]'
+                        ? 'bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold'
+                        : 'hover:bg-white/[0.03] text-gray-300'
                     }`}
                   >
                     <RocketOutlined className="w-5 h-5" />
                     <span className="truncate">{project.title}</span>
-                    {pendingRequests.length > 0 && (
-                      <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
-                        selectedProject?.id === project.id ? 'bg-white/20' : 'bg-red-100 text-red-600'
-                      }`}>
+                    {selectedProject?.id === project.id && pendingRequests.length > 0 && (
+                      <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-[#050510]/30 text-[#050510]">
+                        {pendingRequests.length}
+                      </span>
+                    )}
+                    {selectedProject?.id !== project.id && pendingRequests.length > 0 && (
+                      <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-400">
                         {pendingRequests.length}
                       </span>
                     )}
@@ -192,16 +195,16 @@ export default function ReviewPage() {
 
           {/* Requests List */}
           <div className="lg:col-span-3">
-            <div className="bg-[#fefcf8] border border-[#e8dfd0] rounded-2xl shadow-sm p-6">
+            <div className="holo-card p-6">
               {selectedProject ? (
                 <>
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-extrabold tracking-tight text-[#0a2a5c]">
+                    <h2 className="text-lg font-black tracking-tight text-white">
                       {selectedProject.title}
                     </h2>
                     <Link
                       href={`/projects/${selectedProject.id}`}
-                      className="text-sm text-[#0a2a5c] hover:underline flex items-center"
+                      className="text-sm text-[#00f0ff] hover:underline flex items-center"
                     >
                       查看项目 <ArrowRightOutlined className="ml-1" />
                     </Link>
@@ -210,33 +213,33 @@ export default function ReviewPage() {
                   {pendingRequests.length > 0 && (
                     <div className="mb-8">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium text-[#5c4f3c]">待处理申请</h3>
-                        <span className="text-xs px-3 py-1 bg-red-100 text-red-600 rounded-full">
+                        <h3 className="text-sm font-medium text-gray-300">待处理申请</h3>
+                        <span className="text-xs px-3 py-1 bg-red-500/10 text-red-400 rounded-full">
                           {pendingRequests.length} 项待处理
                         </span>
                       </div>
                       <div className="space-y-3">
                         {pendingRequests.map((request) => (
-                          <div key={request.id} className="border border-[#e8dfd0] rounded-xl p-4 hover:border-[#d4c8b0] hover:bg-[#faf7f2] transition-all duration-300">
+                          <div key={request.id} className="border border-white/[0.06] rounded-xl p-4 hover:border-[#00f0ff]/20 hover:bg-white/[0.02] transition-all duration-300">
                             <div className="flex items-start justify-between">
                               <div className="flex items-start space-x-4">
-                                <div className="w-12 h-12 bg-[#f5f0e8] rounded-full flex items-center justify-center flex-shrink-0">
+                                <div className="w-12 h-12 bg-white/[0.03] rounded-full flex items-center justify-center flex-shrink-0 border border-white/[0.06]">
                                   {getRequestTypeIcon(request.request_type)}
                                 </div>
                                 <div>
                                   <div className="flex items-center space-x-2">
-                                    <span className="font-medium text-[#0a2a5c]">
+                                    <span className="font-medium text-white">
                                       {getRequestTypeLabel(request.request_type)}
                                     </span>
-                                    <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">
+                                    <span className="text-xs px-2 py-0.5 bg-[#ffb800]/10 text-[#ffb800] rounded-full">
                                       {getStatusLabel(request.status)}
                                     </span>
                                   </div>
-                                  <p className="text-sm text-[#8b7e6a] mt-1">
+                                  <p className="text-sm text-gray-400 mt-1">
                                     申请人：{request.user?.nickname || request.user?.username || '未知用户'}
                                   </p>
                                   {request.message && (
-                                    <p className="text-sm text-[#5c4f3c] mt-2 bg-[#faf7f2] rounded-xl p-3 border border-[#e8dfd0]">
+                                    <p className="text-sm text-gray-300 mt-2 bg-white/[0.02] rounded-xl p-3 border border-white/[0.06]">
                                       {request.message}
                                     </p>
                                   )}
@@ -245,13 +248,13 @@ export default function ReviewPage() {
                               <div className="flex space-x-2 flex-shrink-0">
                                 <button
                                   onClick={() => handleAccept(request.id)}
-                                  className="px-4 py-2 bg-green-500 text-white text-sm rounded-xl hover:bg-green-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
+                                  className="px-4 py-2 bg-[#00ff88] text-[#050510] font-bold text-sm rounded-xl hover:bg-[#00ff88]/90 shadow-sm hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                                 >
                                   <CheckCircleOutlined className="mr-1" />接受
                                 </button>
                                 <button
                                   onClick={() => handleReject(request.id)}
-                                  className="px-4 py-2 bg-[#f5f0e8] text-[#5c4f3c] text-sm rounded-xl hover:bg-[#e8dfd0] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
+                                  className="px-4 py-2 bg-white/[0.03] text-gray-300 text-sm rounded-xl hover:bg-white/[0.06] border border-white/[0.06] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center"
                                 >
                                   <CloseCircleOutlined className="mr-1" />拒绝
                                 </button>
@@ -265,20 +268,20 @@ export default function ReviewPage() {
 
                   {processedRequests.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-medium text-[#5c4f3c] mb-4">处理历史</h3>
+                      <h3 className="text-sm font-medium text-gray-300 mb-4">处理历史</h3>
                       <div className="space-y-3">
                         {processedRequests.map((request) => (
-                          <div key={request.id} className="border border-[#e8dfd0] rounded-xl p-4 opacity-75">
+                          <div key={request.id} className="border border-white/[0.06] rounded-xl p-4 opacity-75">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-4">
-                                <div className="w-10 h-10 bg-[#f5f0e8] rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-white/[0.03] rounded-full flex items-center justify-center border border-white/[0.06]">
                                   {getRequestTypeIcon(request.request_type)}
                                 </div>
                                 <div>
-                                  <span className="font-medium text-[#5c4f3c]">
+                                  <span className="font-medium text-gray-300">
                                     {getRequestTypeLabel(request.request_type)}
                                   </span>
-                                  <p className="text-sm text-[#8b7e6a]">
+                                  <p className="text-sm text-gray-500">
                                     {request.user?.nickname || request.user?.username || '未知用户'}
                                   </p>
                                 </div>
@@ -286,8 +289,8 @@ export default function ReviewPage() {
                               <div className="flex items-center space-x-2">
                                 {getStatusIcon(request.status)}
                                 <span className={`text-sm ${
-                                  request.status === 'approved' ? 'text-green-600' :
-                                  request.status === 'rejected' ? 'text-red-600' : 'text-gray-400'
+                                  request.status === 'approved' ? 'text-[#00ff88]' :
+                                  request.status === 'rejected' ? 'text-red-400' : 'text-gray-500'
                                 }`}>
                                   {getStatusLabel(request.status)}
                                 </span>
@@ -301,19 +304,19 @@ export default function ReviewPage() {
 
                   {requests.length === 0 && (
                     <div className="text-center py-12">
-                      <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <InboxOutlined className="text-3xl text-[#8b7e6a]" />
+                      <div className="w-20 h-20 bg-white/[0.03] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/[0.06]">
+                        <InboxOutlined className="text-3xl text-gray-500" />
                       </div>
-                      <p className="text-[#8b7e6a]">暂无对接申请</p>
+                      <p className="text-gray-400">暂无对接申请</p>
                     </div>
                   )}
                 </>
               ) : (
                 <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-[#f5f0e8] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <RocketOutlined className="text-3xl text-[#8b7e6a]" />
+                  <div className="w-20 h-20 bg-white/[0.03] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/[0.06]">
+                    <RocketOutlined className="text-3xl text-gray-500" />
                   </div>
-                  <p className="text-[#8b7e6a]">请从左侧选择一个项目</p>
+                  <p className="text-gray-400">请从左侧选择一个项目</p>
                 </div>
               )}
             </div>

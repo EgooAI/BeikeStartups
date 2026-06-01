@@ -27,8 +27,8 @@ export default function AdminTeamsPage() {
     try {
       const res = await teamApi.list();
       if (res.data) {
-        const data = res.data as Team[];
-        setTeams(data || []);
+        const data = res.data as { items: Team[] };
+        setTeams(data.items || []);
       }
     } catch (err) {
       console.error('Failed to load teams:', err);
@@ -64,11 +64,11 @@ export default function AdminTeamsPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      pending: 'bg-amber-50 text-amber-600',
-      approved: 'bg-green-50 text-green-600',
-      rejected: 'bg-red-50 text-red-600',
+      pending: 'bg-[#ffb800]/10 text-[#ffb800]',
+      approved: 'bg-[#00ff88]/10 text-[#00ff88]',
+      rejected: 'bg-red-500/10 text-red-400',
     };
-    return colors[status] || 'bg-[#f5f0e8] text-[#6b5e4a]';
+    return colors[status] || 'bg-white/[0.05] text-gray-400';
   };
 
   const filteredTeams = teams.filter(team => {
@@ -79,10 +79,10 @@ export default function AdminTeamsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#f7f3ec]/50">
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#050510]">
         <div className="relative flex justify-center items-center">
-          <div className="w-12 h-12 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
-          <div className="absolute w-7 h-7 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+          <div className="w-12 h-12 rounded-full border-4 border-white/[0.06] border-t-[#00f0ff] animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full border-4 border-white/[0.04] border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
         </div>
       </div>
     );
@@ -91,64 +91,64 @@ export default function AdminTeamsPage() {
   return (
     <div className="p-6 lg:p-8 min-h-screen">
       <div className="mb-6">
-        <Link href="/admin" className="inline-flex items-center text-[#a89a80] hover:text-[#0a2a5c] mb-4 transition-colors">
+        <Link href="/admin" className="inline-flex items-center text-gray-500 hover:text-[#00f0ff] mb-4 transition-colors">
           <ArrowLeftOutlined className="mr-2" />
           返回管理后台
         </Link>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">团队管理</h1>
-            <p className="text-[#8b7e6a] mt-1">管理所有创业团队，共 {teams.length} 个团队</p>
+            <h1 className="text-2xl font-black tracking-tight text-white">团队管理</h1>
+            <p className="text-gray-400 mt-1">管理所有创业团队，共 {teams.length} 个团队</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] overflow-hidden">
-        <div className="p-4 border-b border-[#e8dfd0]">
+      <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-white/[0.05]">
           <div className="relative">
-            <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a89a80]" />
+            <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               placeholder="搜索团队名称..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#faf7f2] border border-[#e8dfd0] rounded-xl focus:ring-2 focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c] transition-all"
+              className="w-full pl-10 pr-4 py-2 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 transition-all text-white placeholder:text-gray-500"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#faf7f2]">
+            <thead className="bg-white/[0.03]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#8b7e6a] uppercase tracking-wider">团队名称</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#8b7e6a] uppercase tracking-wider">状态</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#8b7e6a] uppercase tracking-wider">创建时间</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#8b7e6a] uppercase tracking-wider">操作</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">团队名称</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">状态</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">创建时间</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e8dfd0]">
+            <tbody className="divide-y divide-white/[0.05]">
               {filteredTeams.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#f5f0e8] rounded-2xl mb-3">
-                      <TeamOutlined className="text-3xl text-[#a89a80]" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white/[0.03] rounded-2xl mb-3">
+                      <TeamOutlined className="text-3xl text-gray-500" />
                     </div>
-                    <p className="text-[#a89a80]">暂无团队数据</p>
+                    <p className="text-gray-500">暂无团队数据</p>
                   </td>
                 </tr>
               ) : (
                 filteredTeams.map((team) => (
-                  <tr key={team.id} className="hover:bg-[#faf7f2] transition-colors">
+                  <tr key={team.id} className="hover:bg-white/[0.03] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] flex items-center justify-center text-white">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00f0ff] to-[#b347ea] flex items-center justify-center text-[#050510] font-bold">
                           <TeamOutlined />
                         </div>
                         <div>
-                          <p className="font-medium text-[#0a2a5c]">{team.name}</p>
+                          <p className="font-medium text-white">{team.name}</p>
                           {team.description && (
-                            <p className="text-sm text-[#a89a80] truncate max-w-xs">{team.description.substring(0, 50)}</p>
+                            <p className="text-sm text-gray-500 truncate max-w-xs">{team.description.substring(0, 50)}</p>
                           )}
                         </div>
                       </div>
@@ -158,19 +158,19 @@ export default function AdminTeamsPage() {
                         {getStatusLabel(team.status || 'approved')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-[#6b5e4a]">
+                    <td className="px-6 py-4 text-sm text-gray-400">
                       {formatDate(team.created_at)}
                     </td>
                     <td className="px-6 py-4">
                       <Link
                         href={`/teams/${team.id}`}
-                        className="inline-flex items-center text-[#0a2a5c] hover:text-[#0a2a5c]/80 text-sm font-medium transition-colors mr-4"
+                        className="inline-flex items-center text-[#00f0ff] hover:text-[#00c8ff] text-sm font-medium transition-colors mr-4"
                       >
                         查看详情 <RightOutlined className="ml-1 text-xs" />
                       </Link>
                       <button
                         onClick={() => setDisbandTeam(team)}
-                        className="inline-flex items-center text-red-500 hover:text-red-600 text-sm font-medium transition-colors"
+                        className="inline-flex items-center text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
                       >
                         <ExclamationCircleOutlined className="mr-1" />解散
                       </button>
@@ -185,16 +185,16 @@ export default function AdminTeamsPage() {
 
       {/* 解散团队确认弹窗 */}
       {disbandTeam && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#fefcf8] rounded-2xl p-6 w-full max-w-md mx-4 border border-[#e8dfd0] shadow-xl">
-            <h3 className="text-lg font-extrabold tracking-tight text-[#3a2e1a] mb-2">确认解散团队</h3>
-            <p className="text-[#6b5e4a] mb-6">
-              解散团队后，团队&quot;<span className="font-medium">{disbandTeam.name}</span>&quot;的所有成员将恢复为学生身份，团队的所有项目、招募等信息也将被删除。此操作不可恢复，确定要解散吗？
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-[#0f0f1f] rounded-2xl p-6 w-full max-w-md mx-4 border border-[#00f0ff]/10">
+            <h3 className="text-lg font-black tracking-tight text-white mb-2">确认解散团队</h3>
+            <p className="text-gray-400 mb-6">
+              解散团队后，团队&quot;<span className="font-medium text-white">{disbandTeam.name}</span>&quot;的所有成员将恢复为学生身份，团队的所有项目、招募等信息也将被删除。此操作不可恢复，确定要解散吗？
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setDisbandTeam(null)}
-                className="px-4 py-2 text-[#6b5e4a] hover:text-[#3a2e1a] transition-colors rounded-xl hover:bg-[#faf7f2]"
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-white/[0.05]"
                 disabled={disbandLoading}
               >
                 取消
@@ -202,7 +202,7 @@ export default function AdminTeamsPage() {
               <button
                 onClick={handleConfirmDisband}
                 disabled={disbandLoading}
-                className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-300 disabled:opacity-50 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-300 disabled:opacity-50 font-bold"
               >
                 {disbandLoading ? '解散中...' : '确认解散'}
               </button>

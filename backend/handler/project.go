@@ -342,8 +342,19 @@ func ListProjects(c *gin.Context) {
 		return
 	}
 
+	sortField := c.DefaultQuery("sort", "created_at")
+	sortOrder := c.DefaultQuery("order", "desc")
+	if sortOrder != "asc" {
+		sortOrder = "desc"
+	}
+	// 白名单防止SQL注入
+	allowedSorts := map[string]bool{"created_at": true, "updated_at": true, "title": true, "view_count": true}
+	if !allowedSorts[sortField] {
+		sortField = "created_at"
+	}
+
 	offset := (page - 1) * limit
-	if err := query.Offset(offset).Limit(limit).Find(&projects).Error; err != nil {
+	if err := query.Order(sortField + " " + sortOrder).Offset(offset).Limit(limit).Find(&projects).Error; err != nil {
 		response.InternalError(c, "获取项目列表失败")
 		return
 	}

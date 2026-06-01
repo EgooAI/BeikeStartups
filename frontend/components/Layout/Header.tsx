@@ -106,10 +106,10 @@ export default function Header() {
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/[0.04] transition-all"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00f0ff]/20 to-[#b347ea]/20 border border-[#00f0ff]/20 flex items-center justify-center">
-                      <UserOutlined className="text-[#00f0ff] text-xs" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00f0ff] to-[#b347ea] flex items-center justify-center shadow-[0_0_12px_rgba(0,240,255,0.4)]">
+                      <UserOutlined className="text-white text-xs" />
                     </div>
-                    <span>{user.nickname || user.username}</span>
+                    <span className="font-bold text-white">{user.nickname || user.username}</span>
                     <DownOutlined className={`text-xs transition-transform text-gray-500 ${userMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
 

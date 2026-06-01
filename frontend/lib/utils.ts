@@ -12,20 +12,20 @@ export function formatDate(dateString: string): string {
 
 export function getStatusColor(status: string): string {
   const statusColors: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-    cancelled: 'bg-gray-100 text-gray-600',
-    online: 'bg-green-100 text-green-800',
-    offline: 'bg-gray-100 text-gray-600',
-    active: 'bg-green-100 text-green-800',
-    solved: 'bg-blue-100 text-blue-800',
-    invalid: 'bg-red-100 text-red-800',
-    accepted: 'bg-green-100 text-green-800',
+    draft: 'bg-gray-500/10 text-gray-400',
+    pending: 'bg-[#ffb800]/10 text-[#ffb800]',
+    approved: 'bg-[#00ff88]/10 text-[#00ff88]',
+    rejected: 'bg-red-500/10 text-red-400',
+    cancelled: 'bg-gray-500/10 text-gray-400',
+    online: 'bg-[#00ff88]/10 text-[#00ff88]',
+    offline: 'bg-gray-500/10 text-gray-400',
+    active: 'bg-[#00ff88]/10 text-[#00ff88]',
+    solved: 'bg-[#00f0ff]/10 text-[#00f0ff]',
+    invalid: 'bg-red-500/10 text-red-400',
+    accepted: 'bg-[#00ff88]/10 text-[#00ff88]',
   };
 
-  return statusColors[status] || 'bg-gray-100 text-gray-800';
+  return statusColors[status] || 'bg-gray-500/10 text-gray-400';
 }
 
 export function getStatusText(status: string): string {

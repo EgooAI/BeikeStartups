@@ -200,7 +200,7 @@ export const teamApi = {
 };
 
 export const projectApi = {
-  list: (params?: { status?: string; is_public?: string; search?: string; stage?: string; tag?: string; industry?: string; page?: number; limit?: number }) => {
+  list: (params?: { status?: string; is_public?: string; search?: string; stage?: string; tag?: string; industry?: string; page?: number; limit?: number; sort?: string; order?: string }) => {
     const query = new URLSearchParams();
     if (params?.status) query.append('status', params.status);
     if (params?.is_public) query.append('is_public', params.is_public);
@@ -210,6 +210,8 @@ export const projectApi = {
     if (params?.industry) query.append('industry', params.industry);
     if (params?.page) query.append('page', String(params.page));
     if (params?.limit) query.append('limit', String(params.limit));
+    if (params?.sort) query.append('sort', params.sort);
+    if (params?.order) query.append('order', params.order);
     const queryString = query.toString();
     return api.get(`/api/projects${queryString ? `?${queryString}` : ''}`);
   },

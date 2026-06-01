@@ -168,10 +168,10 @@ export default function AdminVerificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#f7f3ec]/50">
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#050510]">
         <div className="relative flex justify-center items-center">
-          <div className="w-12 h-12 rounded-full border-4 border-[#e8dfd0] border-t-[#0a2a5c] animate-spin" />
-          <div className="absolute w-7 h-7 rounded-full border-4 border-[#f5f0e8] border-b-[#f59e0b] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
+          <div className="w-12 h-12 rounded-full border-4 border-white/[0.06] border-t-[#00f0ff] animate-spin" />
+          <div className="absolute w-7 h-7 rounded-full border-4 border-white/[0.04] border-b-[#b347ea] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.7s' }} />
         </div>
       </div>
     );
@@ -183,33 +183,33 @@ export default function AdminVerificationsPage() {
   return (
     <div className="p-6 lg:p-8 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">身份审核</h1>
-        <p className="text-[#8b7e6a] mt-1">审核创业团队认证申请和投资人/导师/资源方身份认证。</p>
+        <h1 className="text-2xl font-black tracking-tight text-white">身份审核</h1>
+        <p className="text-gray-400 mt-1">审核创业团队认证申请和投资人/导师/资源方身份认证。</p>
       </div>
 
-      <div className="flex space-x-1 bg-[#f5f0e8] rounded-xl p-1 mb-6 w-fit">
+      <div className="flex space-x-1 bg-white/[0.03] rounded-xl p-1 mb-6 w-fit">
         <button
           onClick={() => setActiveTab('applications')}
           className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${activeTab === 'applications'
-              ? 'bg-[#fefcf8] text-[#0a2a5c] shadow-sm'
-              : 'text-[#6b5e4a] hover:text-[#0a2a5c]'
+              ? 'bg-white/[0.06] text-[#00f0ff]'
+              : 'text-gray-400 hover:text-white'
             }`}
         >
           创业团队认证
           {pendingApps.length > 0 && (
-            <span className="ml-2 px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">{pendingApps.length}</span>
+            <span className="ml-2 px-1.5 py-0.5 bg-[#ffb800] text-[#050510] text-xs rounded-full font-bold">{pendingApps.length}</span>
           )}
         </button>
         <button
           onClick={() => setActiveTab('roles')}
           className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${activeTab === 'roles'
-              ? 'bg-[#fefcf8] text-[#0a2a5c] shadow-sm'
-              : 'text-[#6b5e4a] hover:text-[#0a2a5c]'
+              ? 'bg-white/[0.06] text-[#00f0ff]'
+              : 'text-gray-400 hover:text-white'
             }`}
         >
           身份认证申请
           {pendingRoles.length > 0 && (
-            <span className="ml-2 px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">{pendingRoles.length}</span>
+            <span className="ml-2 px-1.5 py-0.5 bg-[#ffb800] text-[#050510] text-xs rounded-full font-bold">{pendingRoles.length}</span>
           )}
         </button>
       </div>
@@ -217,28 +217,28 @@ export default function AdminVerificationsPage() {
       {activeTab === 'applications' && (
         <div className="space-y-4">
           {applications.length === 0 ? (
-            <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-12 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f0e8] rounded-2xl mb-4">
-                <FileTextOutlined className="text-4xl text-[#a89a80]" />
+            <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-12 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-white/[0.03] rounded-2xl mb-4">
+                <FileTextOutlined className="text-4xl text-gray-500" />
               </div>
-              <p className="text-[#a89a80]">暂无创业认证申请</p>
+              <p className="text-gray-500">暂无创业认证申请</p>
             </div>
           ) : (
             applications.map((app) => (
-              <div key={app.id} className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+              <div key={app.id} className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${app.status === 'approved' ? 'bg-green-500' :
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[#050510] ${app.status === 'approved' ? 'bg-[#00ff88]' :
                         app.status === 'rejected' ? 'bg-red-500' :
-                          app.status === 'pending' ? 'bg-amber-500' : 'bg-[#a89a80]'
+                          app.status === 'pending' ? 'bg-[#ffb800]' : 'bg-gray-500'
                       }`}>
                       {app.status === 'approved' ? <CheckCircleOutlined /> :
                         app.status === 'rejected' ? <CloseCircleOutlined /> :
                           app.status === 'pending' ? <ClockCircleOutlined /> : <FileTextOutlined />}
                     </div>
                     <div>
-                      <h3 className="font-extrabold tracking-tight text-[#0a2a5c] text-lg">{app.title}</h3>
-                      <p className="text-sm text-[#a89a80]">申请时间: {formatDate(app.created_at)}</p>
+                      <h3 className="font-black tracking-tight text-white text-lg">{app.title}</h3>
+                      <p className="text-sm text-gray-500">申请时间: {formatDate(app.created_at)}</p>
                     </div>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(app.status)}`}>
@@ -246,34 +246,34 @@ export default function AdminVerificationsPage() {
                   </span>
                 </div>
 
-                <div className="mb-4 p-4 bg-[#faf7f2] rounded-xl">
-                  <p className="text-sm text-[#5a4e3a] whitespace-pre-wrap">{app.description}</p>
+                <div className="mb-4 p-4 bg-white/[0.03] rounded-xl">
+                  <p className="text-sm text-white whitespace-pre-wrap">{app.description}</p>
                   {(app as Application & { business_plan?: string }).business_plan && (
-                    <div className="mt-3 pt-3 border-t border-[#e8dfd0]">
-                      <p className="text-xs text-[#8b7e6a] mb-1">商业计划：</p>
-                      <p className="text-sm text-[#5a4e3a] whitespace-pre-wrap">{(app as Application & { business_plan?: string }).business_plan}</p>
+                    <div className="mt-3 pt-3 border-t border-white/[0.05]">
+                      <p className="text-xs text-gray-400 mb-1">商业计划：</p>
+                      <p className="text-sm text-white whitespace-pre-wrap">{(app as Application & { business_plan?: string }).business_plan}</p>
                     </div>
                   )}
                 </div>
 
                 {app.review_note && (
-                  <div className="mb-4 p-3 bg-[#faf7f2] rounded-xl border border-[#e8dfd0]">
-                    <p className="text-sm text-[#6b5e4a]"><strong>审核意见：</strong>{app.review_note}</p>
+                  <div className="mb-4 p-3 bg-white/[0.03] rounded-xl border border-white/[0.05]">
+                    <p className="text-sm text-gray-400"><strong>审核意见：</strong>{app.review_note}</p>
                   </div>
                 )}
 
-                <div className="border-t border-[#e8dfd0] pt-4 flex justify-between items-center">
+                <div className="border-t border-white/[0.05] pt-4 flex justify-between items-center">
                   {app.status === 'pending' && (
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleApproveApp(app.id)}
-                        className="px-5 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                        className="px-5 py-2 bg-[#00ff88] text-[#050510] font-bold rounded-xl hover:bg-[#00ff88]/80 transition-all duration-300 text-sm"
                       >
                         <CheckCircleOutlined className="mr-1" /> 通过
                       </button>
                       <button
                         onClick={() => handleRejectApp(app.id)}
-                        className="px-5 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                        className="px-5 py-2 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all duration-300 text-sm"
                       >
                         <CloseCircleOutlined className="mr-1" /> 拒绝
                       </button>
@@ -282,7 +282,7 @@ export default function AdminVerificationsPage() {
                   {app.status !== 'pending' && <div></div>}
                   <button
                     onClick={() => handleDeleteApp(app.id)}
-                    className="px-4 py-2 bg-[#f5f0e8] text-[#6b5e4a] rounded-xl hover:bg-[#e8dfd0] transition-all duration-300 text-sm font-medium hover:-translate-y-0.5"
+                    className="px-4 py-2 bg-white/[0.03] text-gray-400 rounded-xl hover:bg-white/[0.06] hover:text-white transition-all duration-300 text-sm font-medium"
                   >
                     <DeleteOutlined className="mr-1" /> 删除
                   </button>
@@ -296,90 +296,90 @@ export default function AdminVerificationsPage() {
       {activeTab === 'roles' && (
         <div className="space-y-4">
           {roleRequests.length === 0 ? (
-            <div className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-12 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f0e8] rounded-2xl mb-4">
-                <SafetyOutlined className="text-4xl text-[#a89a80]" />
+            <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-12 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-white/[0.03] rounded-2xl mb-4">
+                <SafetyOutlined className="text-4xl text-gray-500" />
               </div>
-              <p className="text-[#a89a80]">暂无身份认证申请</p>
+              <p className="text-gray-500">暂无身份认证申请</p>
             </div>
           ) : (
             roleRequests.map((req) => (
-              <div key={req.id} className="bg-[#fefcf8] rounded-xl shadow-sm border border-[#e8dfd0] p-6">
+              <div key={req.id} className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${req.role_status === 'approved' ? 'bg-green-500' :
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[#050510] ${req.role_status === 'approved' ? 'bg-[#00ff88]' :
                         req.role_status === 'rejected' ? 'bg-red-500' :
-                          'bg-amber-500'
+                          'bg-[#ffb800]'
                       }`}>
                       {req.role_status === 'approved' ? <CheckCircleOutlined /> :
                         req.role_status === 'rejected' ? <CloseCircleOutlined /> :
                           <ClockCircleOutlined />}
                     </div>
                     <div>
-                      <h3 className="font-extrabold tracking-tight text-[#0a2a5c] text-lg">
+                      <h3 className="font-black tracking-tight text-white text-lg">
                         申请成为{getRoleLabel(req.requested_role)}
                       </h3>
                       {req.user && (
-                        <p className="text-sm text-[#a89a80]">
+                        <p className="text-sm text-gray-500">
                           申请人: {req.user.nickname || req.user.username} ({req.user.email})
                         </p>
                       )}
-                      <p className="text-xs text-[#a89a80]">申请时间: {formatDate(req.created_at)}</p>
+                      <p className="text-xs text-gray-500">申请时间: {formatDate(req.created_at)}</p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${req.role_status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                      req.role_status === 'approved' ? 'bg-green-50 text-green-600' :
-                        'bg-red-50 text-red-500'
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${req.role_status === 'pending' ? 'bg-[#ffb800]/10 text-[#ffb800]' :
+                      req.role_status === 'approved' ? 'bg-[#00ff88]/10 text-[#00ff88]' :
+                        'bg-red-500/10 text-red-400'
                     }`}>
                     {req.role_status === 'pending' ? '待审核' : req.role_status === 'approved' ? '已通过' : '已拒绝'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-[#faf7f2] rounded-xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-white/[0.03] rounded-xl">
                   {req.organization && (
                     <div>
-                      <p className="text-xs text-[#8b7e6a] mb-1">所属机构</p>
-                      <p className="text-sm text-[#5a4e3a]">{req.organization}</p>
+                      <p className="text-xs text-gray-400 mb-1">所属机构</p>
+                      <p className="text-sm text-white">{req.organization}</p>
                     </div>
                   )}
                   {req.expertise && (
                     <div>
-                      <p className="text-xs text-[#8b7e6a] mb-1">专业领域</p>
-                      <p className="text-sm text-[#5a4e3a]">{req.expertise}</p>
+                      <p className="text-xs text-gray-400 mb-1">专业领域</p>
+                      <p className="text-sm text-white">{req.expertise}</p>
                     </div>
                   )}
                   {req.investment_focus && (
                     <div>
-                      <p className="text-xs text-[#8b7e6a] mb-1">投资方向</p>
-                      <p className="text-sm text-[#5a4e3a]">{req.investment_focus}</p>
+                      <p className="text-xs text-gray-400 mb-1">投资方向</p>
+                      <p className="text-sm text-white">{req.investment_focus}</p>
                     </div>
                   )}
                   {req.service_area && (
                     <div>
-                      <p className="text-xs text-[#8b7e6a] mb-1">服务领域</p>
-                      <p className="text-sm text-[#5a4e3a]">{req.service_area}</p>
+                      <p className="text-xs text-gray-400 mb-1">服务领域</p>
+                      <p className="text-sm text-white">{req.service_area}</p>
                     </div>
                   )}
                   {req.application_note && (
                     <div className="md:col-span-2">
-                      <p className="text-xs text-[#8b7e6a] mb-1">申请说明</p>
-                      <p className="text-sm text-[#5a4e3a]">{req.application_note}</p>
+                      <p className="text-xs text-gray-400 mb-1">申请说明</p>
+                      <p className="text-sm text-white">{req.application_note}</p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-between items-center border-t border-[#e8dfd0] pt-4">
+                <div className="flex justify-between items-center border-t border-white/[0.05] pt-4">
                   {req.role_status === 'pending' && (
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleApproveRole(req.id)}
-                        className="px-5 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                        className="px-5 py-2 bg-[#00ff88] text-[#050510] font-bold rounded-xl hover:bg-[#00ff88]/80 transition-all duration-300 text-sm"
                       >
                         <CheckCircleOutlined className="mr-1" /> 通过认证
                       </button>
                       <button
                         onClick={() => handleRejectRole(req.id)}
-                        className="px-5 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                        className="px-5 py-2 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all duration-300 text-sm"
                       >
                         <CloseCircleOutlined className="mr-1" /> 拒绝
                       </button>
@@ -388,7 +388,7 @@ export default function AdminVerificationsPage() {
                   {req.role_status !== 'pending' && <div></div>}
                   <button
                     onClick={() => handleDeleteRole(req.id)}
-                    className="px-4 py-2 bg-[#f5f0e8] text-[#6b5e4a] rounded-xl hover:bg-[#e8dfd0] transition-all duration-300 text-sm font-medium hover:-translate-y-0.5"
+                    className="px-4 py-2 bg-white/[0.03] text-gray-400 rounded-xl hover:bg-white/[0.06] hover:text-white transition-all duration-300 text-sm font-medium"
                   >
                     <DeleteOutlined className="mr-1" /> 删除
                   </button>

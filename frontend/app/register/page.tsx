@@ -9,7 +9,7 @@ import {
   LockOutlined,
   MailOutlined,
   PhoneOutlined,
-  GoldOutlined,
+  ThunderboltOutlined,
   SmileOutlined,
 } from '@ant-design/icons';
 
@@ -132,47 +132,47 @@ export default function RegisterPage() {
   };
 
   const inputClass = (field: keyof FieldError) => {
-    const base = 'w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-sm placeholder:text-[#c4b99a]';
+    const base = 'w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm placeholder:text-gray-600 text-white';
     if (errors[field] && submitted) {
-      return `${base} border-red-300 focus:ring-red-200 focus:border-red-400 bg-red-50/30`;
+      return `${base} border-red-500/40 focus:ring-red-500/20 focus:border-red-500/60 bg-red-500/5`;
     }
     if (form[field] && submitted && !errors[field]) {
-      return `${base} border-green-300 focus:ring-green-200 focus:border-green-400 bg-green-50/30`;
+      return `${base} border-[#00ff88]/40 focus:ring-[#00ff88]/20 focus:border-[#00ff88]/60 bg-[#00ff88]/5`;
     }
-    return `${base} bg-[#faf7f2] border-[#e8dfd0] focus:ring-[#0a2a5c]/20 focus:border-[#0a2a5c]`;
+    return `${base} bg-white/[0.03] border-white/[0.08] focus:ring-[#00f0ff]/10 focus:border-[#00f0ff]/40`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f7f3ec] to-[#faf7f2] flex items-center justify-center py-12 px-4 relative overflow-hidden">
-      {/* Decorative gradient blobs */}
+    <div className="min-h-screen bg-[#050510] flex items-center justify-center py-12 px-4 relative overflow-hidden">
+      {/* Decorative cyberpunk gradient blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#fef3c7]/30 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-morph-blob" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-[#0a2a5c]/[0.03] rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-morph-blob-reverse" />
-        <div className="absolute top-1/3 left-1/2 w-64 h-64 bg-[#d4a853]/[0.06] rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-float" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#00f0ff]/5 rounded-full mix-blend-screen filter blur-3xl opacity-60 animate-morph-blob" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-[#b347ea]/5 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-morph-blob-reverse" />
+        <div className="absolute top-1/3 left-1/2 w-64 h-64 bg-[#ffb800]/[0.04] rounded-full mix-blend-screen filter blur-3xl opacity-40 animate-float" />
       </div>
 
-      <div className="dashboard-panel bg-[#fefcf8] rounded-2xl p-8 w-full max-w-md relative z-10">
+      <div className="holo-card p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] rounded-2xl mb-4 shadow-button">
-            <GoldOutlined className="text-3xl text-[#f59e0b]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#00f0ff]/20 to-[#b347ea]/20 rounded-2xl mb-4 border border-[#00f0ff]/10">
+            <ThunderboltOutlined className="text-3xl text-[#00f0ff]" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#0a2a5c]">创建账号</h1>
-          <p className="text-[#8b7e6a] mt-1">加入贝壳青创汇，开启创业之旅</p>
+          <h1 className="text-2xl font-black tracking-tight text-white">创建账号</h1>
+          <p className="text-gray-400 mt-1">加入贝壳青创汇，开启创业之旅</p>
         </div>
 
         {serverError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-sm">
             {serverError}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
+            <label className="block text-sm font-semibold text-gray-400 mb-2">
               用户名 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <UserOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
+              <UserOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
               <input
                 type="text"
                 value={form.username}
@@ -182,16 +182,16 @@ export default function RegisterPage() {
               />
             </div>
             {submitted && errors.username && (
-              <p className="mt-1.5 text-xs text-red-500">{errors.username}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.username}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
+            <label className="block text-sm font-semibold text-gray-400 mb-2">
               邮箱 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <MailOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
+              <MailOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
               <input
                 type="email"
                 value={form.email}
@@ -201,17 +201,17 @@ export default function RegisterPage() {
               />
             </div>
             {submitted && errors.email && (
-              <p className="mt-1.5 text-xs text-red-500">{errors.email}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.email}</p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
+              <label className="block text-sm font-semibold text-gray-400 mb-2">
                 昵称
               </label>
               <div className="relative">
-                <SmileOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
+                <SmileOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
                 <input
                   type="text"
                   value={form.nickname}
@@ -221,15 +221,15 @@ export default function RegisterPage() {
                 />
               </div>
               {submitted && errors.nickname && (
-                <p className="mt-1.5 text-xs text-red-500">{errors.nickname}</p>
+                <p className="mt-1.5 text-xs text-red-400">{errors.nickname}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
+              <label className="block text-sm font-semibold text-gray-400 mb-2">
                 手机号
               </label>
               <div className="relative">
-                <PhoneOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
+                <PhoneOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
                 <input
                   type="tel"
                   value={form.phone}
@@ -239,17 +239,17 @@ export default function RegisterPage() {
                 />
               </div>
               {submitted && errors.phone && (
-                <p className="mt-1.5 text-xs text-red-500">{errors.phone}</p>
+                <p className="mt-1.5 text-xs text-red-400">{errors.phone}</p>
               )}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
+            <label className="block text-sm font-semibold text-gray-400 mb-2">
               密码 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
+              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
               <input
                 type="password"
                 value={form.password}
@@ -259,20 +259,20 @@ export default function RegisterPage() {
               />
             </div>
             {submitted && errors.password ? (
-              <p className="mt-1.5 text-xs text-red-500">{errors.password}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.password}</p>
             ) : (
               form.password && !submitted && (
-                <p className="mt-1.5 text-xs text-[#8b7e6a]">{form.password.length} 个字符</p>
+                <p className="mt-1.5 text-xs text-gray-500">{form.password.length} 个字符</p>
               )
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#4a3f2f] mb-2">
+            <label className="block text-sm font-semibold text-gray-400 mb-2">
               确认密码 <span className="text-red-400">*</span>
             </label>
             <div className="relative">
-              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4b99a] text-sm" />
+              <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
               <input
                 type="password"
                 value={form.confirmPassword}
@@ -282,21 +282,21 @@ export default function RegisterPage() {
               />
             </div>
             {submitted && errors.confirmPassword && (
-              <p className="mt-1.5 text-xs text-red-500">{errors.confirmPassword}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.confirmPassword}</p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-gradient-to-br from-[#0a2a5c] to-[#1a4a8a] text-white rounded-xl hover:from-[#0a2a5c]/90 hover:to-[#1a4a8a]/90 shadow-button hover:-translate-y-0.5 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            className="w-full px-6 py-3 bg-gradient-to-r from-[#00f0ff] to-[#00c8ff] text-[#050510] font-bold rounded-xl hover:from-[#00d4e0] hover:to-[#00a8e0] shadow-[0_2px_12px_rgba(0,240,255,0.25)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {loading ? '注册中...' : '创建账号'}
           </button>
 
-          <p className="text-center text-sm text-[#8b7e6a]">
+          <p className="text-center text-sm text-gray-400">
             已有账号？{' '}
-            <Link href="/login" className="text-[#f59e0b] hover:underline font-medium">
+            <Link href="/login" className="text-[#00f0ff] hover:underline font-medium">
               立即登录
             </Link>
           </p>
