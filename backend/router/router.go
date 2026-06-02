@@ -110,6 +110,7 @@ func SetupRouter() *gin.Engine {
 		teams.POST("/:id/join-requests/:request_id/reject", handler.RejectTeamJoinRequest)
 		teams.POST("/:id/transfer-owner", handler.TransferTeamOwnership)
 		teams.POST("/:id/leave", handler.LeaveTeam)
+		teams.POST("/:id/members/:user_id/kick", handler.KickTeamMember)
 		teams.POST("/:id/approve", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.ApproveTeam)
 		teams.POST("/:id/reject", middleware.RequireRole(model.RoleAdmin, model.RoleSuperAdmin), handler.RejectTeam)
 	}

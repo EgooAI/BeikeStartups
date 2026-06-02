@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { projectApi, recruitmentApi } from '@/lib/api';
-import { Project, ProjectStage, Recruitment } from '@/types';
+import { projectApi } from '@/lib/api';
+import { Project, ProjectStage } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { message } from 'antd';
 import Link from 'next/link';
@@ -14,7 +14,6 @@ import {
   EyeOutlined,
   HeartOutlined,
   CalendarOutlined,
-  UserOutlined,
   ArrowLeftOutlined,
   ShareAltOutlined,
   FileTextOutlined,
@@ -45,7 +44,6 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
-  const [recruitments, setRecruitments] = useState<Recruitment[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingStage, setEditingStage] = useState(false);
   const [newStage, setNewStage] = useState<ProjectStage>('idea');
@@ -63,14 +61,6 @@ export default function ProjectDetailPage() {
       const res = await projectApi.get(Number(params.id));
       if (res.data) {
         setProject(res.data as Project);
-      }
-      const recRes = await recruitmentApi.list('active');
-      if (recRes.data) {
-        const data = recRes.data as any;
-        const teamRecs = (data.items || []).filter(
-          (r: Recruitment) => r.team_id === (res.data as any)?.team_id
-        );
-        setRecruitments(teamRecs);
       }
     } catch (err) {
       console.error('Failed to fetch project:', err);
@@ -313,68 +303,6 @@ export default function ProjectDetailPage() {
                   </p>
                 </div>
               </div>
-            </div>
-
-            {/* Recruitment Section */}
-            {recruitments.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-xl font-black tracking-tight text-white mb-4">招募需求</h2>
-                <div className="space-y-4">
-                  {recruitments.map((rec) => (
-                    <div key={rec.id} className="p-5 border border-white/[0.06] rounded-xl hover:border-[#00f0ff]/20 hover:bg-white/[0.02] transition-all duration-300">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-black tracking-tight text-white">{rec.position}</h3>
-                          <p className="text-sm text-gray-400 mt-1">{rec.description}</p>
-                          {rec.requirements && (
-                            <p className="text-sm text-gray-500 mt-2">要求: {rec.requirements}</p>
-                          )}
-                        </div>
-                        {user?.role === 'student' && (
-                          <Link
-                            href={`/responses/create?recruitment_id=${rec.id}`}
-                            className="px-5 py-2 bg-[#ffb800] text-[#050510] font-bold text-sm rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap"
-                          >
-                            申请加入
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 border-t border-white/[0.06] pt-6">
-              {user ? (
-                <>
-                  {user.role === 'student' && (
-                    <Link
-                      href={user ? `/responses/create?recruitment_id=${recruitments[0]?.id || ''}` : '/login'}
-                      className="px-6 py-3 bg-[#ffb800] text-[#050510] font-bold rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300"
-                    >
-                      <UserOutlined className="mr-2" />申请加入团队
-                    </Link>
-                  )}
-
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="px-6 py-3 bg-[#ffb800] text-[#050510] font-bold rounded-xl hover:bg-[#ffc800] shadow-sm hover:shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:-translate-y-0.5 transition-all duration-300"
-                  >
-                    登录后申请加入
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="px-6 py-3 border border-white/[0.08] text-gray-300 rounded-xl hover:bg-white/[0.03] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 font-medium"
-                  >
-                    注册账号
-                  </Link>
-                </>
-              )}
             </div>
 
             {/* Resource Connection for non-student roles */}

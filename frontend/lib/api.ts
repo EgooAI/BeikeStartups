@@ -197,6 +197,9 @@ export const teamApi = {
 
   leave: (id: number) =>
     api.post(`/api/teams/${id}/leave`),
+
+  kickMember: (teamId: number, userId: number) =>
+    api.post(`/api/teams/${teamId}/members/${userId}/kick`),
 };
 
 export const projectApi = {

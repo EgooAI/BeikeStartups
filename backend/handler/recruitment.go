@@ -85,12 +85,21 @@ func GetRecruitment(c *gin.Context) {
 		}
 	}
 
-	user := c.MustGet("user").(*model.User)
-	if recruitment.Status == model.RecruitStatusInvalid && (user == nil || user.Role != model.RoleAdmin) {
-		var team model.Team
-		if err := database.DB.First(&team, recruitment.TeamID).Error; err == nil && team.OwnerID != user.ID {
+	userInterface, _ := c.Get("user")
+	user, _ := userInterface.(*model.User)
+
+	if recruitment.Status == model.RecruitStatusInvalid {
+		if user == nil {
 			response.Forbidden(c, "无权查看此招募")
 			return
+		}
+		// 管理员可以查看所有招募
+		if user.Role != model.RoleAdmin {
+			var team model.Team
+			if err := database.DB.First(&team, recruitment.TeamID).Error; err != nil || team.OwnerID != user.ID {
+				response.Forbidden(c, "无权查看此招募")
+				return
+			}
 		}
 	}
 

@@ -74,6 +74,8 @@ export default function DashboardPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [showDisbandModal, setShowDisbandModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showKickModal, setShowKickModal] = useState(false);
+  const [kickTarget, setKickTarget] = useState<{ id: number; name: string } | null>(null);
 
   function normalizeData<T>(data: unknown): T[] {
     if (Array.isArray(data)) return data as T[];
@@ -171,6 +173,19 @@ export default function DashboardPage() {
       message.success('已退出团队');
     } catch (err: unknown) {
       message.error(err instanceof Error ? err.message : '退出团队失败');
+    }
+  }
+
+  async function handleKickMember() {
+    if (!myTeam || !kickTarget) return;
+    try {
+      await teamApi.kickMember(myTeam.id, kickTarget.id);
+      setShowKickModal(false);
+      setKickTarget(null);
+      window.location.replace('/dashboard');
+      message.success(`已将 ${kickTarget.name} 踢出团队`);
+    } catch (err: unknown) {
+      message.error(err instanceof Error ? err.message : '踢出成员失败');
     }
   }
 
@@ -687,6 +702,17 @@ export default function DashboardPage() {
                                 {isOwner && (
                                   <CrownOutlined className="text-[#ffb800] text-xs flex-shrink-0" />
                                 )}
+                                {user.role === 'team_owner' && !isOwner && (
+                                  <button
+                                    onClick={() => {
+                                      setKickTarget({ id: memberUser.id || 0, name: displayName });
+                                      setShowKickModal(true);
+                                    }}
+                                    className="flex-shrink-0 px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                                  >
+                                    踢出
+                                  </button>
+                                )}
                               </div>
                             );
                           })}
@@ -826,6 +852,34 @@ export default function DashboardPage() {
                 className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors text-sm shadow-sm"
               >
                 确认退出
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showKickModal && kickTarget && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="holo-card p-6 sm:p-8 w-full max-w-md">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
+              <ExclamationCircleOutlined className="text-red-400 text-xl" />
+            </div>
+            <h3 className="text-lg font-bold text-white text-center mb-2">确认踢出成员</h3>
+            <p className="text-sm text-gray-400 text-center leading-relaxed mb-8">
+              确定要将 <span className="text-white font-semibold">{kickTarget.name}</span> 踢出团队吗？踢出后该成员的身份将恢复为学生。
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowKickModal(false); setKickTarget(null); }}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-white/[0.08] text-gray-400 font-medium hover:bg-white/[0.03] transition-colors text-sm"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleKickMember}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors text-sm shadow-sm"
+              >
+                确认踢出
               </button>
             </div>
           </div>

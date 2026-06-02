@@ -515,6 +515,62 @@ func LeaveTeam(c *gin.Context) {
 	response.SuccessWithMessage(c, "已退出团队", nil)
 }
 
+func KickTeamMember(c *gin.Context) {
+	teamID := parseUintParam(c.Param("id"))
+	userID := parseUintParam(c.Param("user_id"))
+
+	operator := c.MustGet("user").(*model.User)
+
+	team, err := repository.GetTeamByID(teamID)
+	if err != nil {
+		response.NotFound(c, "团队不存在")
+		return
+	}
+
+	// 只有团队负责人或管理员可以踢出成员
+	if operator.Role != model.RoleAdmin && operator.Role != model.RoleSuperAdmin && operator.ID != team.OwnerID {
+		response.Forbidden(c, "只有团队负责人或管理员可以踢出成员")
+		return
+	}
+
+	// 不能踢出团队负责人自己
+	if team.OwnerID == userID {
+		response.Forbidden(c, "不能踢出团队负责人")
+		return
+	}
+
+	// 删除该用户在该团队的所有招募申请记录
+	var recruitments []model.Recruitment
+	if err := database.DB.Where("team_id = ?", teamID).Find(&recruitments).Error; err != nil {
+		response.InternalError(c, "获取团队招募失败")
+		return
+	}
+
+	if len(recruitments) > 0 {
+		recruitmentIDs := make([]uint, len(recruitments))
+		for i, rec := range recruitments {
+			recruitmentIDs[i] = rec.ID
+		}
+		if err := database.DB.Where("user_id = ? AND recruitment_id IN ?", userID, recruitmentIDs).Delete(&model.RecruitmentResponse{}).Error; err != nil {
+			response.InternalError(c, "清理申请记录失败")
+			return
+		}
+	}
+
+	if err := repository.RemoveTeamMember(teamID, userID); err != nil {
+		response.InternalError(c, "踢出成员失败: "+err.Error())
+		return
+	}
+
+	// 将被踢出用户的角色改回 student
+	if err := database.DB.Model(&model.User{}).Where("id = ?", userID).Update("role", model.RoleStudent).Error; err != nil {
+		response.InternalError(c, "更新用户角色失败")
+		return
+	}
+
+	response.SuccessWithMessage(c, "成员已踢出", nil)
+}
+
 func parseUintParam(param string) uint {
 	var id uint
 	_, _ = fmt.Sscan(param, &id)

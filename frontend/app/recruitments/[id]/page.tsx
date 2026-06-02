@@ -143,8 +143,8 @@ export default function RecruitmentDetailPage({ params }: { params: Promise<{ id
     try {
       const res = await recruitmentApi.getResponses(recruitmentId);
       if (res.data) {
-        const data = res.data as Response[];
-        setResponses(data || []);
+        const items = (res.data as { items?: Response[] }).items || [];
+        setResponses(items);
       }
       setShowResponses(true);
     } catch (err: unknown) {
