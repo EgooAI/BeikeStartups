@@ -18,6 +18,7 @@ type CreateEventRequest struct {
 	StartAt     time.Time `json:"start_at" binding:"required"`
 	EndAt       time.Time `json:"end_at" binding:"required"`
 	Status      string    `json:"status" binding:"required,oneof=active closed cancelled"`
+	Notice      string    `json:"notice"`
 }
 
 type UpdateEventRequest struct {
@@ -28,6 +29,7 @@ type UpdateEventRequest struct {
 	StartAt     *time.Time `json:"start_at"`
 	EndAt       *time.Time `json:"end_at"`
 	Status      *string    `json:"status"`
+	Notice      *string    `json:"notice"`
 }
 
 type EventSignupRequest struct {
@@ -94,6 +96,7 @@ func CreateEvent(c *gin.Context) {
 		StartAt:     req.StartAt,
 		EndAt:       req.EndAt,
 		Status:      model.EventStatus(req.Status),
+		Notice:      req.Notice,
 		OwnerID:     user.ID,
 	}
 
@@ -139,6 +142,9 @@ func UpdateEvent(c *gin.Context) {
 	}
 	if req.Status != nil {
 		event.Status = model.EventStatus(*req.Status)
+	}
+	if req.Notice != nil {
+		event.Notice = *req.Notice
 	}
 
 	if err := database.DB.Save(&event).Error; err != nil {

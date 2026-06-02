@@ -405,6 +405,7 @@ type Event struct {
 	StartAt     time.Time   `json:"start_at"`
 	EndAt       time.Time   `json:"end_at"`
 	Status      EventStatus `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
+	Notice      string      `gorm:"type:text" json:"notice"`
 
 	OwnerID uint  `gorm:"not null;index" json:"owner_id"`
 	Owner   *User `gorm:"foreignKey:OwnerID" json:"owner,omitempty"`

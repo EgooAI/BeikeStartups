@@ -31,6 +31,7 @@ interface EventDetail {
   start_at: string;
   end_at: string;
   status: string;
+  notice?: string;
   owner?: {
     id: number;
     nickname?: string;
@@ -288,24 +289,35 @@ export default function EventDetailPage() {
                 <ExclamationCircleOutlined className="mr-2 text-[#ffb800]" />
                 活动须知
               </h2>
-              <ul className="space-y-3 text-white">
-                <li className="flex items-start">
-                  <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
-                  <span>请提前15分钟到达活动现场签到</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
-                  <span>活动期间请保持手机静音</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
-                  <span>如有疑问可在互动环节提问</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
-                  <span>报名后如无法参加请提前取消报名</span>
-                </li>
-              </ul>
+              {event.notice ? (
+                <ul className="space-y-3 text-white">
+                  {event.notice.split('\n').filter(line => line.trim()).map((line, index) => (
+                    <li key={index} className="flex items-start">
+                      <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <ul className="space-y-3 text-white">
+                  <li className="flex items-start">
+                    <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
+                    <span>请提前15分钟到达活动现场签到</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
+                    <span>活动期间请保持手机静音</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
+                    <span>如有疑问可在互动环节提问</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircleOutlined className="mr-2 mt-1 text-[#00ff88]" />
+                    <span>报名后如无法参加请提前取消报名</span>
+                  </li>
+                </ul>
+              )}
             </div>
 
             {/* 报名人员列表 - 仅管理员可见 */}

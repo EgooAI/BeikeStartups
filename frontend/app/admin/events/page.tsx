@@ -26,6 +26,8 @@ export default function AdminEventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [signups, setSignups] = useState<Signup[]>([]);
   const [loadingSignups, setLoadingSignups] = useState(false);
+  const DEFAULT_NOTICE = '请提前15分钟到达活动现场签到\n活动期间请保持手机静音\n如有疑问可在互动环节提问\n报名后如无法参加请提前取消报名';
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -34,6 +36,7 @@ export default function AdminEventsPage() {
     start_at: '',
     end_at: '',
     status: 'active',
+    notice: DEFAULT_NOTICE,
   });
 
   useEffect(() => {
@@ -63,6 +66,7 @@ export default function AdminEventsPage() {
       start_at: '',
       end_at: '',
       status: 'active',
+      notice: DEFAULT_NOTICE,
     });
     setEditingEvent(null);
     setShowForm(false);
@@ -100,6 +104,7 @@ export default function AdminEventsPage() {
       start_at: event.start_at?.slice(0, 16) || '',
       end_at: event.end_at?.slice(0, 16) || '',
       status: event.status,
+      notice: event.notice || DEFAULT_NOTICE,
     });
     setEditingEvent(event);
     setShowForm(true);
@@ -243,6 +248,19 @@ export default function AdminEventsPage() {
                   className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white placeholder:text-gray-500"
                   rows={3}
                   placeholder="输入活动描述"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1.5">
+                  活动须知
+                  <span className="text-xs text-gray-500 ml-2">（每行一条，用于活动详情页展示）</span>
+                </label>
+                <textarea
+                  value={formData.notice}
+                  onChange={(e) => setFormData({ ...formData, notice: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm focus:outline-none focus:border-[#00f0ff]/40 focus:ring-1 focus:ring-[#00f0ff]/20 text-white placeholder:text-gray-500"
+                  rows={5}
+                  placeholder="每行一条须知"
                 />
               </div>
               <div>

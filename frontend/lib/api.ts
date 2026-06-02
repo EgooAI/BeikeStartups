@@ -328,10 +328,10 @@ export const eventApi = {
   get: (id: number) =>
     api.get(`/api/events/${id}`),
 
-  create: (data: { title: string; description: string; event_type: string; location: string; start_at: string; end_at: string; status: string }) =>
+  create: (data: { title: string; description: string; event_type: string; location: string; start_at: string; end_at: string; status: string; notice?: string }) =>
     api.post('/api/events', data),
 
-  update: (id: number, data: { title?: string; description?: string; event_type?: string; location?: string; start_at?: string; end_at?: string; status?: string }) =>
+  update: (id: number, data: { title?: string; description?: string; event_type?: string; location?: string; start_at?: string; end_at?: string; status?: string; notice?: string }) =>
     api.put(`/api/events/${id}`, data),
 
   delete: (id: number) =>

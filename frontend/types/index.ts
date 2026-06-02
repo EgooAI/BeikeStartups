@@ -158,6 +158,7 @@ export interface Event {
   start_at: string;
   end_at: string;
   status: 'active' | 'closed' | 'cancelled';
+  notice?: string;
   cover_image?: string;
   max_participants?: number;
   current_participants: number;
