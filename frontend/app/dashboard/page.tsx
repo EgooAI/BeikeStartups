@@ -230,7 +230,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            {!isInvestorRole && (
+            {(user?.role === 'team_owner' || user?.role === 'team_member') && (
               <div className="flex items-center gap-3">
                 <Link
                   href="/projects/create"
