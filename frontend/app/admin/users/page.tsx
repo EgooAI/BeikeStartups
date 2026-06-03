@@ -57,6 +57,7 @@ export default function AdminUsersPage() {
   const getRoleLabel = (role: string) => {
     const labels: Record<string, string> = {
       student: '同学',
+      team_member: '团队成员',
       team_owner: '团队负责人',
       investor: '投资人',
       mentor: '导师',
@@ -70,7 +71,7 @@ export default function AdminUsersPage() {
   const getRoleColor = (role: string) => {
     const colors: Record<string, string> = {
       student: 'bg-[#00f0ff]/10 text-[#00f0ff]',
-      team: 'bg-orange-500/10 text-orange-400',
+      team_member: 'bg-orange-500/10 text-orange-400',
       investor: 'bg-[#b347ea]/10 text-[#b347ea]',
       mentor: 'bg-[#00ff88]/10 text-[#00ff88]',
       partner: 'bg-teal-500/10 text-teal-400',
@@ -180,17 +181,14 @@ export default function AdminUsersPage() {
                       <span className="text-xs text-white">不可操作</span>
                     ) : (
                       <div className="flex items-center space-x-2">
-                        <select
-                          value={u.role}
-                          onChange={(e) => changeRole(u.id, e.target.value)}
-                          className="text-xs px-2 py-1.5 bg-black border border-white/[0.08] rounded-xl focus:outline-none focus:border-[#00f0ff]/40 text-white"
-                        >
-                          <option value="student">同学</option>
-                          <option value="investor">投资人</option>
-                          <option value="mentor">导师</option>
-                          <option value="partner">资源方</option>
-                          {currentUserIsSuperAdmin && <option value="admin">管理员</option>}
-                        </select>
+                        {currentUserIsSuperAdmin && u.role !== 'admin' && (
+                          <button
+                            onClick={() => changeRole(u.id, 'admin')}
+                            className="text-xs px-3 py-1.5 rounded-xl font-medium transition-all duration-300 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                          >
+                            设为管理员
+                          </button>
+                        )}
                         <button
                           onClick={() => toggleActive(u.id, u.is_active)}
                           className={`text-xs px-3 py-1.5 rounded-xl font-medium transition-all duration-300 ${u.is_active
