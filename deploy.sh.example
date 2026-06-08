@@ -13,16 +13,15 @@ BACKEND_PORT=8500
 
 # 程序配置
 PROGRAM_CMD="/var/www/BeikeStartups/BeikeStartups/backend/BeikeStartups" # 此行按需修改
-PROGRAM_MATCH="/BeikeStartups/backend/BeikeStartups" # 此行按需修改
-
 FRONTEND_CMD="pnpm start -p $FRONTEND_PORT"
-FRONTEND_MATCH="pnpm start -p $FRONTEND_PORT"
 
 BACKEND_DIR="backend"
 FRONTEND_DIR="frontend"
 
 BACKEND_LOG="backend.log"
 FRONTEND_LOG="frontend.log"
+BACKEND_PID="backend.pid"
+FRONTEND_PID="frontend.pid"
 
 # 数据库配置
 export DB_HOST="localhost"
@@ -33,17 +32,13 @@ export DB_NAME="beikestartups_db"
 
 # 后端配置
 export NEXT_PUBLIC_API_URL="https://api.example.com" # 此行必须修改，前端请求的后端地址
+export CORS_ORIGIN="https://www.example.com" # 此行必须修改，入站的前端地址
 export JWT_SECRET="your_jwt_secret_key" # 此行必须修改
-export CORS_ORIGIN="https://www.example.com" # 此行必须修改，入站访问地址
 
 # ===== 校验 =====
 # 检查数据库环境变量是否是默认值
 if [ "$DB_USER" = "your_user" ] || [ "$DB_PASSWORD" = "your_db_password" ]; then
     echo "[!] 数据库配置似乎未修改，请检查脚本的环境变量设置！"
-    exit 1
-fi
-if [ "$JWT_SECRET" = "your_jwt_secret_key" ]; then
-    echo "[!] JWT_SECRET 似乎未修改，请检查脚本的环境变量设置！"
     exit 1
 fi
 if [ "$NEXT_PUBLIC_API_URL" = "https://api.example.com" ]; then
@@ -54,29 +49,42 @@ if [ "$CORS_ORIGIN" = "https://www.example.com" ]; then
     echo "[!] CORS_ORIGIN 似乎未修改，请检查脚本的环境变量设置！"
     exit 1
 fi
+if [ "$JWT_SECRET" = "your_jwt_secret_key" ]; then
+    echo "[!] JWT_SECRET 似乎未修改，请检查脚本的环境变量设置！"
+    exit 1
+fi
 
 echo "[*] 后端将在端口 $BACKEND_PORT 上运行，前端将在端口 $FRONTEND_PORT 上运行"
 echo ""
 
 # ===== 通用函数 =====
-kill_process() {
-    local MATCH=$1
+kill_by_pid_file() {
+    local PID_FILE=$1
     local NAME=$2
 
-    PIDS=$(pgrep -f "$MATCH" || true)
-    if [ -n "$PIDS" ]; then
-        echo "[*] 发现 $NAME 进程，正在终止: $PIDS"
-        kill $PIDS
-        sleep 2
-        kill -9 $PIDS 2>/dev/null || true
-    else
-        echo "[*] 未发现存活的 $NAME 进程"
+    if [ ! -f "$PID_FILE" ]; then
+        echo "[*] 未发现 $NAME PID 文件"
+        return
     fi
+
+    local PID
+    PID=$(cat "$PID_FILE")
+
+    if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+        echo "[*] 发现 $NAME 进程 PID=$PID，正在终止"
+        kill "$PID"
+        sleep 2
+        kill -9 "$PID" 2>/dev/null || true
+    else
+        echo "[*] $NAME PID 文件存在，但进程已不存在"
+    fi
+
+    rm -f "$PID_FILE"
 }
 
 # ===== 清理旧进程 =====
-kill_process "$PROGRAM_MATCH" "backend"
-kill_process "$FRONTEND_MATCH" "frontend"
+kill_by_pid_file "$BACKEND_PID" "backend"
+kill_by_pid_file "$FRONTEND_PID" "frontend"
 
 # ===== 启动 backend =====
 echo "[*] 构建 backend..."
@@ -91,6 +99,7 @@ export GIN_MODE="release"
 
 echo "[*] 构建完毕，正在启动 backend..."
 nohup $PROGRAM_CMD > "../$BACKEND_LOG" 2>&1 &
+echo $! > "../$BACKEND_PID"
 
 cd ..
 
@@ -102,6 +111,7 @@ pnpm build
 
 echo "[*] 构建完毕，正在启动 frontend..."
 nohup $FRONTEND_CMD > "../$FRONTEND_LOG" 2>&1 &
+echo $! > "../$FRONTEND_PID"
 
 cd ..
 
@@ -116,7 +126,20 @@ free -h
 echo "[*] 等待数秒后检查部署状态..."
 sleep 5
 
-curl --silent --fail "http://localhost:$BACKEND_PORT" > /dev/null && echo "[*] 后端检查通过！" || echo "[!] 后端检查失败！"
-curl --silent --fail "http://localhost:$FRONTEND_PORT" > /dev/null && echo "[*] 前端检查通过！" || echo "[!] 前端检查失败！"
+check_http_status() {
+    local URL=$1
+    local NAME=$2
+    local STATUS
+
+    STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" "$URL" || true)
+    if [ "$STATUS" = "404" ] || { [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; }; then
+        echo "[*] $NAME 检查通过！HTTP $STATUS"
+    else
+        echo "[!] $NAME 检查失败！HTTP $STATUS"
+    fi
+}
+
+check_http_status "http://localhost:$BACKEND_PORT" "backend"
+check_http_status "http://localhost:$FRONTEND_PORT" "frontend"
 
 echo "[*] 部署结束！"
