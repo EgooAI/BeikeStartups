@@ -356,7 +356,7 @@ export default function HomePage() {
                 <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00f0ff] opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-[#00f0ff]" /></span>
                 <span className="tracking-[0.3em] uppercase text-xs font-bold">SYSTEM ONLINE</span>
               </div>
-              <h1 className={`text-5xl sm:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[0.92] ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`}>
+              <h1 className={`text-5xl sm:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[1.2] ${isLoaded ? 'animate-slide-up' : 'opacity-0'}`}>
                 <span className="text-white">让校园</span><br />
                 <span className="bg-gradient-to-r from-[#00f0ff] via-[#b347ea] to-[#ffb800] bg-clip-text text-transparent">创业项目</span><br />
                 <span className="text-white">被更多人<span className="text-[#00f0ff] text-neon-cyan">看见</span></span>
